@@ -1,13 +1,22 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
-    <router-view/>
+    <v-app>
+      <main>
+        <toolbar title="Ola"/>
+        <router-view/>
+      </main>
+    </v-app>
   </div>
 </template>
 
 <script>
+import Toolbar from '@/components/Toolbar'
+
 export default {
-  name: 'app'
+  name: 'app',
+  components: {
+    Toolbar
+  }
 }
 </script>
 

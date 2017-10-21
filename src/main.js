@@ -3,8 +3,13 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
+import Vuetify from 'vuetify'
+import('../node_modules/vuetify/dist/vuetify.min.css')
 
+console.log(JSON.stringify(process.env))
 Vue.config.productionTip = false
+
+Vue.use(Vuetify)
 
 /* eslint-disable no-new */
 new Vue({
