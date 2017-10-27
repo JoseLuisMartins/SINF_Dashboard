@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <v-container>
     <v-data-table
           v-bind:headers="headers"
           :items="items"
