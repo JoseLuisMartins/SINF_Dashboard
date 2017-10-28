@@ -1,6 +1,6 @@
 <template>
   <a class="pointer" @click="loadPage">
-  <v-card :color="color" dark @click="loadPage">
+  <v-card class="hoverAnim" :color="color" dark @click="loadPage">
     <v-card-title primary-title class="pb-0">
       <div class="headline" ma0>  {{title}} <v-icon class="hiddenIcon" :color="color2" x-large> {{icon}} </v-icon> </div>
     </v-card-title>
@@ -50,6 +50,12 @@ export default {
 .pointer{
   cursor:pointer;
 }
+
+.hoverAnim:hover{
+  transition: background-color 0.5s ease 0.1s;
+  background-color: #333 !important;
+}
+
 </style>
 
 

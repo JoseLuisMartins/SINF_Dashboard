@@ -35,7 +35,7 @@
     </v-layout>
     <v-layout row wrap>
       <v-flex d-inline xs12 sm6 md3 v-for="topic in topics" :key="topic.title">
-        <topic :title="topic.title" :icon="topic.icon" :value="topic.value" :description="topic.description" :color="topic.color" :color2="topic.color2" :dest="topic.dest"/> 
+        <topic class="hoverAnim" :title="topic.title" :icon="topic.icon" :value="topic.value" :description="topic.description" :color="topic.color" :color2="topic.color2" :dest="topic.dest"/> 
       </v-flex>
     </v-layout>
     <v-layout row wrap>
@@ -148,4 +148,15 @@ export default {
 .limitHeight{
   max-height: 200px;
 }
+
+.hoverAnim:hover{
+  color: black;
+}
+
+.hoverAnim{
+  transition: color 1s linear 1s;
+}
+
+
+
 </style>
