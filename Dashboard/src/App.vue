@@ -1,10 +1,8 @@
 <template>
   <div id="app">
     <v-app>
-      <main>
         <toolbar title="360º Dashboard"/>
         <router-view/>
-      </main>
     </v-app>
   </div>
 </template>

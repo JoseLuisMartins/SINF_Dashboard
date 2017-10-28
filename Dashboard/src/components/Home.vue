@@ -38,11 +38,23 @@
         <topic :title="topic.title" :icon="topic.icon" :value="topic.value" :description="topic.description" :color="topic.color" :color2="topic.color2" :dest="topic.dest"/> 
       </v-flex>
     </v-layout>
+    <v-layout row wrap>
+      <v-flex class="chartHolder" sm12 md6 v-for="data in chartData" :key="data.name">
+        <v-card class="chartHeight white darken-3"> 
+          <v-card-title primary-title pb-1 > <div class="headline">{{data.title}}</div> </v-card-title>
+          <line-chart class="limitHeight"
+            :data="data"
+            :options="chartOptions"
+            ></line-chart>
+        </v-card>
+      </v-flex>
+    </v-layout>
   </v-container>
 </template>
 
 <script>
 import Topic from '@/components/home/Topic'
+import LineChart from '@/components/charts/LineChart'
 
 export default {
   name: 'HelloWorld',
@@ -51,6 +63,63 @@ export default {
       date: null,
       menu: false,
       modal: false,
+      chartOptions: {
+        responsive: true,
+        height: 100,
+        width: 300,
+        maintainAspectRatio: false,
+        fontColor: '#FFF',
+        elements: {
+          line: {
+            backgroundColor: '#F00',
+            pointBackgroundColor: '#FF00FF',
+            borderColor: '#CC3311',
+            fill: false,
+            tension: 0.5
+          }
+        },
+        scales: {
+          yAxes: [{
+            ticks: {
+              beginAtZero: false
+            }
+          }],
+          xAxes: [{
+            ticks: {
+            }
+          }]
+        },
+        legend: {
+          display: false,
+          labels: {
+            fontColor: '#FFF'
+          }
+        }
+      },
+      chartData: [
+        {
+          title: 'Turnover',
+          labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+          datasets: [
+            {
+              pointBackgroundColor: '#FF5522',
+              label: 'Turnover',
+              data: [20, 30, 20, 23, 21, 12, 23, 23, 32, 52, 50, 25]
+            }
+          ]
+        },
+        {
+          title: 'Costs',
+          labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+          datasets: [
+            {
+              pointBackgroundColor: '#FF5522',
+              label: 'Costs',
+              data: [20, 50, 20, 23, 21, 12, 23, 23, 32, 52, 50, 25]
+            }
+          ]
+        }
+      ],
       december: function (date) {
         return date.getMonth() === 11
       },
@@ -63,7 +132,7 @@ export default {
     }
   },
   components: {
-    Topic
+    Topic, LineChart
   },
   mounted: function () {
   }
@@ -72,21 +141,11 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h1, h2 {
-  font-weight: normal;
+.chartHolder{
+  width: 100%;
 }
 
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-
-a {
-  color: #42b983;
+.limitHeight{
+  max-height: 200px;
 }
 </style>
