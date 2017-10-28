@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Web.Http;
 using FirstREST.Lib_Primavera.Model;
 
+
 namespace FirstREST.Controllers
 {
     public class ClientesController : ApiController
@@ -16,7 +17,7 @@ namespace FirstREST.Controllers
 
         public IEnumerable<Lib_Primavera.Model.Cliente> Get()
         {
-                return Lib_Primavera.PriIntegration.ListaClientes();
+            return Lib_Primavera.PriIntegration.ListaClientes();
         }
 
 
