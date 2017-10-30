@@ -6,7 +6,8 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Xml;
 using Newtonsoft.Json;
-
+using Newtonsoft.Json.Linq;
+using FirstREST.Mongo;
 namespace FirstREST.Controllers
 {
     public class SaftController : ApiController
@@ -16,11 +17,14 @@ namespace FirstREST.Controllers
 
         public String Get()
         {
-            XmlDocument doc = new XmlDocument();
-            doc.LoadXml(System.IO.File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "Assets\\SAFT_DEMOSINF_01-01-2016_31-12-2016.xml"));
-            string jsonText = JsonConvert.SerializeXmlNode(doc);
 
-            return jsonText;
+            return MongoConnection.GetCollection("Header");
+        }
+
+        public String Get(string id)
+        {
+
+            return MongoConnection.GetCollection(id);
         }
 
     }

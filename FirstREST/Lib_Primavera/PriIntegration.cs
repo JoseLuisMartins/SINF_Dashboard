@@ -312,10 +312,80 @@ namespace FirstREST.Lib_Primavera
 
         #endregion Artigo
 
-   
+        #region Inventory
+        public static Lib_Primavera.Model.Inventory GetInventory(string codArtigo)
+        {
+
+            GcpBEArtigo objArtigo = new GcpBEArtigo();
+            Model.Inventory myArt = new Model.Inventory();
+
+            if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
+            {
+
+                if (PriEngine.Engine.Comercial.Artigos.Existe(codArtigo) == false)
+                {
+                    return null;
+                }
+                else
+                {
+                    objArtigo = PriEngine.Engine.Comercial.Artigos.Edita(codArtigo);
+                    myArt.CodArtigo = objArtigo.get_Artigo();
+                    myArt.Description = objArtigo.get_Descricao();
+                    myArt.Stock = objArtigo.get_StkActual();
+
+                    return myArt;
+                }
+
+            }
+            else
+            {
+                return null;
+            }
+
+        }
+
+        public static List<Model.Inventory> ListInventory()
+        {
+
+            StdBELista objList;
+
+            Model.Inventory art = new Model.Inventory();
+            List<Model.Inventory> listInventory = new List<Model.Inventory>();
+
+            if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
+            {
+
+                //objList = PriEngine.Engine.Comercial.Artigos.LstArtigos();
+                objList = PriEngine.Engine.Consulta("SELECT Artigo.Artigo, Artigo.Descricao, Artigo.STKActual FROM Artigo");
+
+                while (!objList.NoFim())
+                {
+                    art = new Model.Inventory();
+                    art.CodArtigo = objList.Valor("artigo");
+                    art.Description = objList.Valor("descricao");
+                    art.Stock = objList.Valor("stkactual");
+
+
+                    listInventory.Add(art);
+                    objList.Seguinte();
+                }
+
+                return listInventory;
+
+            }
+            else
+            {
+                return null;
+
+            }
+
+        }
+
+        #endregion Inventory
+
 
         #region DocCompra
-        
+
 
         public static List<Model.DocCompra> VGR_List()
         {
