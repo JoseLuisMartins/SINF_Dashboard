@@ -31,8 +31,17 @@ namespace FirstREST.Lib_Primavera
 
                 objList = PriEngine.Engine.Consulta("SELECT Cliente, Nome, Moeda, NumContrib as NumContribuinte, Fac_Mor AS campo_exemplo, CDU_Email as Email FROM  CLIENTES");
 
+                //StdBECampos objeto = PriEngine.Engine.Comercial.Compras.ValidaCamposSAFT();
+                //StdBECampos objeto = PriEngine.Engine.Comercial.Compras.;
+                //PriEngine.Engine.Comercial.TabCompras.LstTodosDocCompras();
+                //PriEngine.Engine.Comercial.TabCompras.LstDocCompras();
+                //PriEngine.Engine.Comercial.Fornecedores.
+                //PriEngine.Engine.Comercial.Stocks.DaCamposUtil
+                //PriEngine.Engine.Comercial.ArtigosFornecedores.DaPrecoFornecedor();
+                //PriEngine.Engine.Comercial.TabCompras.LstDocCompras();
+                //PriEngine.Engine.Comercial.TabStocks.LstDocStocks();
+                //GcpBEFornecedor fornecedor = PriEngine.Engine.Comercial.Fornecedores.Consulta("sdioadioausd");
 
-              
                 while (!objList.NoFim())
                 {
                     listClientes.Add(new Model.Cliente
@@ -311,6 +320,10 @@ namespace FirstREST.Lib_Primavera
         }
 
         #endregion Artigo
+
+        #region Fornecedor
+
+        #endregion Fornecedor
 
         #region Inventory
         public static Lib_Primavera.Model.Inventory GetInventory(string codArtigo)

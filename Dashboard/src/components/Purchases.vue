@@ -72,7 +72,7 @@
             <v-btn class="ma-0" outline> Day </v-btn>
             <v-btn class="ma-0" outline> Month </v-btn>
             <v-btn color="blue" class="ma-0" dark> Year </v-btn>
-            <v-btn class="ma-0" outline> Custom </v-btn>
+            <v-btn color="blue" class="ma-0" dark> Custom </v-btn>
           </v-card-title>
           <v-card-text class="chartHolder">
             <line-chart class="limitHeight" :data="salesChartData"> </line-chart>
@@ -160,7 +160,23 @@ export default {
         {name: 'Pistacho Amarelo', company: 'Felisberto Inc.'},
         {name: 'Pistacho Vermelho', company: 'Felisberto Inc.'},
         {name: 'Pistacho Azul', company: 'Felisberto Inc.'},
-        {name: 'Pistacho Laranja', company: 'Felisberto Inc.'}
+        {name: 'Pistacho Laranja', company: 'Felisberto Inc.'},
+        {name: 'Pistacho', company: 'Felisberto Inc.'},
+        {name: 'Pistacho Amarelo', company: 'Felisberto Inc.'},
+        {name: 'Pistacho Vermelho', company: 'Felisberto Inc.'},
+        {name: 'Pistacho Azul', company: 'Felisberto Inc.'},
+        {name: 'Pistacho', company: 'Felisberto Inc.'},
+        {name: 'Pistacho Amarelo', company: 'Felisberto Inc.'},
+        {name: 'Pistacho Vermelho', company: 'Felisberto Inc.'},
+        {name: 'Pistacho Azul', company: 'Felisberto Inc.'},
+        {name: 'Pistacho', company: 'Felisberto Inc.'},
+        {name: 'Pistacho Amarelo', company: 'Felisberto Inc.'},
+        {name: 'Pistacho Vermelho', company: 'Felisberto Inc.'},
+        {name: 'Pistacho Azul', company: 'Felisberto Inc.'},
+        {name: 'Pistacho', company: 'Felisberto Inc.'},
+        {name: 'Pistacho Amarelo', company: 'Felisberto Inc.'},
+        {name: 'Pistacho Vermelho', company: 'Felisberto Inc.'},
+        {name: 'Pistacho Azul', company: 'Felisberto Inc.'}
       ],
       salesChartData: {
         title: 'Turnover',
