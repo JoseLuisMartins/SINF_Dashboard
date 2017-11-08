@@ -387,7 +387,7 @@ namespace FirstREST.Lib_Primavera
         #region DocCompra
 
 
-        public static List<Model.DocCompra> VGR_List()
+        public static List<Model.DocCompra> VGR_List(string begin, string end)
         {
                 
             StdBELista objListCab;
@@ -399,7 +399,11 @@ namespace FirstREST.Lib_Primavera
 
             if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
             {
-                objListCab = PriEngine.Engine.Consulta("SELECT id, NumDocExterno, Entidade, DataDoc, NumDoc, TotalMerc, Serie From CabecCompras where TipoDoc='VGR'");
+                string query = String.Format(
+                    "SELECT id, NumDocExterno, Entidade, DataDoc, NumDoc, TotalMerc, Serie From CabecCompras where TipoDoc='VGR' and (DataDoc between '{0}' and '{1}' )",
+                     begin, end);
+
+                objListCab = PriEngine.Engine.Consulta(query);
                 while (!objListCab.NoFim())
                 {
                     dc = new Model.DocCompra();

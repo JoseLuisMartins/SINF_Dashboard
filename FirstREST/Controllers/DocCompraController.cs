@@ -13,10 +13,14 @@ namespace FirstREST.Controllers
     public class DocCompraController : ApiController
     {
 
-
-        public IEnumerable<Lib_Primavera.Model.DocCompra> Get()
+        public IEnumerable<Lib_Primavera.Model.DocCompra> Get(string begin = "", string end = "")
         {
-            return Lib_Primavera.PriIntegration.VGR_List();
+            return Lib_Primavera.PriIntegration.VGR_List(begin, end);
+        }
+
+        public string ListSpaces(int id)
+        {
+            return "ID: " + id;
         }
 
         /*
