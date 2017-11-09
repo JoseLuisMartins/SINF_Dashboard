@@ -10,8 +10,6 @@ export default {
   mounted () {
     this.renderChart(this.chartData, {
       responsive: true,
-      height: 100,
-      width: 300,
       maintainAspectRatio: false,
       fontColor: '#FFF',
       elements: {
