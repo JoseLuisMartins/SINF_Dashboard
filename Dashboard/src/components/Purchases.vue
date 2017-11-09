@@ -141,8 +141,8 @@
           <v-card-title>
             <div class="headline"> Purchases </div>
           </v-card-title>
-          <v-card-text class="chartHolder">
-            <line-chart class="limitHeight" :chart-data="salesChartData"> </line-chart>
+          <v-card-text>
+            <line-chart class="limitHeight chartHolder" :chart-data="salesChartData"> </line-chart>
           </v-card-text>
         </v-card>
       </v-flex>
@@ -369,11 +369,11 @@ export default {
 }
 
 .chartHolder{
+  position: relative;
+  height: 300px;
   width: 100%;
-}
-
-.limitHeight{
-  max-height: 200px;
+  min-width: 0;
+  min-height: 0;
 }
 
 </style>
