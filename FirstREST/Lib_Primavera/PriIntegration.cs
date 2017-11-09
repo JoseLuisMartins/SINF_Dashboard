@@ -40,6 +40,7 @@ namespace FirstREST.Lib_Primavera
                 //PriEngine.Engine.Comercial.ArtigosFornecedores.DaPrecoFornecedor();
                 //PriEngine.Engine.Comercial.TabCompras.LstDocCompras();
                 //PriEngine.Engine.Comercial.TabStocks.LstDocStocks();
+                //PriEngine.Engine.Comercial.Vendedores.LstVendedores();
                 //GcpBEFornecedor fornecedor = PriEngine.Engine.Comercial.Fornecedores.Consulta("sdioadioausd");
 
                 while (!objList.NoFim())
@@ -322,6 +323,38 @@ namespace FirstREST.Lib_Primavera
         #endregion Artigo
 
         #region Fornecedor
+
+        public static List<Model.Fornecedor> ListaFornecedores(string[] fornecedorIds)
+        {
+            if (fornecedorIds.Length == 0)
+                return null;
+
+            if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
+            {
+                List<Model.Fornecedor> result = new List<Model.Fornecedor>();
+
+                foreach (string id in fornecedorIds)
+                {
+                    //Pedir info de Fornecedor
+                    GcpBEFornecedor f = PriEngine.Engine.Comercial.Fornecedores.Consulta(id);
+                    if (f == null)
+                        continue;
+                    Model.Fornecedor nf = new Model.Fornecedor();
+                    nf.CodFornecedor = f.get_Fornecedor();
+                    nf.NomeFiscal = f.get_NomeFiscal();
+                    nf.NomeFornecedor = f.get_Nome();
+                    nf.Telefone = f.get_Telefone();
+                    nf.NumContribuinte = f.get_NumContribuinte();
+                    result.Add(nf);
+                }
+
+                return result;
+            }
+
+            return null;
+            
+
+        }
 
         #endregion Fornecedor
 
