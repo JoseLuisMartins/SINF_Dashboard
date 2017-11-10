@@ -455,6 +455,8 @@ namespace FirstREST.Lib_Primavera
                     dc = new Model.DocCompra();
                     dc.id = objListCab.Valor("id");
                     dc.NumDocExterno = objListCab.Valor("NumDocExterno");
+
+                    //Nome do fornecedor : Guardar estes valores para enviar para ListaFornecedores ou então fazer isso no frontend e enviar um request novo.
                     dc.Entidade = objListCab.Valor("Entidade");
                     dc.NumDoc = objListCab.Valor("NumDoc");
                     dc.Data = objListCab.Valor("DataDoc");
