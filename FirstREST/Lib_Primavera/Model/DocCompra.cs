@@ -27,6 +27,12 @@ namespace FirstREST.Lib_Primavera.Model
             set;
         }
 
+        public Fornecedor Fornecedor
+        {
+            get;
+            set;
+        }
+
         public int NumDoc
         {
             get;

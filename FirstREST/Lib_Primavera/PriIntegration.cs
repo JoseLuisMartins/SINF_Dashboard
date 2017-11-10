@@ -86,7 +86,6 @@ namespace FirstREST.Lib_Primavera
                     myCli.NumContribuinte = objCli.get_NumContribuinte();
                     myCli.Morada = objCli.get_Morada();
                     myCli.Email = PriEngine.Engine.Comercial.Clientes.DaValorAtributo(codCliente, "CDU_Email");
-
                     
                     return myCli;
                 }
@@ -324,28 +323,29 @@ namespace FirstREST.Lib_Primavera
 
         #region Fornecedor
 
-        public static List<Model.Fornecedor> ListaFornecedores(string[] fornecedorIds)
+        public static List<Model.Fornecedor> ListaFornecedores()
         {
-            if (fornecedorIds.Length == 0)
-                return null;
+            StdBELista objListCab;
 
             if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
             {
                 List<Model.Fornecedor> result = new List<Model.Fornecedor>();
 
-                foreach (string id in fornecedorIds)
+                string query = String.Format(
+                    "SELECT Fornecedor, Nome, NumContrib, Tel, NomeFiscal From Fornecedores");
+
+                objListCab = PriEngine.Engine.Consulta(query);
+
+                while (!objListCab.NoFim())
                 {
-                    //Pedir info de Fornecedor
-                    GcpBEFornecedor f = PriEngine.Engine.Comercial.Fornecedores.Consulta(id);
-                    if (f == null)
-                        continue;
-                    Model.Fornecedor nf = new Model.Fornecedor();
-                    nf.CodFornecedor = f.get_Fornecedor();
-                    nf.NomeFiscal = f.get_NomeFiscal();
-                    nf.NomeFornecedor = f.get_Nome();
-                    nf.Telefone = f.get_Telefone();
-                    nf.NumContribuinte = f.get_NumContribuinte();
-                    result.Add(nf);
+                    Model.Fornecedor fc = new Model.Fornecedor();
+                    fc.CodFornecedor = objListCab.Valor("Fornecedor");
+                    fc.NomeFiscal = objListCab.Valor("NomeFiscal");
+                    fc.NomeFornecedor = objListCab.Valor("Nome");
+                    fc.Telefone = objListCab.Valor("Tel");
+                    fc.NumContribuinte = objListCab.Valor("NumContrib");
+                    result.Add(fc);
+                    objListCab.Seguinte();
                 }
 
                 return result;
@@ -354,6 +354,26 @@ namespace FirstREST.Lib_Primavera
             return null;
             
 
+        }
+
+        public static Model.Fornecedor GetFornecedor(string id)
+        {
+            if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
+            {
+                Model.Fornecedor nf = new Model.Fornecedor();
+
+                nf.Telefone = PriEngine.Engine.Comercial.Fornecedores.DaValorAtributo(id,"Tel");
+                nf.NomeFornecedor = PriEngine.Engine.Comercial.Fornecedores.DaValorAtributo(id, "Nome");
+                nf.NomeFiscal = PriEngine.Engine.Comercial.Fornecedores.DaValorAtributo(id, "NomeFiscal");
+                nf.NumContribuinte = PriEngine.Engine.Comercial.Fornecedores.DaValorAtributo(id, "NumContrib");
+                nf.CodFornecedor = id;
+
+                return nf;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         #endregion Fornecedor
@@ -455,8 +475,6 @@ namespace FirstREST.Lib_Primavera
                     dc = new Model.DocCompra();
                     dc.id = objListCab.Valor("id");
                     dc.NumDocExterno = objListCab.Valor("NumDocExterno");
-
-                    //Nome do fornecedor : Guardar estes valores para enviar para ListaFornecedores ou então fazer isso no frontend e enviar um request novo.
                     dc.Entidade = objListCab.Valor("Entidade");
                     dc.NumDoc = objListCab.Valor("NumDoc");
                     dc.Data = objListCab.Valor("DataDoc");
