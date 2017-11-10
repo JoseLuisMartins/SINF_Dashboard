@@ -142,7 +142,7 @@
             <div class="headline"> Purchases </div>
           </v-card-title>
           <v-card-text>
-            <line-chart class="limitHeight chartHolder" :chart-data="salesChartData"> </line-chart>
+            <line-chart class="limitHeight chartHolder" :chart-data="salesChartData" :options="chartOptions"> </line-chart>
           </v-card-text>
         </v-card>
       </v-flex>
@@ -179,14 +179,14 @@
                   <v-card-text>
                     <v-table>
                       <tr>
-                      <th> Art </th> <th>Descr</th><th>Quantity</th><th> UnitPrice </th><th> - LiquidPrice</th><th>  - Warehouse</th><th>  - Lot</th>
+                      <th>Art</th><th>Descr</th><th>Quantity</th><th>UnitPrice</th><th>LiquidPrice</th><th>Warehouse</th><th>Lot</th>
                       </tr>
                       <tr flat v-for="line in props.item.LinhasDoc" :key="line.id">
                         <td>{{line.CodArtigo}}</td>
                         <td>{{line.DescArtigo}}</td>
-                        <td>{{line.Quantidade}}</td>
-                        <td>{{line.PrecoUnitario}}</td>
-                        <td>{{line.TotalLiquido}}</td>
+                        <td>{{Math.abs(line.Quantidade)}}</td>
+                        <td>{{Math.abs(line.PrecoUnitario)}}</td>
+                        <td>{{Math.abs(line.TotalLiquido)}}</td>
                         <td>{{line.Armazem}}</td>
                         <td>{{line.Lote}}</td>
                       </tr>
@@ -235,7 +235,7 @@
 
 <script>
 
-import LineChart from '@/components/charts/ScatterChart'
+import LineChart from '@/components/charts/LineChart'
 import PurchasesService from '@/services/Purchases'
 
 export default {
@@ -290,6 +290,43 @@ export default {
       ],
       salesChartData: {
         datasets: []
+      },
+      chartOptions: {
+        responsive: true,
+        maintainAspectRatio: false,
+        fontColor: '#FFF',
+        elements: {
+          line: {
+            backgroundColor: '#F00',
+            pointBackgroundColor: '#FF00FF',
+            borderColor: '#CC3311',
+            fill: false,
+            tension: 0.5
+          }
+        },
+        scales: {
+          yAxes: [{
+            ticks: {
+              beginAtZero: false
+            }
+          }],
+          xAxes: [{
+            type: 'time',
+            distribution: 'linear',
+            time: {
+              displayFormats: {
+                quarter: 'MMM YYYY'
+              },
+              unit: 'month'
+            }
+          }]
+        },
+        legend: {
+          display: false,
+          labels: {
+            fontColor: '#FFF'
+          }
+        }
       }
     }
   },
@@ -309,26 +346,20 @@ export default {
       this.currentDataSet = res.data
     },
     currentDataSet: function (val) {
-      let dict = {}
-
-      for (var i = 0; i < val.length; i++) {
-        let x = new Date(val[i].Data).getMonth()
-        dict[x] = val[i].TotalMerc + (dict[x] || 0)
-      }
-
       let data = []
 
-      for (var key in dict) {
+      for (var i = 0; i < val.length; i++) {
+        val[i].TotalMerc = Math.abs(val[i].TotalMerc)
         data.push({
-          x: Number(key) + 1,
-          y: dict[key]
+          x: new Date(val[i].Data),
+          y: val[i].TotalMerc
         })
       }
-
-      console.log(data)
+      data.sort((a, b) => {
+        return a.x > b.x ? 1 : a.x < b.x ? -1 : 0
+      })
 
       this.salesChartData = {
-        data: data,
         datasets: [
           {
             pointRadius: 3,
