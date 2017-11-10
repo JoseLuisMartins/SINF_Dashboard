@@ -6,14 +6,14 @@ export default {
   },
   getSuppliersInfo (ids) {
     let url = 'api/Fornecedor/?'
-    
     for (let i = 0; i < ids.length; i++) {
       url += `fIds=${ids[i]}`
 
-      if (i != ids.length - 1)
-          url += '&'
-        
+      if (i !== ids.length - 1) {
+        url += '&'
+      }
     }
-  return Api().get(url)
-}
+
+    return Api().get(url)
+  }
 }
