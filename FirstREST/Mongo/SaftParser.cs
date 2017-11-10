@@ -18,6 +18,11 @@ namespace FirstREST.Mongo
             doc.LoadXml(System.IO.File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "Assets\\SAFT_DEMOSINF_01-01-2016_31-12-2016.xml"));
             string jsonText = JsonConvert.SerializeXmlNode(doc);
 
+            /*
+            XmlDocument doc = new XmlDocument();
+            doc = XValidation.validation();         
+           */
+           
             JToken tkn = JObject.Parse(jsonText);
 
             JToken auditFile = tkn.SelectToken("AuditFile");

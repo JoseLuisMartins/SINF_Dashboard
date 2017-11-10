@@ -59,6 +59,14 @@ namespace FirstREST.Mongo
 
             return coll.Find(filter).ToList().ToJson();
         }
+        
+        public static string GetCollectionByDate(string collection, string field, string begin, string end)
+        {
 
+            var coll = db.GetCollection<BsonDocument>(collection);
+
+            var filter = "{" + field + ": {$gte:'"+ begin + "', $lt:'" + end +"'}}";
+            return coll.FindSync(filter).ToList().ToJson();
+        }
     }
 }
