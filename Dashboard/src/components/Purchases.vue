@@ -209,22 +209,19 @@
               > </v-text-field> <v-icon> search </v-icon>
           </v-card-title>
           <v-card-text>
-
             <v-data-table
-              v-bind:headers="linhasDoc"
+              v-bind:headers="suppliersHeader"
               :items="items"
               hide-actions
               class="elevation-1"
               >
-
               <template slot="items" scope="props">
-                
-                <td> {{props.item.name }} </td>
-
+                <td> {{props.item.CodFornecedor }} </td>
+                <td> {{props.item.NomeFornecedor }} </td>
+                <td> {{props.item.Telefone }} </td>
+                <td> {{props.item.NumContribuinte }} </td>
               </template>
-
             </v-data-table>
-
           </v-card-text>
         </v-card>
       </v-flex>
@@ -241,6 +238,15 @@ import PurchasesService from '@/services/Purchases'
 export default {
   components: {
     LineChart
+  },
+  methods: {
+    getSup: async function () {
+      const res = await PurchasesService.getSuppliers()
+      this.items = res.data
+    }
+  },
+  beforeMount () {
+    this.getSup()
   },
   data () {
     return {
@@ -261,33 +267,17 @@ export default {
         {text: 'Total Merc', value: 'TotalMerc', align: 'center'},
         {text: 'Serie', value: 'Serie', align: 'center'}
       ],
+      suppliersHeader: [
+        {text: 'Fornecedor', value: 'CodFornecedor', align: 'left'},
+        {text: 'Nome', value: 'Nome', align: 'center'},
+        {text: 'Telefone', value: 'Telefone', align: 'center'},
+        {text: 'NumContribuinte', value: 'NumContrib', align: 'center'}
+      ],
       menu: false,
       dateBegin: null,
       dateEnd: null,
       currentDataSet: [],
-      items: [
-        {name: 'Pistacho', company: 'Felisberto Inc.'},
-        {name: 'Pistacho Amarelo', company: 'Felisberto Inc.'},
-        {name: 'Pistacho Vermelho', company: 'Felisberto Inc.'},
-        {name: 'Pistacho Azul', company: 'Felisberto Inc.'},
-        {name: 'Pistacho Laranja', company: 'Felisberto Inc.'},
-        {name: 'Pistacho', company: 'Felisberto Inc.'},
-        {name: 'Pistacho Amarelo', company: 'Felisberto Inc.'},
-        {name: 'Pistacho Vermelho', company: 'Felisberto Inc.'},
-        {name: 'Pistacho Azul', company: 'Felisberto Inc.'},
-        {name: 'Pistacho', company: 'Felisberto Inc.'},
-        {name: 'Pistacho Amarelo', company: 'Felisberto Inc.'},
-        {name: 'Pistacho Vermelho', company: 'Felisberto Inc.'},
-        {name: 'Pistacho Azul', company: 'Felisberto Inc.'},
-        {name: 'Pistacho', company: 'Felisberto Inc.'},
-        {name: 'Pistacho Amarelo', company: 'Felisberto Inc.'},
-        {name: 'Pistacho Vermelho', company: 'Felisberto Inc.'},
-        {name: 'Pistacho Azul', company: 'Felisberto Inc.'},
-        {name: 'Pistacho', company: 'Felisberto Inc.'},
-        {name: 'Pistacho Amarelo', company: 'Felisberto Inc.'},
-        {name: 'Pistacho Vermelho', company: 'Felisberto Inc.'},
-        {name: 'Pistacho Azul', company: 'Felisberto Inc.'}
-      ],
+      items: [],
       salesChartData: {
         datasets: []
       },

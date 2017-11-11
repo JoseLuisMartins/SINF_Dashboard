@@ -4,16 +4,12 @@ export default {
   request (begin, end) {
     return Api().get(`/api/DocCompra/?begin=${begin}&end=${end}`)
   },
-  getSuppliersInfo (ids) {
-    let url = 'api/Fornecedor/?'
-    for (let i = 0; i < ids.length; i++) {
-      url += `fIds=${ids[i]}`
-
-      if (i !== ids.length - 1) {
-        url += '&'
-      }
-    }
+  getSupplierInfo (id) {
+    let url = `api/Fornecedor/?id=${id}`
 
     return Api().get(url)
+  },
+  getSuppliers () {
+    return Api().get('api/Fornecedor/')
   }
 }
