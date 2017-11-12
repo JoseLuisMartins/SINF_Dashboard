@@ -142,13 +142,13 @@
             <div class="headline"> Purchases </div>
           </v-card-title>
           <v-card-text>
-            <line-chart class="limitHeight chartHolder" :chart-data="salesChartData" :options="chartOptions"> </line-chart>
+            <line-chart class="limitHeight chartHolder" :chart-data="purchasesChartData" :options="chartOptions"> </line-chart>
           </v-card-text>
         </v-card>
       </v-flex>
     </v-layout>
     <v-layout row wrap>
-      <v-flex sm12 md6>
+      <v-flex sm12 md12>
         <v-card>
           <v-card-title class="pb-0">
             <div class="headline"> Purchased Products </div>
@@ -161,7 +161,6 @@
             <v-data-table
               v-bind:headers="purchasesHeader"
               :items="currentDataSet"
-              hide-actions
               class="elevation-1"
               item-key="id"
               >
@@ -177,7 +176,7 @@
               <template slot="expand" scope="props">
                 <v-card color="grey lighten-3">
                   <v-card-text>
-                    <v-table>
+                    <table>
                       <tr>
                       <th>Art</th><th>Descr</th><th>Quantity</th><th>UnitPrice</th><th>LiquidPrice</th><th>Warehouse</th><th>Lot</th>
                       </tr>
@@ -190,7 +189,7 @@
                         <td>{{line.Armazem}}</td>
                         <td>{{line.Lote}}</td>
                       </tr>
-                    </v-table>
+                    </table>
                   </v-card-text>
                 </v-card>
               </template>
@@ -199,7 +198,7 @@
           </v-card-text>
         </v-card>
       </v-flex>
-      <v-flex sm12 md6>
+      <v-flex sm12 md12>
         <v-card>
           <v-card-title class="pb-0">
             <div class="headline"> Suppliers </div>
@@ -212,7 +211,7 @@
             <v-data-table
               v-bind:headers="suppliersHeader"
               :items="items"
-              hide-actions
+              
               class="elevation-1"
               >
               <template slot="items" scope="props">
@@ -278,7 +277,7 @@ export default {
       dateEnd: null,
       currentDataSet: [],
       items: [],
-      salesChartData: {
+      purchasesChartData: {
         datasets: []
       },
       chartOptions: {
@@ -349,7 +348,7 @@ export default {
         return a.x > b.x ? 1 : a.x < b.x ? -1 : 0
       })
 
-      this.salesChartData = {
+      this.purchasesChartData = {
         datasets: [
           {
             pointRadius: 3,

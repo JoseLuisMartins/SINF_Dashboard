@@ -1,3 +1,3 @@
 export default {
-  HOST: 'http://192.168.1.117:49822'
+  HOST: 'http://192.168.1.64:9000'
 }
