@@ -17,13 +17,11 @@ namespace FirstREST.Controllers
 
         public String Get()
         {
-
             return MongoConnection.GetCollection("Header");
         }
 
         public String Get(string id)
         {
-
             return MongoConnection.GetCollection(id);
         }
 

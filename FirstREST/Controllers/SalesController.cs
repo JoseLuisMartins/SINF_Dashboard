@@ -5,15 +5,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Web.Http;
+using System.Web.Mvc;
 
 namespace FirstREST.Controllers
 {
     public class SalesController : ApiController
     {
-        public String Get(string begin, string end)
+        public HttpResponseMessage Get(string begin, string end)
         {
-            return MongoConnection.GetCollectionByDate("Invoices", "InvoiceDate", begin, end);
+            string res = MongoConnection.GetCollectionByDate("Invoices", "InvoiceDate", begin, end);
+            var response = this.Request.CreateResponse(HttpStatusCode.OK);
+            response.Content = new StringContent(res, Encoding.UTF8, "application/json");
+
+            return response;
         }
     }
 }

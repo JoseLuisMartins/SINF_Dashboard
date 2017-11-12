@@ -5,6 +5,7 @@ using System.Web;
 using MongoDB.Driver;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
+using MongoDB.Bson.IO;
 
 namespace FirstREST.Mongo
 {
@@ -17,6 +18,7 @@ namespace FirstREST.Mongo
 
         static MongoConnection()
         {
+           
             client = new MongoClient("mongodb://localhost:27017");
             client.DropDatabase("SAFTDB");
             db = client.GetDatabase("SAFTDB");
@@ -62,11 +64,12 @@ namespace FirstREST.Mongo
         
         public static string GetCollectionByDate(string collection, string field, string begin, string end)
         {
+            var settings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
 
             var coll = db.GetCollection<BsonDocument>(collection);
 
-            var filter = "{" + field + ": {$gte:'"+ begin + "', $lt:'" + end +"'}}";
-            return coll.FindSync(filter).ToList().ToJson();
+            var filter = "{" + field + ": {$gte:'" + begin + "', $lt:'" + end + "'}}";
+            return coll.FindSync(filter).ToList().ToJson(settings);
         }
     }
 }
