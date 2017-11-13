@@ -280,7 +280,6 @@ namespace FirstREST.Lib_Primavera
             {
                 return null;
             }
-
         }
 
         public static List<Model.Artigo> ListaArtigos()
@@ -322,6 +321,35 @@ namespace FirstREST.Lib_Primavera
         #endregion Artigo
 
         #region Fornecedor
+
+        public static List<Model.Artigo> GetArtigos_Fornecedor(string idFornecedor)
+        {
+
+            StdBELista objListCab;
+
+            if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
+            {
+                List<Model.Artigo> result = new List<Model.Artigo>();
+
+                string query = String.Format(
+                    "SELECT Artigo, Descricao From Artigo where Fornecedor = '{0}'", idFornecedor);
+
+                objListCab = PriEngine.Engine.Consulta(query);
+
+                while (!objListCab.NoFim())
+                {
+                    Model.Artigo fc = new Model.Artigo();
+                    fc.CodArtigo = objListCab.Valor("Artigo");
+                    fc.DescArtigo = objListCab.Valor("Descricao");
+                    result.Add(fc);
+                    objListCab.Seguinte();
+                }
+
+                return result;
+            }
+
+            return null;
+        }
 
         public static List<Model.Fornecedor> ListaFornecedores()
         {
@@ -452,10 +480,8 @@ namespace FirstREST.Lib_Primavera
 
         #region DocCompra
 
-
         public static List<Model.DocCompra> VGR_List(string begin, string end)
         {
-                
             StdBELista objListCab;
             StdBELista objListLin;
             Model.DocCompra dc = new Model.DocCompra();
@@ -466,9 +492,10 @@ namespace FirstREST.Lib_Primavera
             if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
             {
                 string query = String.Format(
-                    "SELECT id, NumDocExterno, Entidade, DataDoc, NumDoc, TotalMerc, Serie From CabecCompras where TipoDoc='VGR' and (DataDoc between '{0}' and '{1}' )",
+                    "SELECT id, NumDocExterno, Entidade, DataDoc, NumDoc, TotalMerc, Serie From CabecCompras where TipoDoc='VFA' and (DataDoc between '{0}' and '{1}' )",
                      begin, end);
 
+                //objListCab = PriEngine.Engine.Comercial.TabCompras.LstDocCompras();
                 objListCab = PriEngine.Engine.Consulta(query);
                 while (!objListCab.NoFim())
                 {
@@ -741,5 +768,59 @@ namespace FirstREST.Lib_Primavera
         }
 
         #endregion DocsVenda
+
+        #region Compras
+
+        public static double getDatedPurchases(string begin, string end)
+        {
+            double total = 0;
+
+            if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
+            {
+                
+                string query = String.Format("SELECT CabecCompras.TotalMerc, CabecCompras.TotalIva FROM CabecCompras WHERE (DataDoc between '{0}' and '{1}' )", begin, end);
+                //TipoDoc='VGR'
+                
+                StdBELista objList = PriEngine.Engine.Consulta(query);
+
+                while (!objList.NoFim())
+                {
+                    //TODO VER ISTO AIAIAI
+                    total += objList.Valor("TotalMerc");
+                    total += objList.Valor("TotalIVA");
+
+                    objList.Seguinte();
+                }
+            }
+
+            return total;
+        }
+
+        public static double getDatedPurchasesByFornecedor(string begin, string end, string idF)
+        {
+            double total = 0;
+
+            if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
+            {
+
+                string query = String.Format("SELECT CabecCompras.TotalMerc, CabecCompras.TotalIva FROM CabecCompras WHERE (DataDoc between '{0}' and '{1}' ) AND Entidade = '{2}'", begin, end,idF);
+                //TipoDoc='VGR'
+
+                StdBELista objList = PriEngine.Engine.Consulta(query);
+
+                while (!objList.NoFim())
+                {
+                    //TODO VER ISTO AIAIAI
+                    total += objList.Valor("TotalMerc");
+                    total += objList.Valor("TotalIVA");
+
+                    objList.Seguinte();
+                }
+            }
+
+            return total;
+        }
+
+        #endregion Compras
     }
 }
