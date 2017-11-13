@@ -1,35 +1,74 @@
 <template>
   <v-container mt-4 grid-list-md>
     <v-layout row wrap mb-4>
-      <v-flex d-flex offset-md4 md4 xs12>
+      <v-flex mb-4 d-flex sm6 offset-sm3 xs12>
         <v-card>
-          <v-menu
-            white
-            lazy
-            :close-on-content-click="false"
-            v-model="menu"
-            transition="scale-transition"
-            :nudge-top="-20"
-            max-width="290px"
-            min-width="290px"
-          >
-            <v-text-field
-              slot="activator"
-              label="Date"
-              v-model="date"
-              prepend-icon="event"
-              readonly
-            ></v-text-field>
-            <v-date-picker type="month" v-model="date" no-title scrollable actions :allowed-dates="december">
-              <template scope="{ save, cancel }">
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn flat color="primary" @click="cancel">Cancel</v-btn>
-                  <v-btn flat color="primary" @click="save">OK</v-btn>
-                </v-card-actions>
-              </template>
-            </v-date-picker>
-          </v-menu>
+          <v-card-text>
+            <v-layout row wrap>
+              <v-flex xs12 sm6>
+                <v-menu
+                  lazy
+                  :close-on-content-click="false"
+                  transition="scale-transition"
+                  full-width
+                  v-model="menu"
+                  offset-y
+                  :nudge-right="40"
+                  max-width="290px"
+                  max-height="600px"
+                >
+
+                  <v-text-field
+                    slot="activator"
+                    v-model="dateBegin"
+                    prepend-icon="event"
+                    readonly
+                    label="Begin Date"
+                  ></v-text-field>
+                  
+                  <v-date-picker v-model="dateBegin" no-title scrollable actions>
+                    <template  slot-scope="{save, cancel}">
+                      <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn flat color="primary" @click="cancel"> Cancel </v-btn>
+                        <v-btn flat color="primary" @click="save"> Ok </v-btn>
+                      </v-card-actions>
+                    </template>
+                  </v-date-picker>
+                </v-menu>
+              </v-flex>
+              <v-flex xs12 sm6>
+                <v-menu
+                  lazy
+                  :clonse-on-content-click="false"
+                  transition="scale-transition"
+                  full-width
+                  :nudge-right="40"
+                  max-width="290px"
+                  max-height="600px"
+                >
+
+                  <v-text-field
+                    slot="activator"
+                    v-model="dateEnd"
+                    prepend-icon="event"
+                    readonly
+                    label="End Date"
+                  ></v-text-field>
+                  
+                  <v-date-picker v-model="dateEnd" no-title scrollable actions>
+                    <template slot-scope="{save, cancel}">
+                      <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn flat color="primary" @click="cancel"> Cancel </v-btn>
+                        <v-btn flat color="primary" @click="save"> Ok </v-btn>
+                      </v-card-actions>
+                    </template>
+                  </v-date-picker>
+                </v-menu>
+              </v-flex>
+            </v-layout>
+          </v-card-text>
         </v-card>
       </v-flex>
     </v-layout>
@@ -60,7 +99,8 @@ export default {
   name: 'HelloWorld',
   data () {
     return {
-      date: null,
+      dateBegin: null,
+      dateEnd: null,
       menu: false,
       modal: false,
       chartOptions: {
@@ -135,6 +175,12 @@ export default {
     Topic, LineChart
   },
   mounted: function () {
+  },
+  methods: {
+    dateBegin: async function (val) {
+    },
+    dateEnd: async function (val) {
+    }
   }
 }
 </script>
