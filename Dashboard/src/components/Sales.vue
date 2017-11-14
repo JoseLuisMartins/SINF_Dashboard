@@ -140,21 +140,16 @@
         <v-card>
           <v-card-title>
             <div class="headline"> Sales </div>
-            <v-spacer></v-spacer>
-            <v-btn class="ma-0" outline> Day </v-btn>
-            <v-btn class="ma-0" outline> Month </v-btn>
-            <v-btn color="blue" class="ma-0" dark> Year </v-btn>
-            <v-btn class="ma-0" outline> Custom </v-btn>
           </v-card-title>
           <v-card-text >
-            <line-chart class="chartHolder" :chartData="salesChartData"> </line-chart>
+            <line-chart class="chartHolder" :chartData="salesChartData" :options="chartOptions"> </line-chart>
           </v-card-text>
         </v-card>
       </v-flex>
     </v-layout>
 
     <v-layout row wrap>
-      <v-flex sm12 md6>
+      <v-flex d-flex sm12 md6>
         <v-card>
           <v-card-title class="pb-0">
             <div class="headline"> Products </div>
@@ -185,7 +180,7 @@
         </v-card>
       </v-flex>
 
-      <v-flex sm12 md6>
+      <v-flex d-flex sm12 md6>
         <v-card>
           <v-card-title class="pb-0">
             <div class="headline"> Customers </div>
@@ -236,9 +231,9 @@
 
               <template slot="items" scope="props">
                 
-                <td> {{props.item.InvoiceNo }} </td>
-                <td> {{props.item.InvoiceDate }} </td>
-                <td> {{props.item.InvoiceType }} </td>
+                <td> {{props.item.Entidade }} </td>
+                <td> {{props.item.Data }} </td>
+                <td> {{props.item.TotalMerc }} </td>
 
               </template>
 
@@ -290,6 +285,7 @@
 
 import LineChart from '@/components/charts/LineChart'
 import SalesService from '@/services/Sales'
+import ChartOptions from '@/components/charts/config'
 
 export default {
   data () {
@@ -316,26 +312,9 @@ export default {
         {text: 'Total value', value: 'TotalMerc', align: 'left'}
       ],
       salesChartData: {
-        title: 'Turnover',
-        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-        datasets: [
-          {
-            pointRadius: 5,
-            pointHoverRadius: 10,
-            pointBackgroundColor: '#FF5522',
-            label: 'tmp',
-            data: [20, 30, 20, 23, 21, 12, 23, 23, 32, 52, 50, 25]
-          },
-          {
-            pointRadius: 5,
-            pointHoverRadius: 10,
-            pointBackgroundColor: '#2255FF',
-            borderColor: '#1144AA',
-            label: 'tmp2',
-            data: [30, 20, 23, 21, 12, 23, 23, 32, 52, 50, 25, 12]
-          }
-        ]
+        datasets: []
       },
+      chartOptions: ChartOptions.options,
       invoicesDataSet: [],
       customersDataSet: [],
       productsDataSet: [],
@@ -358,13 +337,40 @@ export default {
     dateBegin: async function (val) {
       const res = await SalesService.getInvoices(this.dateBegin, this.dateEnd)
       this.invoicesDataSet = res.data
-
-      console.log('this.backlogDataSet')
-      console.log(this.backlogDataSet)
     },
     dateEnd: async function (val) {
       const res = await SalesService.getInvoices(this.dateBegin, this.dateEnd)
       this.invoicesDataSet = res.data
+    },
+    invoicesDataSet: function (val) {
+      let data = []
+
+      for (var i = 0; i < val.length; i++) {
+        val[i].NetTotal = val[i].DocumentTotals.NetTotal
+        data.push({
+          x: new Date(val[i].InvoiceDate),
+          y: val[i].NetTotal
+        })
+      }
+
+      data.sort((a, b) => {
+        return a.x > b.x ? 1 : a.x < b.x ? -1 : 0
+      })
+
+      this.salesChartData = {
+        datasets: [
+          {
+            pointRadius: 3,
+            pointHoverRadius: 6,
+            pointBackgroundColor: '#FF5522',
+            borderWidth: 3,
+            showLine: true,
+            label: 'Sales',
+            snapGaps: false,
+            data: data
+          }
+        ]
+      }
     }
   },
   components: {
@@ -394,9 +400,6 @@ export default {
   position: relative;
 }
 
-.chartHolder{
-  width: 100%;
-}
 
 .limitHeight{
   max-height: 200px;

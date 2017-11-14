@@ -1,4 +1,4 @@
-<template>
+\<template>
   <div id="app">
     <v-app>
         <toolbar title="360º Dashboard"/>

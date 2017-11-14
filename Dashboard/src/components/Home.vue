@@ -176,7 +176,7 @@ export default {
   },
   mounted: function () {
   },
-  methods: {
+  watch: {
     dateBegin: async function (val) {
     },
     dateEnd: async function (val) {
