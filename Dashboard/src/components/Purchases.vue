@@ -164,7 +164,6 @@
               class="elevation-1"
               item-key="id"
               >
-
               <template slot="items" scope="props">
                 <tr @click="props.expanded = !props.expanded"> 
                   <td> {{props.item.Entidade}} </td>

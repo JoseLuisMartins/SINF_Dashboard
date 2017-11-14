@@ -4,7 +4,7 @@
       <v-flex xs12>
       <v-btn dark @click.stop="dialogStatus=true">See Invoice Details</v-btn>
       <v-dialog v-model="dialogStatus" max-width="1000" >
-        <v-card>
+        <v-card class="grey lighten-2">
           <v-card-title>
             <v-spacer></v-spacer>
             <v-menu bottom left>
@@ -23,22 +23,11 @@
               <v-flex xs12 >
             
                 <v-card >
-
-                  <v-layout row justify-space-between>
-                      <v-flex d-flex xs4 >
-                        <v-card >
-                          <v-card-title>
-                            CompanyName
-                          </v-card-title>
-
-                        </v-card>
-                      </v-flex>
-                    </v-layout>
-
+                
                   <v-card-text>
                     <v-layout row justify-space-between>
                       <v-flex d-flex xs4 >
-                        <v-card >
+                        <v-card class="elevation-0">
                           <v-card-text class="pa-1">{{ShipFromAddressDetail}}</v-card-text>
                           <v-card-text class="pa-1">{{ShipFromCity}}</v-card-text>
                           <v-card-text class="pa-1">{{ShipFromPostalCode}}</v-card-text>
@@ -56,7 +45,7 @@
 
                     <v-layout row justify-space-between>
                       <v-flex d-flex xs4 >
-                        <v-card >
+                        <v-card class="elevation-0 mb-4 ">
                           <v-card-title>
                             Bill to
                           </v-card-title>
@@ -72,8 +61,9 @@
                       <v-flex d-flex xs12 >
                         <v-data-table
                           v-bind:headers="invoiceLineHeader"
-                          :items="invoiceLines"
-                          class="elevation-1"
+                          :items="Lines"
+                          hide-actions
+                          class="elevation-3"
                         >
                         <template slot="items" slot-scope="props">
                           <td>{{ props.item.ProductDescription }}</td>
@@ -87,9 +77,9 @@
 
                      <v-layout column wrap>
                       <v-flex d-flex offset-xs8 >
-                        <v-card >                         
-                          <v-card-text class="pa-1"> {{NetTotal}}</v-card-text>
-                          <v-card-text class="pa-1" > {{GrossTotal}}</v-card-text>                      
+                        <v-card class="elevation-1 mt-2 ">                         
+                          <v-card-text class="pa-1"> Net Total: {{NetTotal}}</v-card-text>
+                          <v-card-text class="pa-1" > Gross Total: {{GrossTotal}}</v-card-text>                      
                         </v-card>
                       </v-flex>
                     </v-layout>
@@ -131,10 +121,9 @@ export default {
         {text: 'Quantity', value: 'Quantity'},
         {text: 'Price', value: 'UnitPrice'}
       ],
-      invoiceLines: [],
       items: [
         {
-          title: 'Export'
+          title: 'Export to PDF'
         },
         {
           title: 'Print'
@@ -142,8 +131,10 @@ export default {
       ]
     }
   },
+  mounted: function () {
+    console.log(this.ShipToAddressDetail)
+  },
   props: [
-    'CompanyName',
     'ShipFromAddressDetail',
     'ShipFromCity',
     'ShipFromPostalCode',
