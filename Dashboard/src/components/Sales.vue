@@ -260,14 +260,38 @@
               v-bind:headers="invoiceHeader"
               :items="invoicesDataSet"
               class="elevation-1"
+              item-key="Hash"
               >
-
               <template slot="items" scope="props">
-                
-                <td> {{props.item.InvoiceNo }} </td>
-                <td> {{props.item.InvoiceDate }} </td>
-                <td> {{props.item.InvoiceType }} </td>
+                <tr  @click="props.expanded = !props.expanded">
+                  <td> {{props.item.InvoiceNo }} </td>
+                  <td> {{props.item.InvoiceDate }} </td>
+                  <td> {{props.item.InvoiceType }} </td>
+                </tr>
+              </template>
+              <template slot="expand" scope="props">
+                <v-card flat>
+                  <v-card-text>
+                  
+                <invoice
+                  :ShipFromAddressDetail="props.item.ShipFrom.Address.AddressDetail"
+                  :ShipFromCity="props.item.ShipFrom.Address.City"
+                  :ShipFromPostalCode="props.item.ShipFrom.Address.PostalCode"
+                  :ShipToAddressDetail="props.item.ShipTo.Address.AddressDetail"
+                  :ShipToCity="props.item.ShipTo.Address.City"
+                  :ShipToPostalCode="props.item.ShipTo.Address.PostalCode"
+                  :InvoiceDate="props.item.InvoiceDate"
+                  :InvoiceNo="props.item.InvoiceNo"
+                  :CustomerID="props.item.CustomerID"
+                  :Lines="props.item.Line"
+                  :NetTotal="props.item.DocumentTotals.NetTotal"
+                  :GrossTotal="props.item.DocumentTotals.GrossTotal"
+                >
+                </invoice>
+                   
 
+                  </v-card-text>
+                </v-card>
               </template>
 
             </v-data-table>
@@ -282,7 +306,7 @@
 
 
 <script>
-
+import Invoice from '@/components/dialogs/Invoice'
 import LineChart from '@/components/charts/LineChart'
 import SalesService from '@/services/Sales'
 import ChartOptions from '@/components/charts/config'
@@ -374,7 +398,8 @@ export default {
     }
   },
   components: {
-    LineChart
+    LineChart,
+    Invoice
   }
 }
 </script>
