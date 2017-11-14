@@ -10,7 +10,7 @@ export default {
   getProducts () {
     return Api().get(`/api/saft/Products`)
   },
-  getBacklog () {
-    return Api().get(`/api/DocVenda`)
+  getBacklog (begin, end) {
+    return Api().get(`/api/DocVenda/?begin=${begin}&end=${end}`)
   }
 }

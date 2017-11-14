@@ -131,9 +131,6 @@ export default {
       ]
     }
   },
-  mounted: function () {
-    console.log(this.ShipToAddressDetail)
-  },
   props: [
     'ShipFromAddressDetail',
     'ShipFromCity',

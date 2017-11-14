@@ -355,16 +355,21 @@ export default {
 
     this.customersDataSet = (await SalesService.getCustomers()).data
     this.productsDataSet = (await SalesService.getProducts()).data
-    this.backlogDataSet = (await SalesService.getBacklog()).data
   },
   watch: {
     dateBegin: async function (val) {
-      const res = await SalesService.getInvoices(this.dateBegin, this.dateEnd)
-      this.invoicesDataSet = res.data
+      const invoices = await SalesService.getInvoices(this.dateBegin, this.dateEnd)
+      const backlog = await SalesService.getBacklog(this.dateBegin, this.dateEnd)
+
+      this.backlogDataSet = backlog.data
+      this.invoicesDataSet = invoices.data
     },
     dateEnd: async function (val) {
-      const res = await SalesService.getInvoices(this.dateBegin, this.dateEnd)
-      this.invoicesDataSet = res.data
+      const invoices = await SalesService.getInvoices(this.dateBegin, this.dateEnd)
+      const backlog = await SalesService.getBacklog(this.dateBegin, this.dateEnd)
+
+      this.backlogDataSet = backlog.data
+      this.invoicesDataSet = invoices.data
     },
     invoicesDataSet: function (val) {
       let data = []
