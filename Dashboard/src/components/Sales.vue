@@ -152,11 +152,12 @@
         </v-card>
       </v-flex>
     </v-layout>
+
     <v-layout row wrap>
       <v-flex sm12 md6>
         <v-card>
           <v-card-title class="pb-0">
-            <div class="headline"> Sales Invoices </div>
+            <div class="headline"> Products </div>
             <v-spacer></v-spacer>
             <v-text-field 
               label="Search"
@@ -165,8 +166,71 @@
           <v-card-text>
 
             <v-data-table
-              v-bind:headers="salesHeader"
-              :items="currentDataSet"
+              v-bind:headers="productsHeader"
+              :items="productsDataSet"
+              class="elevation-1"
+              >
+
+              <template slot="items" scope="props">
+                
+                <td> {{props.item.ProductGroup }} </td>
+                <td> {{props.item.ProductDescription }} </td>
+                <td> {{props.item.ProductNumberCode }} </td>
+               
+              </template>
+
+            </v-data-table>
+
+          </v-card-text>
+        </v-card>
+      </v-flex>
+
+      <v-flex sm12 md6>
+        <v-card>
+          <v-card-title class="pb-0">
+            <div class="headline"> Customers </div>
+            <v-spacer></v-spacer>
+            <v-text-field 
+              label="Search"
+              > </v-text-field> <v-icon> search </v-icon>
+          </v-card-title>
+          <v-card-text>
+
+            <v-data-table
+              v-bind:headers="customersHeader"
+              :items="customersDataSet"
+              class="elevation-1"
+              >
+
+              <template slot="items" scope="props">
+                
+                <td> {{props.item.CustomerID }} </td>
+                <td> {{props.item.CompanyName }} </td>
+
+              </template>
+
+            </v-data-table>
+
+          </v-card-text>
+        </v-card>
+      </v-flex>
+    </v-layout>
+
+     <v-layout row wrap>
+      <v-flex sm12 >
+        <v-card>
+          <v-card-title class="pb-0">
+            <div class="headline"> Sales Backlog </div>
+            <v-spacer></v-spacer>
+            <v-text-field 
+              label="Search"
+              > </v-text-field> <v-icon> search </v-icon>
+          </v-card-title>
+          <v-card-text>
+
+            <v-data-table
+              v-bind:headers="backlogHeader"
+              :items="backlogDataSet"
               class="elevation-1"
               >
 
@@ -183,10 +247,13 @@
           </v-card-text>
         </v-card>
       </v-flex>
-      <v-flex sm12 md6>
+    </v-layout>
+
+    <v-layout row wrap>
+      <v-flex sm12 >
         <v-card>
           <v-card-title class="pb-0">
-            <div class="headline"> Customers </div>
+            <div class="headline"> Sales Invoices </div>
             <v-spacer></v-spacer>
             <v-text-field 
               label="Search"
@@ -195,16 +262,17 @@
           <v-card-text>
 
             <v-data-table
-              v-bind:headers="salesHeader"
-              :items="currentDataSet"
-              hide-actions
+              v-bind:headers="invoiceHeader"
+              :items="invoicesDataSet"
               class="elevation-1"
               >
 
               <template slot="items" scope="props">
                 
-                <td> {{props.item.name }} </td>
-               
+                <td> {{props.item.InvoiceNo }} </td>
+                <td> {{props.item.InvoiceDate }} </td>
+                <td> {{props.item.InvoiceType }} </td>
+
               </template>
 
             </v-data-table>
@@ -212,9 +280,7 @@
           </v-card-text>
         </v-card>
       </v-flex>
-      </v-flex>
     </v-layout>
-
 
   </v-container>
 </template>
@@ -230,10 +296,24 @@ export default {
     return {
       menu: false,
       productDetail: false,
-      salesHeader: [
+      invoiceHeader: [
         {text: 'Invoice Number', value: 'InvoiceNo', align: 'left'},
         {text: 'Invoice Date', value: 'InvoiceDate', align: 'left'},
         {text: 'Invoice Type', value: 'InvoiceType', align: 'left'}
+      ],
+      productsHeader: [
+        {text: 'Category', value: 'ProductGroup', align: 'left'},
+        {text: 'Description', value: 'ProductDescription', align: 'left'},
+        {text: 'Number code', value: 'ProductNumberCode', align: 'left'}
+      ],
+      customersHeader: [
+        {text: 'Id', value: 'CustomerID', align: 'left'},
+        {text: 'Company name', value: 'CompanyName', align: 'left'}
+      ],
+      backlogHeader: [
+        {text: 'Entity', value: 'Entidade', align: 'left'},
+        {text: 'Data', value: 'Data', align: 'left'},
+        {text: 'Total value', value: 'TotalMerc', align: 'left'}
       ],
       salesChartData: {
         title: 'Turnover',
@@ -256,25 +336,35 @@ export default {
           }
         ]
       },
-      currentDataSet: [],
+      invoicesDataSet: [],
+      customersDataSet: [],
+      productsDataSet: [],
+      backlogDataSet: [],
       dateBegin: null,
       dateEnd: null
     }
   },
-  mounted: function () {
+  mounted: async function () {
     let currentYear = new Date().getFullYear()
     this.dateEnd = `${currentYear}-01-01`
     currentYear -= 1
     this.dateBegin = `${currentYear}-01-01`
+
+    this.customersDataSet = (await SalesService.getCustomers()).data
+    this.productsDataSet = (await SalesService.getProducts()).data
+    this.backlogDataSet = (await SalesService.getBacklog()).data
   },
   watch: {
     dateBegin: async function (val) {
       const res = await SalesService.getInvoices(this.dateBegin, this.dateEnd)
-      this.currentDataSet = res.data
+      this.invoicesDataSet = res.data
+
+      console.log('this.backlogDataSet')
+      console.log(this.backlogDataSet)
     },
     dateEnd: async function (val) {
       const res = await SalesService.getInvoices(this.dateBegin, this.dateEnd)
-      this.currentDataSet = res.data
+      this.invoicesDataSet = res.data
     }
   },
   components: {
