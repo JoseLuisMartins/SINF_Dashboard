@@ -14,12 +14,12 @@ namespace FirstREST.Controllers
         // api/Compras/?begin=<beginDate>&end=<endDate>
         public int Get(string begin = "", string end = "")
         {
-            return (int)(Lib_Primavera.PriIntegration.getDatedPurchases(begin,end));
+            return (int)(Lib_Primavera.PriIntegration.getDatedPurchases(begin,end) * -1);
         }
 
         public int Get(string fornecedor, string begin = "", string end = "")
         {
-            return (int)(1);
+            return (int)(Lib_Primavera.PriIntegration.getDatedPurchasesByFornecedor(begin,end,fornecedor) * -1);
         }
     }
 }

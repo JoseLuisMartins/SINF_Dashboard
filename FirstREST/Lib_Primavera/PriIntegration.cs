@@ -480,7 +480,7 @@ namespace FirstREST.Lib_Primavera
 
         #region DocCompra
 
-        public static List<Model.DocCompra> VGR_List(string begin, string end)
+        public static List<Model.DocCompra> ListPurchasesInvoices(string begin, string end)
         {
             StdBELista objListCab;
             StdBELista objListLin;
@@ -492,7 +492,7 @@ namespace FirstREST.Lib_Primavera
             if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
             {
                 string query = String.Format(
-                    "SELECT id, NumDocExterno, Entidade, DataDoc, NumDoc, TotalMerc, Serie From CabecCompras where TipoDoc='VFA' and (DataDoc between '{0}' and '{1}' )",
+                    "SELECT id, NumDocExterno, Entidade, DataDoc, NumDoc, TotalMerc, Serie, TipoDoc From CabecCompras where (TipoDoc='VFA' or TipoDoc='VNC') and (DataDoc between '{0}' and '{1}' )",
                      begin, end);
 
                 //objListCab = PriEngine.Engine.Comercial.TabCompras.LstDocCompras();
@@ -507,6 +507,7 @@ namespace FirstREST.Lib_Primavera
                     dc.Data = objListCab.Valor("DataDoc");
                     dc.TotalMerc = objListCab.Valor("TotalMerc");
                     dc.Serie = objListCab.Valor("Serie");
+                    dc.TipoDoc = objListCab.Valor("TipoDoc");
                     objListLin = PriEngine.Engine.Consulta("SELECT idCabecCompras, Artigo, Descricao, Quantidade, Unidade, PrecUnit, Desconto1, TotalILiquido, PrecoLiquido, Armazem, Lote from LinhasCompras where IdCabecCompras='" + dc.id + "' order By NumLinha");
                     listlindc = new List<Model.LinhaDocCompra>();
 
@@ -784,16 +785,16 @@ namespace FirstREST.Lib_Primavera
             if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
             {
                 
-                string query = String.Format("SELECT CabecCompras.TotalMerc, CabecCompras.TotalIva FROM CabecCompras WHERE (DataDoc between '{0}' and '{1}' )", begin, end);
-                //TipoDoc='VGR'
+                string query = String.Format("SELECT CabecCompras.TotalMerc, CabecCompras.TotalDesc FROM CabecCompras WHERE (CabecCompras.DataDoc between '{0}' and '{1}' ) and (TipoDoc = 'VFA' or TipoDoc = 'VNC')", begin, end);
                 
                 StdBELista objList = PriEngine.Engine.Consulta(query);
+                // Cotacao = 'COT'
 
                 while (!objList.NoFim())
                 {
-                    //TODO VER ISTO AIAIAI
+
                     total += objList.Valor("TotalMerc");
-                    total += objList.Valor("TotalIVA");
+                    total -= objList.Valor("TotalDesc");
 
                     objList.Seguinte();
                 }
@@ -809,16 +810,14 @@ namespace FirstREST.Lib_Primavera
             if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
             {
 
-                string query = String.Format("SELECT CabecCompras.TotalMerc, CabecCompras.TotalIva FROM CabecCompras WHERE (DataDoc between '{0}' and '{1}' ) AND Entidade = '{2}'", begin, end,idF);
-                //TipoDoc='VGR'
-
+                string query = String.Format("SELECT CabecCompras.TotalMerc, CabecCompras.TotalDesc FROM CabecCompras WHERE (DataDoc between '{0}' and '{1}' ) and (TipoDoc = 'VFA' or TipoDoc = 'VNC') and Entidade = '{2}'", begin, end, idF);
+             
                 StdBELista objList = PriEngine.Engine.Consulta(query);
 
                 while (!objList.NoFim())
                 {
-                    //TODO VER ISTO AIAIAI
                     total += objList.Valor("TotalMerc");
-                    total += objList.Valor("TotalIVA");
+                    total -= objList.Valor("TotalDesc");
 
                     objList.Seguinte();
                 }
