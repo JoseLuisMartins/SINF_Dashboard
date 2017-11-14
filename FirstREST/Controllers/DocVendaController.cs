@@ -13,12 +13,12 @@ namespace FirstREST.Controllers
 {
     public class DocVendaController : ApiController
     {
-        //
-        // GET: /Clientes/
+        
+        // api/DocVenda?begin=''&end=''
 
-        public IEnumerable<Lib_Primavera.Model.DocVenda> Get()
+        public IEnumerable<Lib_Primavera.Model.DocVenda> Get(string begin, string end)
         {
-            return Lib_Primavera.PriIntegration.Encomendas_List();
+            return Lib_Primavera.PriIntegration.Encomendas_List(begin, end);
         }
 
 
@@ -48,7 +48,7 @@ namespace FirstREST.Controllers
             {
                 var response = Request.CreateResponse(
                    HttpStatusCode.Created, dv.id);
-                string uri = Url.Link("DefaultApi", new {DocId = dv.id });
+                string uri = Url.Link("DefaultApi", new { DocId = dv.id });
                 response.Headers.Location = new Uri(uri);
                 return response;
             }

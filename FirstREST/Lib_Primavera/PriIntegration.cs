@@ -665,7 +665,7 @@ namespace FirstREST.Lib_Primavera
 
      
 
-        public static List<Model.DocVenda> Encomendas_List()
+        public static List<Model.DocVenda> Encomendas_List(string begin, string end)
         {
             
             StdBELista objListCab;
@@ -678,7 +678,13 @@ namespace FirstREST.Lib_Primavera
 
             if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
             {
-                objListCab = PriEngine.Engine.Consulta("SELECT id, Entidade, Data, NumDoc, TotalMerc, Serie From CabecDoc where TipoDoc='ECL'");
+
+                string query = String.Format(
+                   "SELECT id, Entidade, Data, NumDoc, TotalMerc, Serie From CabecDoc where TipoDoc='ECL' and (Data between '{0}' and '{1}' )",
+                     begin, end);
+
+                objListCab = PriEngine.Engine.Consulta(query);
+                
                 while (!objListCab.NoFim())
                 {
                     dv = new Model.DocVenda();

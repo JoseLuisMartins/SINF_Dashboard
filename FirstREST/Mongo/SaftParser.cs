@@ -7,6 +7,7 @@ using System.Linq;
 using System.Web;
 using System.Xml;
 using FirstREST.Validation;
+using System.Globalization;
 
 namespace FirstREST.Mongo
 {
@@ -14,14 +15,14 @@ namespace FirstREST.Mongo
     {
         public SaftParser()
         {
-            
+
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(System.IO.File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "Assets\\SAFT_DEMOSINF_01-01-2016_31-12-2016.xml"));
             string jsonText = JsonConvert.SerializeXmlNode(doc);
 
-            
+
             //XMLValidation.validation();
-           
+
             JToken tkn = JObject.Parse(jsonText);
 
             JToken auditFile = tkn.SelectToken("AuditFile");
@@ -46,7 +47,7 @@ namespace FirstREST.Mongo
             JToken customers = master.SelectToken("Customer");
             JToken suppliers = master.SelectToken("Supplier");
             JToken products = master.SelectToken("Product");
-            
+
             MongoConnection.AddMany("Accounts", accounts.ToString());
             MongoConnection.AddMany("Customers", customers.ToString());
             MongoConnection.AddMany("Suppliers", suppliers.ToString());
@@ -77,13 +78,36 @@ namespace FirstREST.Mongo
             AddObj(ref goodsInfo, movementOfGoods, "TotalQuantityIssued");
             JToken stockMovements = movementOfGoods.SelectToken("StockMovement");
 
+            JObject totalSales = getSalesValue(invoices);
 
+            MongoConnection.Add("TotalSales", totalSales.ToString());
             MongoConnection.Add("InvoicesInfo", invoicesInfo.ToString());
             MongoConnection.AddMany("Invoices", invoices.ToString());
 
             MongoConnection.Add("GoodsInfo", goodsInfo.ToString());
             MongoConnection.AddMany("StockMovements", stockMovements.ToString());
 
+        }
+
+
+        private JObject getSalesValue(JToken salesInvoices)
+        {
+            double total = 0;
+
+            JArray array = JArray.Parse(salesInvoices.ToString());
+            foreach (JObject invoice in array.Children<JObject>())
+            {
+
+                string invoiceType = invoice.SelectToken("InvoiceType").ToString();
+                double grossTotal = double.Parse(invoice.SelectToken("DocumentTotals")["NetTotal"].ToString());
+
+                total += (invoiceType.Equals("NC", StringComparison.Ordinal)) ? -grossTotal : grossTotal;
+            }
+
+            JObject obj = new JObject();
+            obj.Add("TotalSales", total);
+
+            return obj;
         }
 
         private void AddObj(ref JObject obj, JToken tkn, String desc)
@@ -97,7 +121,7 @@ namespace FirstREST.Mongo
             obj.Add("NumberOfEntries", tkn.SelectToken("NumberOfEntries"));
             obj.Add("TotalDebit", tkn.SelectToken("TotalDebit"));
             obj.Add("TotalCredit", tkn.SelectToken("TotalCredit"));
-            
+
             return obj;
         }
 

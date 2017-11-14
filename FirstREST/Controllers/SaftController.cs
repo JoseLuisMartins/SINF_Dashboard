@@ -8,21 +8,31 @@ using System.Xml;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using FirstREST.Mongo;
+using System.Text;
 namespace FirstREST.Controllers
 {
     public class SaftController : ApiController
     {
-           
-        // GET: /Saft/
 
-        public String Get()
+        // GET: /Saft/
+        public HttpResponseMessage Get()
         {
-            return MongoConnection.GetCollection("Header");
+            string res = MongoConnection.GetCollection("Header");
+            var response = this.Request.CreateResponse(HttpStatusCode.OK);
+            response.Content = new StringContent(res, Encoding.UTF8, "application/json");
+
+            return response;
         }
 
-        public String Get(string id)
+
+
+        public HttpResponseMessage Get(string id)
         {
-            return MongoConnection.GetCollection(id);
+            string res = MongoConnection.GetCollection(id);
+            var response = this.Request.CreateResponse(HttpStatusCode.OK);
+            response.Content = new StringContent(res, Encoding.UTF8, "application/json");
+
+            return response;
         }
 
     }

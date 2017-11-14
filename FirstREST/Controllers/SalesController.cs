@@ -13,6 +13,7 @@ namespace FirstREST.Controllers
 {
     public class SalesController : ApiController
     {
+        // api/sales?begin=''&end=''
         public HttpResponseMessage Get(string begin, string end)
         {
             string res = MongoConnection.GetCollectionByDate("Invoices", "InvoiceDate", begin, end);
@@ -21,5 +22,10 @@ namespace FirstREST.Controllers
 
             return response;
         }
+
+
+
+
+
     }
 }
