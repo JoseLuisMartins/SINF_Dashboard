@@ -94,6 +94,7 @@
 <script>
 import Topic from '@/components/home/Topic'
 import LineChart from '@/components/charts/LineChart'
+import PurchasesService from '@/services/Purchases'
 
 export default {
   name: 'HelloWorld',
@@ -165,7 +166,7 @@ export default {
       },
       topics: [
          {color: 'teal darken-1', color2: 'teal lighten-3', icon: 'attach_money', title: 'Sales', value: '130€', description: 'Total Sales', dest: 'sales'},
-         {color: 'deep-orange darken-1', color2: 'deep-orange lighten-3', icon: 'shopping_cart', title: 'Purchases', value: '130€', description: 'Total Purchases', dest: 'purchases'},
+         {color: 'deep-orange darken-1', color2: 'deep-orange lighten-3', icon: 'shopping_cart', title: 'Purchases', value: '', description: 'Total Purchases', dest: 'purchases'},
          {color: 'light-blue darken-1', color2: 'light-blue lighten-3', icon: 'view_quilt', title: 'Inventory', value: '130€', description: 'Value in Inventory', dest: 'inventory'},
          {color: 'purple darken-1', color2: 'purple lighten-3', icon: 'account_balance_wallet', title: 'Accounting', value: '130€', description: 'Cashflow', dest: 'accounting'}
       ]
@@ -175,11 +176,19 @@ export default {
     Topic, LineChart
   },
   mounted: function () {
+    let currentYear = new Date().getFullYear()
+    this.dateEnd = `${currentYear}-01-01`
+    currentYear -= 1
+    this.dateBegin = `${currentYear}-01-01`
   },
   watch: {
     dateBegin: async function (val) {
+      let totalPurchaseValue = await PurchasesService.getTotalAmount(this.dateBegin, this.dateEnd)
+      this.topics[1].value = `${totalPurchaseValue.data}€`
     },
     dateEnd: async function (val) {
+      let totalPurchaseValue = await PurchasesService.getTotalAmount(this.dateBegin, this.dateEnd)
+      this.topics[1].value = `${totalPurchaseValue.data}€`
     }
   }
 }

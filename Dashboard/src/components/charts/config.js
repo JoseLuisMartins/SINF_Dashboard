@@ -9,7 +9,7 @@ export default {
         pointBackgroundColor: '#FF00FF',
         borderColor: '#CC3311',
         fill: false,
-        tension: 0.5
+        tension: 0
       }
     },
     scales: {
@@ -17,9 +17,6 @@ export default {
         ticks: {
           beginAtZero: false
         }
-      },
-      {
-        stacked: true
       }],
       xAxes: [{
         type: 'time',

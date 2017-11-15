@@ -154,15 +154,20 @@
           <v-card-title class="pb-0">
             <div class="headline"> Products </div>
             <v-spacer></v-spacer>
-            <v-text-field 
+            <v-text-field
+              append-icon="search"
               label="Search"
-              > </v-text-field> <v-icon> search </v-icon>
+              single-line
+              hide-details
+              v-model="search_1"
+            ></v-text-field>
           </v-card-title>
           <v-card-text>
 
             <v-data-table
               v-bind:headers="productsHeader"
               :items="productsDataSet"
+              :search="search_1"
               class="elevation-1"
               >
 
@@ -185,13 +190,18 @@
           <v-card-title class="pb-0">
             <div class="headline"> Customers </div>
             <v-spacer></v-spacer>
-            <v-text-field 
+            <v-text-field
+              append-icon="search"
               label="Search"
-              > </v-text-field> <v-icon> search </v-icon>
+              single-line
+              hide-details
+              v-model="search_2"
+            ></v-text-field>
           </v-card-title>
           <v-card-text>
 
             <v-data-table
+              :search="search_2"
               v-bind:headers="customersHeader"
               :items="customersDataSet"
               class="elevation-1"
@@ -217,13 +227,18 @@
           <v-card-title class="pb-0">
             <div class="headline"> Sales Backlog </div>
             <v-spacer></v-spacer>
-            <v-text-field 
+            <v-text-field
+              append-icon="search"
               label="Search"
-              > </v-text-field> <v-icon> search </v-icon>
+              single-line
+              hide-details
+              v-model="search_3"
+            ></v-text-field>
           </v-card-title>
           <v-card-text>
 
             <v-data-table
+              :search="search_3"
               v-bind:headers="backlogHeader"
               :items="backlogDataSet"
               class="elevation-1"
@@ -250,13 +265,18 @@
           <v-card-title class="pb-0">
             <div class="headline"> Sales Invoices </div>
             <v-spacer></v-spacer>
-            <v-text-field 
+            <v-text-field
+              append-icon="search"
               label="Search"
-              > </v-text-field> <v-icon> search </v-icon>
+              single-line
+              hide-details
+              v-model="search_4"
+            ></v-text-field>
           </v-card-title>
           <v-card-text>
 
             <v-data-table
+              :search="search_4"
               v-bind:headers="invoiceHeader"
               :items="invoicesDataSet"
               class="elevation-1"
@@ -314,6 +334,10 @@ import ChartOptions from '@/components/charts/config'
 export default {
   data () {
     return {
+      search_1: '',
+      search_2: '',
+      search_3: '',
+      search_4: '',
       menu: false,
       productDetail: false,
       invoiceHeader: [

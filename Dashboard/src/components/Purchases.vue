@@ -73,70 +73,7 @@
       </v-flex>
     </v-layout>
     <v-layout row wrap>
-      <v-flex d-flex xs12 md6>
-        <v-card>
-          <v-card-title>
-            <div class="headline"> Sort by </div> 
-          </v-card-title>
-          <v-card-text>
-            <v-layout row wrap>
-              <v-flex xs12 md8>
-                <v-layout column>
-                  <v-flex>
-                    <v-layout row>
-                      <v-flex xs4 class="relative">
-                      <v-btn class="allSize" block round outline> Supplier </v-btn>
-                      </v-flex>
-                      <v-flex xs8>
-                      <v-text-field
-                        label="Search for a Supplier"
-                      > </v-text-field>
-                      </v-flex>
-                    </v-layout>
-                  </v-flex>
-                  <v-flex d-flex>
-                    <v-layout row>
-                      <v-flex xs4 class="relative">
-                      <v-btn class="allSize" block round outline> Region </v-btn>
-                      </v-flex>
-                      <v-flex xs8>
-                      <v-text-field
-                        label="Search for a Region"
-                      > </v-text-field>
-                      </v-flex>
-                    </v-layout>
-                  </v-flex>
-                  <v-flex>
-                    <v-layout row>
-                      <v-flex xs4 class="relative">
-                      <v-btn class="allSize" block round outline> Product </v-btn>
-                      </v-flex>
-                      <v-flex xs8>
-                      <v-text-field
-                        label="Search for a Product"
-                      > </v-text-field>
-                      </v-flex>
-                    </v-layout>
-                  </v-flex>
-                </v-layout>
-
-              </v-flex>
-              <v-flex d-flex xs12 md4>
-                <v-layout row wrap align-center>
-                  <v-flex sm6 md12>
-                    <v-btn block outline large>Add</v-btn>
-                  </v-flex>
-                  <v-flex sm6 md12>
-                    <v-btn block outline large>Cancel</v-btn>
-                  </v-flex>
-                </v-layout>
-              </v-flex>
-
-            </v-layout>
-          </v-card-text>
-        </v-card>
-      </v-flex>
-      <v-flex d-flex xs12 md6>
+      <v-flex d-flex xs12>
         <v-card>
           <v-card-title>
             <div class="headline"> Purchases </div>
@@ -148,18 +85,23 @@
       </v-flex>
     </v-layout>
     <v-layout row wrap>
-      <v-flex sm12 md12>
+      <v-flex sm12 md6>
         <v-card>
           <v-card-title class="pb-0">
-            <div class="headline"> Purchased Products </div>
+            <div class="headline"> Purchases Documents </div>
             <v-spacer></v-spacer>
-            <v-text-field 
+            <v-text-field
+              append-icon="search"
               label="Search"
-              > </v-text-field> <v-icon> search </v-icon>
+              single-line
+              hide-details
+              v-model="search_1"
+            ></v-text-field>
           </v-card-title>
           <v-card-text>
             <v-data-table
-              v-bind:headers="purchasesHeader"
+              :search="search_1"
+              :headers="purchasesHeader"
               :items="currentDataSet"
               class="elevation-1"
               item-key="id"
@@ -167,6 +109,7 @@
               <template slot="items" scope="props">
                 <tr @click="props.expanded = !props.expanded"> 
                   <td> {{props.item.Entidade}} </td>
+                  <td> {{props.item.TipoDoc }} </td>
                   <td> {{props.item.Data }} </td>
                   <td> {{props.item.TotalMerc }} </td>
                   <td> {{props.item.Serie }} </td>
@@ -197,17 +140,22 @@
           </v-card-text>
         </v-card>
       </v-flex>
-      <v-flex sm12 md12>
+      <v-flex sm12 md6>
         <v-card>
           <v-card-title class="pb-0">
             <div class="headline"> Suppliers </div>
             <v-spacer></v-spacer>
-            <v-text-field 
+            <v-text-field
+              append-icon="search"
               label="Search"
-              > </v-text-field> <v-icon> search </v-icon>
+              single-line
+              hide-details
+              v-model="search_2"
+            ></v-text-field>
           </v-card-title>
           <v-card-text>
             <v-data-table
+              :search="search_2"
               v-bind:headers="suppliersHeader"
               :items="items"
               
@@ -249,6 +197,8 @@ export default {
   },
   data () {
     return {
+      search_1: '',
+      search_2: '',
       linhasDoc: [
         {text: 'Code', value: 'CodArtigo', align: 'left'},
         {text: 'Description', value: 'DescArtigo'},
@@ -262,6 +212,7 @@ export default {
       ],
       purchasesHeader: [
         {text: 'Entity', value: 'Entidade', align: 'left'},
+        {text: 'TypeDoc', value: 'TipoDoc', align: 'center'},
         {text: 'Date', value: 'Data', align: 'center'},
         {text: 'Total Merc', value: 'TotalMerc', align: 'center'},
         {text: 'Serie', value: 'Serie', align: 'center'}
@@ -300,17 +251,26 @@ export default {
     },
     currentDataSet: function (val) {
       let data = []
+      let dict = {}
 
       for (var i = 0; i < val.length; i++) {
         val[i].TotalMerc = Math.abs(val[i].TotalMerc)
+        const aux = val[i].Data
+        dict[aux] = val[i].TotalMerc + (dict[aux] || 0)
+      }
+
+      for (let key in dict) {
         data.push({
-          x: new Date(val[i].Data),
-          y: val[i].TotalMerc
+          x: new Date(key),
+          y: dict[key]
         })
       }
+
       data.sort((a, b) => {
-        return a.x > b.x ? 1 : a.x < b.x ? -1 : 0
+        return a.x > b.x ? 1 : (a.x < b.x ? -1 : 0)
       })
+
+      console.log(data)
 
       this.purchasesChartData = {
         datasets: [
