@@ -78,9 +78,7 @@ namespace FirstREST.Mongo
             AddObj(ref goodsInfo, movementOfGoods, "TotalQuantityIssued");
             JToken stockMovements = movementOfGoods.SelectToken("StockMovement");
 
-            JObject totalSales = getSalesValue(invoices);
-
-            MongoConnection.Add("TotalSales", totalSales.ToString());
+            
             MongoConnection.Add("InvoicesInfo", invoicesInfo.ToString());
             MongoConnection.AddMany("Invoices", invoices.ToString());
 
@@ -90,25 +88,6 @@ namespace FirstREST.Mongo
         }
 
 
-        private JObject getSalesValue(JToken salesInvoices)
-        {
-            double total = 0;
-
-            JArray array = JArray.Parse(salesInvoices.ToString());
-            foreach (JObject invoice in array.Children<JObject>())
-            {
-
-                string invoiceType = invoice.SelectToken("InvoiceType").ToString();
-                double grossTotal = double.Parse(invoice.SelectToken("DocumentTotals")["NetTotal"].ToString());
-
-                total += (invoiceType.Equals("NC", StringComparison.Ordinal)) ? -grossTotal : grossTotal;
-            }
-
-            JObject obj = new JObject();
-            obj.Add("TotalSales", total);
-
-            return obj;
-        }
 
         private void AddObj(ref JObject obj, JToken tkn, String desc)
         {
