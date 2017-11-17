@@ -79,7 +79,22 @@
             <div class="headline"> Purchases </div>
           </v-card-title>
           <v-card-text>
-            <line-chart class="limitHeight chartHolder" :chart-data="purchasesChartData" :options="chartOptions"> </line-chart>
+            <div class="limitHeight chartHolder" v-if="purchasesChartData.datasets.length == 0"> 
+              <v-layout justify-center>
+                <v-flex class="loading a blue ">L</v-flex> 
+                <v-flex class="loading b blue">o</v-flex> 
+                <v-flex class="loading c blue">a</v-flex> 
+                <v-flex class="loading d blue">d</v-flex> 
+                <v-flex class="loading e blue">i</v-flex> 
+                <v-flex class="loading f blue">n</v-flex> 
+                <v-flex class="loading g blue">g</v-flex> 
+              
+              </v-layout>
+              </div>
+            <line-chart class="limitHeight chartHolder"
+              v-if="purchasesChartData.datasets.length != 0"
+              :chart-data="purchasesChartData"
+              :options="chartOptions"> </line-chart>
           </v-card-text>
         </v-card>
       </v-flex>
@@ -105,6 +120,7 @@
               :items="currentDataSet"
               class="elevation-1"
               item-key="id"
+              :loading="currentDataSet.length == 0"
               >
               <template slot="items" scope="props">
                 <tr @click="props.expanded = !props.expanded"> 
@@ -158,7 +174,7 @@
               :search="search_2"
               v-bind:headers="suppliersHeader"
               :items="items"
-              
+              :loading="currentDataSet.length == 0"
               class="elevation-1"
               >
               <template slot="items" scope="props">
@@ -255,13 +271,15 @@ export default {
 
       for (var i = 0; i < val.length; i++) {
         val[i].TotalMerc = Math.abs(val[i].TotalMerc)
-        const aux = val[i].Data
-        dict[aux] = val[i].TotalMerc + (dict[aux] || 0)
+        const regex = /(\d{4}-\d{2}-\d{2})/
+        const date = val[i].Data.match(regex)[1]
+        dict[date] = Number(val[i].TotalMerc) + (dict[date] || 0)
       }
 
       for (let key in dict) {
+        const dataString = key.split('-')
         data.push({
-          x: new Date(key),
+          x: new Date(Number(dataString[0]), Number(dataString[1]), Number(dataString[2])),
           y: dict[key]
         })
       }
@@ -318,6 +336,57 @@ export default {
   width: 100%;
   min-width: 0;
   min-height: 0;
+}
+
+.loading{
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
+  max-height: 20px;
+  max-width: 20px;
+  border-radius: 10px;
+  color: white;
+  animation: loadinga 1s infinite 0.0s;
+  animation-timing-function: infinite;
+  animation-direction: alternate-reverse;
+}
+
+.loading.a {
+  animation-delay: 0.0s;
+}
+
+.loading.b {
+  animation-delay: 0.1s;
+}
+
+.loading.c {
+  animation-delay: 0.2s;
+}
+
+.loading.d {
+  animation-delay: 0.3s;
+}
+
+.loading.e {
+  animation-delay: 0.4s;
+}
+
+.loading.f {
+  animation-delay: 0.5s;
+}
+
+.loading.g {
+  animation-delay: 0.5s;
+}
+
+@keyframes loadinga {
+  0%{
+    transform: translateY(-20px)
+  } 
+  100%{
+    transform: translateY(20px)
+  }
 }
 
 </style>

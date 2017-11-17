@@ -1,9 +1,4 @@
 <template>
-  <v-container grid-list-md text-xs-center>
-    <v-layout row justify-center>
-      <v-flex xs12>
-      <v-btn dark @click.stop="dialogStatus=true">See Invoice Details</v-btn>
-      <v-dialog v-model="dialogStatus" max-width="1000" >
         <v-card class="grey lighten-2">
           <v-card-title>
             <v-spacer></v-spacer>
@@ -92,21 +87,7 @@
               </v-flex>
             </v-layout>
         </v-card-text>
-
-        <v-layout row wrap>
-          <v-flex d-flex offset-xs10 >
-            <v-card-actions>
-              <v-btn color="primary" flat @click.stop="dialogStatus=false">Close</v-btn>
-            </v-card-actions>
-          </v-flex>  
-        </v-layout>
-          
-
         </v-card>
-      </v-dialog>
-      </v-flex>
-    </v-layout>
-  </v-container>
 </template>
 
 
@@ -143,8 +124,21 @@ export default {
     'CustomerID',
     'Lines',
     'NetTotal',
-    'GrossTotal'
-  ]
+    'GrossTotal',
+    'showDialog'
+  ],
+  watch: {
+    dialogStatus (val) {
+      if (this.showDialog !== val) {
+        this.showDialog = val
+      }
+    },
+    showDialog (val) {
+      if (this.dialogStatus !== val) {
+        this.dialogStatus = val
+      }
+    }
+  }
 }
 </script>
 
