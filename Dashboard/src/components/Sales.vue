@@ -480,11 +480,11 @@ export default {
 
 
 @keyframes loadinga {
-  0%{
-    transform: translateY(-20px)
-  } 
   100%{
-    transform: translateY(20px)
+    transform: translateY(0px)
+  } 
+  0%{
+    transform: translateY(40px)
   }
 }
 
