@@ -1,5 +1,29 @@
 <template>
   <v-container mt-5 grid-list-xs>
+
+    <v-dialog
+      v-model="showInvoiceDialog"
+      scrollable
+      max-width="1000"
+    >
+      <invoice v-if="dialogItem!==null"
+        :ShipFromAddressDetail="dialogItem.ShipFrom.Address.AddressDetail"
+        :ShipFromCity="dialogItem.ShipFrom.Address.City"
+        :ShipFromPostalCode="dialogItem.ShipFrom.Address.PostalCode"
+        :ShipToAddressDetail="dialogItem.ShipTo.Address.AddressDetail"
+        :ShipToCity="dialogItem.ShipTo.Address.City"
+        :ShipToPostalCode="dialogItem.ShipTo.Address.PostalCode"
+        :InvoiceDate="dialogItem.InvoiceDate"
+        :InvoiceNo="dialogItem.InvoiceNo"
+        :CustomerID="dialogItem.CustomerID"
+        :Lines="dialogItem.Line"
+        :NetTotal="dialogItem.DocumentTotals.NetTotal"
+        :GrossTotal="dialogItem.DocumentTotals.GrossTotal"
+      >
+      </invoice>
+    </v-dialog>
+
+
     <v-layout>
       <v-flex mb-4 d-flex sm6 offset-sm3 xs12>
         <v-card>
@@ -73,76 +97,27 @@
       </v-flex>
     </v-layout>
     <v-layout row wrap>
-      <v-flex d-flex xs12 md6>
-        <v-card>
-          <v-card-title>
-            <div class="headline"> Sort by </div> 
-          </v-card-title>
-          <v-card-text>
-            <v-layout row wrap>
-              <v-flex xs12 md8>
-                <v-layout column>
-                  <v-flex>
-                    <v-layout row>
-                      <v-flex xs4 class="relative">
-                      <v-btn class="allSize" block round outline> Region </v-btn>
-                      </v-flex>
-                      <v-flex xs8>
-                      <v-text-field
-                        label="Search for a Region"
-                      > </v-text-field>
-                      </v-flex>
-                    </v-layout>
-                  </v-flex>
-                  <v-flex d-flex>
-                    <v-layout row>
-                      <v-flex xs4 class="relative">
-                      <v-btn class="allSize" block round outline> Product </v-btn>
-                      </v-flex>
-                      <v-flex xs8>
-                      <v-text-field
-                        label="Search for a Product"
-                      > </v-text-field>
-                      </v-flex>
-                    </v-layout>
-                  </v-flex>
-                  <v-flex>
-                    <v-layout row>
-                      <v-flex xs4 class="relative">
-                      <v-btn class="allSize" block round outline> Category </v-btn>
-                      </v-flex>
-                      <v-flex xs8>
-                      <v-text-field
-                        label="Search for a Category"
-                      > </v-text-field>
-                      </v-flex>
-                    </v-layout>
-                  </v-flex>
-                </v-layout>
-
-              </v-flex>
-              <v-flex d-flex xs12 md4>
-                <v-layout row wrap align-center>
-                  <v-flex sm6 md12>
-                    <v-btn block outline large>Add</v-btn>
-                  </v-flex>
-                  <v-flex sm6 md12>
-                    <v-btn block outline large>Cancel</v-btn>
-                  </v-flex>
-                </v-layout>
-              </v-flex>
-
-            </v-layout>
-          </v-card-text>
-        </v-card>
-      </v-flex>
-      <v-flex d-flex xs12 md6>
+      <v-flex d-flex xs12 md12>
         <v-card>
           <v-card-title>
             <div class="headline"> Sales </div>
           </v-card-title>
           <v-card-text >
-            <line-chart class="chartHolder" :chartData="salesChartData" :options="chartOptions"> </line-chart>
+            <div class="limitHeight chartHolder" v-if="salesChartData.datasets.length == 0"> 
+              <v-layout justify-center>
+              <v-flex class="loading a blue ">L</v-flex> 
+              <v-flex class="loading b blue">o</v-flex> 
+              <v-flex class="loading c blue">a</v-flex> 
+              <v-flex class="loading d blue">d</v-flex> 
+              <v-flex class="loading e blue">i</v-flex> 
+              <v-flex class="loading f blue">n</v-flex> 
+              <v-flex class="loading g blue">g</v-flex> 
+            
+              </v-layout>
+              </div>
+            <line-chart class="chartHolder"
+             v-if="salesChartData.datasets.length !== 0"
+             :chartData="salesChartData" :options="chartOptions"> </line-chart>
           </v-card-text>
         </v-card>
       </v-flex>
@@ -169,6 +144,7 @@
               :items="productsDataSet"
               :search="search_1"
               class="elevation-1"
+              :loading="productsDataSet.length == 0"
               >
 
               <template slot="items" scope="props">
@@ -205,6 +181,7 @@
               v-bind:headers="customersHeader"
               :items="customersDataSet"
               class="elevation-1"
+              :loading="customersDataSet.length == 0"
               >
 
               <template slot="items" scope="props">
@@ -242,6 +219,7 @@
               v-bind:headers="backlogHeader"
               :items="backlogDataSet"
               class="elevation-1"
+              :loading="backlogDataSet.length == 0"
               >
 
               <template slot="items" scope="props">
@@ -281,39 +259,15 @@
               :items="invoicesDataSet"
               class="elevation-1"
               item-key="Hash"
+              :loading="invoicesDataSet.length == 0"
               >
               <template slot="items" scope="props">
-                <tr  @click="props.expanded = !props.expanded">
+                <tr class="cursor-pointer" @click="() => { showInvoiceDialog=true, dialogItem=props.item }">
                   <td> {{props.item.InvoiceNo }} </td>
                   <td> {{props.item.InvoiceDate }} </td>
                   <td> {{props.item.InvoiceType }} </td>
                 </tr>
               </template>
-              <template slot="expand" scope="props">
-                <v-card flat>
-                  <v-card-text>
-                  
-                <invoice
-                  :ShipFromAddressDetail="props.item.ShipFrom.Address.AddressDetail"
-                  :ShipFromCity="props.item.ShipFrom.Address.City"
-                  :ShipFromPostalCode="props.item.ShipFrom.Address.PostalCode"
-                  :ShipToAddressDetail="props.item.ShipTo.Address.AddressDetail"
-                  :ShipToCity="props.item.ShipTo.Address.City"
-                  :ShipToPostalCode="props.item.ShipTo.Address.PostalCode"
-                  :InvoiceDate="props.item.InvoiceDate"
-                  :InvoiceNo="props.item.InvoiceNo"
-                  :CustomerID="props.item.CustomerID"
-                  :Lines="props.item.Line"
-                  :NetTotal="props.item.DocumentTotals.NetTotal"
-                  :GrossTotal="props.item.DocumentTotals.GrossTotal"
-                >
-                </invoice>
-                   
-
-                  </v-card-text>
-                </v-card>
-              </template>
-
             </v-data-table>
 
           </v-card-text>
@@ -367,6 +321,8 @@ export default {
       customersDataSet: [],
       productsDataSet: [],
       backlogDataSet: [],
+      showInvoiceDialog: false,
+      dialogItem: null,
       dateBegin: null,
       dateEnd: null
     }
@@ -397,12 +353,21 @@ export default {
     },
     invoicesDataSet: function (val) {
       let data = []
+      let dict = {}
 
       for (var i = 0; i < val.length; i++) {
         val[i].NetTotal = val[i].DocumentTotals.NetTotal
+        const mult = val[i].InvoiceType === 'NC' ? -1 : 1
+
+        const date = val[i].InvoiceDate
+        dict[date] = Number(val[i].NetTotal) * mult + (dict[date] || 0)
+      }
+
+      for (let key in dict) {
+        const dataString = key.split('-')
         data.push({
-          x: new Date(val[i].InvoiceDate),
-          y: val[i].NetTotal
+          x: new Date(Number(dataString[0]), Number(dataString[1]), Number(dataString[2])),
+          y: dict[key]
         })
       }
 
@@ -465,6 +430,62 @@ export default {
   width: 100%;
   min-width: 0;
   min-height: 0;
+}
+
+.cursor-pointer{
+  cursor: pointer;
+}
+
+.loading{
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
+  max-height: 20px;
+  max-width: 20px;
+  border-radius: 10px;
+  color: white;
+  animation: loadinga 1s infinite 0.0s;
+  animation-timing-function: infinite;
+  animation-direction: alternate-reverse;
+}
+
+.loading.a {
+  animation-delay: 0.0s;
+}
+
+.loading.b {
+  animation-delay: 0.1s;
+}
+
+.loading.c {
+  animation-delay: 0.2s;
+}
+
+.loading.d {
+  animation-delay: 0.3s;
+}
+
+.loading.e {
+  animation-delay: 0.4s;
+}
+
+.loading.f {
+  animation-delay: 0.5s;
+}
+
+.loading.g {
+  animation-delay: 0.5s;
+}
+
+
+@keyframes loadinga {
+  100%{
+    transform: translateY(0px)
+  } 
+  0%{
+    transform: translateY(40px)
+  }
 }
 
 </style>
