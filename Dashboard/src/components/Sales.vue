@@ -357,16 +357,14 @@ export default {
 
       for (var i = 0; i < val.length; i++) {
         val[i].NetTotal = val[i].DocumentTotals.NetTotal
+        const mult = val[i].InvoiceType === 'NC' ? -1 : 1
 
         const date = val[i].InvoiceDate
-        console.log(date)
-        dict[date] = Number(val[i].NetTotal) + (dict[date] || 0)
-        console.log(dict)
+        dict[date] = Number(val[i].NetTotal) * mult + (dict[date] || 0)
       }
 
       for (let key in dict) {
         const dataString = key.split('-')
-        console.log(dataString)
         data.push({
           x: new Date(Number(dataString[0]), Number(dataString[1]), Number(dataString[2])),
           y: dict[key]
