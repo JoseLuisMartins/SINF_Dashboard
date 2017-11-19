@@ -1,6 +1,9 @@
 import Api from '@/services/Api'
 
 export default {
+  getTotalNetSales (begin, end) {
+    return Api().get(`/api/saft/TotalNetSales?begin=${begin}&end=${end}`)
+  },
   getInvoices (begin, end) {
     return Api().get(`/api/sales/?begin=${begin}&end=${end}`)
   },
