@@ -188,16 +188,14 @@ export default {
       this.topics[1].value = `${totalPurchaseValue.data}€`
 
       let totalSalesValue = await SalesService.getTotalNetSales(this.dateBegin, this.dateEnd)
-      this.topics[0].value = `${parseFloat(totalSalesValue.data.TotalNetSales).toFixed(2)}€`
-
-      console.log('sales: ' + totalSalesValue.data.TotalNetSales)
+      this.topics[0].value = `${parseFloat(totalSalesValue.data.TotalNetSales).toFixed(0)}€`
     },
     dateEnd: async function (val) {
       let totalPurchaseValue = await PurchasesService.getTotalAmount(this.dateBegin, this.dateEnd)
       this.topics[1].value = `${totalPurchaseValue.data}€`
 
       let totalSalesValue = await SalesService.getTotalNetSales(this.dateBegin, this.dateEnd)
-      this.topics[0].value = `${totalSalesValue.data.TotalNetSales}€`
+      this.topics[0].value = `${parseFloat(totalSalesValue.data.TotalNetSales).toFixed(0)}€`
     }
   }
 }

@@ -5,7 +5,7 @@ export default {
     return Api().get(`/api/saft/TotalNetSales?begin=${begin}&end=${end}`)
   },
   getInvoices (begin, end) {
-    return Api().get(`/api/sales/?begin=${begin}&end=${end}`)
+    return Api().get(`/api/saft/SalesInvoices/?begin=${begin}&end=${end}`)
   },
   getCustomers () {
     return Api().get(`/api/saft/Customers`)
