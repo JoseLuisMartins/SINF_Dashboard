@@ -38,6 +38,13 @@ namespace FirstREST.Controllers
             }
         }
 
+        // GET api/Inventory/?begin='2016-01-01&2017-1-01'    
+        public IEnumerable<Lib_Primavera.Model.Inventory> Get(string begin, string end)
+        {
+            return Lib_Primavera.PriIntegration.ListInventoryByDate(begin,end);
+           
+        }
+
     }
 }
 

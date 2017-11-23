@@ -294,7 +294,6 @@ namespace FirstREST.Lib_Primavera
             {
 
                 objList = PriEngine.Engine.Comercial.Artigos.LstArtigos();
-
                 while (!objList.NoFim())
                 {
                     art = new Model.Artigo();
@@ -473,6 +472,41 @@ namespace FirstREST.Lib_Primavera
 
             }
 
+        }
+
+        public static List<Model.Inventory> ListInventoryByDate(string begin, string end)
+        {
+            StdBELista objList;
+
+            Model.Inventory art = null;
+            List<Model.Inventory> listArts = new List<Model.Inventory>();
+
+            if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
+            {
+
+                objList = PriEngine.Engine.Comercial.Artigos.LstArtigos();
+
+                string query = String.Format(
+                    "SELECT Artigo, EntradaSaida, Unidade , SUM(Quantidade) as Quantidade From LinhasSTK where NOT TipoDoc = 'GR' AND Artigo IS NOT NULL AND Data between '{0}' and '{1}' group by Artigo, Unidade, EntradaSaida",
+                        begin, end);
+
+                
+                objList = PriEngine.Engine.Consulta(query);
+
+                while (!objList.NoFim())
+                {
+                    art = new Model.Inventory();
+                    art.CodArtigo = objList.Valor("Artigo");
+                    art.Stock = objList.Valor("Quantidade");
+                    art.InOut = objList.Valor("EntradaSaida");
+
+                    listArts.Add(art);
+                    objList.Seguinte();
+                }
+                return listArts;
+            }
+            else
+                return null;
         }
 
         #endregion Inventory
