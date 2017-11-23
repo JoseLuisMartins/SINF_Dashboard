@@ -5,6 +5,7 @@ import App from './App'
 import router from './router'
 import Vuetify from 'vuetify'
 import('../node_modules/vuetify/dist/vuetify.min.css')
+import('../src/assets/css/global.css')
 
 console.log(JSON.stringify(process.env))
 Vue.config.productionTip = false
