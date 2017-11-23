@@ -95,18 +95,16 @@
               :search="search_1"
               v-bind:headers="headers"
               :items="items"
-              hide-actions
               class="elevation-1"
-              :loading="0 == 0"
+              :loading="items.length == 0"
             >
               <template slot="items" scope="props">
-                <td>{{ props.item.CodArtigo }}</td>
-                <td class="text-xs-right">{{ props.item.DescArtigo }}</td>
-                <td class="text-xs-right">{{ props.item.STKAtual }}</td>
+                <td class="text-xs-right">{{ props.item.CodArtigo }}</td> 
+                <td class="text-xs-right">{{ props.item.Description }}</td>
+                <td class="text-xs-right">{{ props.item.Stock }}</td>
               </template>
 
             </v-data-table>
-            <span>TOTAL = {{inventoryValue}} €</span>
           </v-card-text>
         </v-card>
       </v-flex>
@@ -156,9 +154,9 @@ export default {
       },
       selected: [],
       headers: [
-        { text: 'Codigo', value: 'CodArtigo', align: 'left' },
-        { text: 'Descrição', value: 'DescArtigo' },
-        { text: 'STKAtual', value: 'STKAtual' }
+        { text: 'Codigo', value: 'Code', align: 'left' },
+        { text: 'Descrição', value: 'DescArtigo', allign: 'left' },
+        { text: 'Stock', value: 'Stock', allign: 'left' }
       ],
       inventoryChartData: {
         datasets: []
@@ -190,7 +188,7 @@ export default {
     this.dateBegin = `${currentYear}-01-01`
 
     this.$nextTick(async () => {
-      const res = await Products.all()
+      const res = await Products.getInventory(this.dateBegin, this.dateEnd)
       this.items = res.data
     })
   }

@@ -7,5 +7,10 @@ export default{
   getFornecedor (idF) {
     let url = `api/artigos/?fornecedor=${idF}`
     return Api().get(url)
+  },
+  getInventory (begin, end) {
+    let urlInventory = `api/Inventory/?begin=${begin}&end=${end}`
+    return Api().get(urlInventory)
   }
+
 }
