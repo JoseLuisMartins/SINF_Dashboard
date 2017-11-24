@@ -11,6 +11,9 @@ export default{
   getInventory (begin, end) {
     let urlInventory = `api/Inventory/?begin=${begin}&end=${end}`
     return Api().get(urlInventory)
+  },
+  getProductsBySupplier (id) {
+    return Api().get(`api/Artigos/?fornecedor=${id}`)
   }
 
 }

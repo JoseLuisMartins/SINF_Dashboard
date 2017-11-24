@@ -23,6 +23,7 @@
   max-width: 20px;
   border-radius: 10px;
   color: white;
+  transform: scale(0.0);
   animation: loadinga 1s infinite 0.0s;
   animation-timing-function: infinite;
   animation-direction: alternate-reverse;
@@ -56,12 +57,16 @@
   animation-delay: 0.5s;
 }
 
+pointer {
+  cursor: pointer;
+}
+
 
 @keyframes loadinga {
   100%{
-    transform: translateY(0px)
+    transform: translateY(0px) scale(0.4) rotate(-20deg);
   } 
   0%{
-    transform: translateY(40px)
+    transform: translateY(40px) scale(1.5) rotate(20deg);
   }
 }

@@ -1,5 +1,29 @@
 <template>
   <v-container mt-2 grid-list-xs>
+    <v-dialog 
+      max-width="1000px"
+      v-model="supplierDialog">
+      <v-card>
+        <v-card-title>
+          <span class="headline"> Products </span>
+        </v-card-title>
+        <v-card-text>
+          <div v-if="supplierProducts == null"> Loading... </div>
+          <v-data-table v-if="supplierProducts != null"
+            :loading="supplierProducts == null"
+            v-bind:headers="supplierProductsHeader"
+            :items="supplierProducts"
+            >
+            <template slot="items" scope="props">
+              <td> {{props.item.CodArtigo }} </td>
+              <td> {{props.item.DescArtigo }} </td>
+              <td> {{props.item.STKAtual }} </td>
+            </template>
+          </v-data-table>
+
+        </v-card-text>
+      </v-card>
+    </v-dialog>
     <v-layout>
       <v-flex mb-4 d-flex sm6 offset-sm3 xs12>
         <v-card>
@@ -179,10 +203,12 @@
               class="elevation-1"
               >
               <template slot="items" scope="props">
+                <tr class="pointer" @click="() => {displaySupplierModal(props.item.CodFornecedor)}">
                 <td> {{props.item.CodFornecedor }} </td>
                 <td> {{props.item.NomeFornecedor }} </td>
                 <td> {{props.item.Telefone }} </td>
                 <td> {{props.item.NumContribuinte }} </td>
+                </tr>
               </template>
             </v-data-table>
           </v-card-text>
@@ -197,7 +223,8 @@
 
 import LineChart from '@/components/charts/LineChart'
 import PurchasesService from '@/services/Purchases'
-import ChartOptions from '@/components/Charts/config'
+import Products from '@/services/Products'
+import ChartOptions from '@/components/charts/config'
 
 export default {
   components: {
@@ -207,6 +234,15 @@ export default {
     getSup: async function () {
       const res = await PurchasesService.getSuppliers()
       this.items = res.data
+    },
+    async displaySupplierModal (id) {
+      try {
+        this.supplierProducts = null
+        this.supplierDialog = true
+        const res = await Products.getProductsBySupplier(id)
+        this.supplierProducts = res.data
+      } catch (err) {
+      }
     }
   },
   beforeMount () {
@@ -235,6 +271,11 @@ export default {
         {text: 'Total Merc', value: 'TotalMerc', align: 'center'},
         {text: 'Serie', value: 'Serie', align: 'center'}
       ],
+      supplierProductsHeader: [
+        {text: 'Product', value: 'CodArtigo', align: 'left'},
+        {text: 'Description', value: 'DescArtigo', align: 'center'},
+        {text: 'Actual Stock', value: 'STKAtual', align: 'center'}
+      ],
       suppliersHeader: [
         {text: 'Fornecedor', value: 'CodFornecedor', align: 'left'},
         {text: 'Nome', value: 'Nome', align: 'center'},
@@ -249,7 +290,11 @@ export default {
       purchasesChartData: {
         datasets: []
       },
-      chartOptions: ChartOptions.options
+      chartOptions: ChartOptions.options,
+      supplierDialog: false,
+      supplierProducts: [
+        {CodArtigo: '13123', DescArtigo: 'Descr', STKAtual: 'Stk'}
+      ]
     }
   },
   mounted: function () {
@@ -293,8 +338,6 @@ export default {
       data.sort((a, b) => {
         return a.x > b.x ? 1 : (a.x < b.x ? -1 : 0)
       })
-
-      console.log(data)
 
       this.purchasesChartData = {
         datasets: [
