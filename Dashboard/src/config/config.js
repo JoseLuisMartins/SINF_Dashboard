@@ -1,3 +1,3 @@
 export default {
-  HOST: 'http://172.30.29.10:9001'
+  HOST: 'http://localhost:49822/'
 }

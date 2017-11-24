@@ -487,8 +487,8 @@ namespace FirstREST.Lib_Primavera
                 objList = PriEngine.Engine.Comercial.Artigos.LstArtigos();
 
                 string query = String.Format(
-                    "SELECT Artigo, EntradaSaida, Unidade , SUM(Quantidade) as Quantidade , SUM(Quantidade * PrecUnit - DescontoComercial + DespesaAdicionalCompra) as Valor From LinhasSTK where NOT TipoDoc = 'GR' AND NOT TipoDoc='SOF' AND Artigo IS NOT NULL AND Data between '{0}' and '{1}' group by Artigo, Unidade, EntradaSaida",
-                    begin, end);
+                    "SELECT Artigo, EntradaSaida, Unidade , SUM(Quantidade) as Quantidade From LinhasSTK where NOT TipoDoc = 'GR' AND Artigo IS NOT NULL AND Data between '{0}' and '{1}' group by Artigo, Unidade, EntradaSaida",
+                        begin, end);
 
                 
                 objList = PriEngine.Engine.Consulta(query);
@@ -814,50 +814,30 @@ namespace FirstREST.Lib_Primavera
 
         public static double getDatedPurchases(string begin, string end)
         {
-            double total = 0;
 
             if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
             {
-                
-                string query = String.Format("SELECT CabecCompras.TotalMerc, CabecCompras.TotalDesc FROM CabecCompras WHERE (CabecCompras.DataDoc between '{0}' and '{1}' ) and (TipoDoc = 'VFA' or TipoDoc = 'VNC')", begin, end);
-                
-                StdBELista objList = PriEngine.Engine.Consulta(query);
-                // Cotacao = 'COT'
 
-                while (!objList.NoFim())
-                {
+                string query = String.Format("SELECT SUM(CabecCompras.TotalMerc) - SUM(CabecCompras.TotalDesc) as total FROM CabecCompras WHERE (CabecCompras.DataDoc between '{0}' and '{1}' ) and not (TipoDoc = 'COT' or TipoDoc = 'PCO' or TipoDoc='VFS' or TipoDoc='VGT' or TipoDoc='ECF')", begin, end);
 
-                    total += objList.Valor("TotalMerc");
-                    total -= objList.Valor("TotalDesc");
-
-                    objList.Seguinte();
-                }
+                return (double)PriEngine.Engine.Consulta(query).Valor("total");
             }
 
-            return total;
+            return 0;
         }
 
         public static double getDatedPurchasesByFornecedor(string begin, string end, string idF)
         {
-            double total = 0;
 
             if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
             {
+                string query = String.Format("SELECT SUM(CabecCompras.TotalMerc) - SUM(CabecCompras.TotalDesc) as total FROM CabecCompras WHERE (CabecCompras.DataDoc between '{0}' and '{1}' ) and not (TipoDoc = 'COT' or TipoDoc = 'PCO' or TipoDoc='VFS' or TipoDoc='VGT' or TipoDoc='ECF') and Entidade = '{2}'", begin, end,idF);
 
-                string query = String.Format("SELECT CabecCompras.TotalMerc, CabecCompras.TotalDesc FROM CabecCompras WHERE (DataDoc between '{0}' and '{1}' ) and (TipoDoc = 'VFA' or TipoDoc = 'VNC') and Entidade = '{2}'", begin, end, idF);
-             
-                StdBELista objList = PriEngine.Engine.Consulta(query);
+                return (double)PriEngine.Engine.Consulta(query).Valor("total");
 
-                while (!objList.NoFim())
-                {
-                    total += objList.Valor("TotalMerc");
-                    total -= objList.Valor("TotalDesc");
-
-                    objList.Seguinte();
-                }
             }
 
-            return total;
+            return 0;
         }
 
         #endregion Compras

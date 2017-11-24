@@ -36,7 +36,6 @@
                   transition="scale-transition"
                   full-width
                   v-model="menu"
-                  offset-y
                   :nudge-right="40"
                   max-width="290px"
                   max-height="600px"
@@ -101,7 +100,7 @@
         <v-card>
           <v-card-title>
             <div class="headline"> Purchases </div>
-            <div class="ml-3"><b>Total Purchases : {{totalAmount}}€</b></div>
+            <div class="ml-3"><b>Total : {{totalAmount}}€</b></div>
           </v-card-title>
           <v-card-text>
             <div class="limitHeight chartHolder" v-if="purchasesChartData.datasets.length == 0"> 
@@ -306,14 +305,14 @@ export default {
   watch: {
     dateBegin: async function (val) {
       const res = await PurchasesService.request(this.dateBegin, this.dateEnd)
-      this.currentDataSet = res.data
       const total = await PurchasesService.getTotalAmount(this.dateBegin, this.dateEnd)
+      this.currentDataSet = res.data
       this.totalAmount = total.data
     },
     dateEnd: async function (val) {
       const res = await PurchasesService.request(this.dateBegin, this.dateEnd)
-      this.currentDataSet = res.data
       const total = await PurchasesService.getTotalAmount(this.dateBegin, this.dateEnd)
+      this.currentDataSet = res.data
       this.totalAmount = total.data
     },
     currentDataSet: function (val) {
