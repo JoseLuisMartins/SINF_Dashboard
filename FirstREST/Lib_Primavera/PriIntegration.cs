@@ -487,8 +487,8 @@ namespace FirstREST.Lib_Primavera
                 objList = PriEngine.Engine.Comercial.Artigos.LstArtigos();
 
                 string query = String.Format(
-                    "SELECT Artigo, EntradaSaida, Unidade , SUM(Quantidade) as Quantidade From LinhasSTK where NOT TipoDoc = 'GR' AND Artigo IS NOT NULL AND Data between '{0}' and '{1}' group by Artigo, Unidade, EntradaSaida",
-                        begin, end);
+                    "SELECT Artigo, EntradaSaida, Unidade , SUM(Quantidade) as Quantidade , SUM(Quantidade * PrecUnit - DescontoComercial + DespesaAdicionalCompra) as Valor From LinhasSTK where NOT TipoDoc = 'GR' AND NOT TipoDoc='SOF' AND Artigo IS NOT NULL AND Data between '{0}' and '{1}' group by Artigo, Unidade, EntradaSaida",
+                    begin, end);
 
                 
                 objList = PriEngine.Engine.Consulta(query);
