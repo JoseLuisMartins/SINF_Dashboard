@@ -77,10 +77,10 @@
     </v-layout>
 
     <v-layout row wrap>
-      <v-flex d-flex sm12 md12>
+      <v-flex d-flex sm6 md6>
         <v-card>
           <v-card-title class="pb-0">
-            <div class="headline"> Products </div>
+            <div class="headline"> In </div>
             <v-spacer></v-spacer>
             <v-text-field
               append-icon="search"
@@ -94,9 +94,41 @@
             <v-data-table
               :search="search_1"
               v-bind:headers="headers"
-              :items="items"
+              :items="productsIn"
               class="elevation-1"
-              :loading="items.length == 0"
+              :loading="productsIn.length == 0"
+            >
+              <template slot="items" scope="props">
+                <td class="text-xs-right">{{ props.item.CodArtigo }}</td> 
+                <td class="text-xs-right">{{ props.item.Description }}</td>
+                <td class="text-xs-right">{{ props.item.Stock }}</td>
+              </template>
+
+            </v-data-table>
+          </v-card-text>
+        </v-card>
+      </v-flex>
+
+      <v-flex d-flex sm6 md6>
+        <v-card>
+          <v-card-title class="pb-0">
+            <div class="headline"> Out </div>
+            <v-spacer></v-spacer>
+            <v-text-field
+              append-icon="search"
+              label="Search"
+              single-line
+              hide-details
+              v-model="search_2"
+            ></v-text-field>
+          </v-card-title>
+          <v-card-text>
+            <v-data-table
+              :search="search_2"
+              v-bind:headers="headers"
+              :items="productsOut"
+              class="elevation-1"
+              :loading="productsOut.length == 0"
             >
               <template slot="items" scope="props">
                 <td class="text-xs-right">{{ props.item.CodArtigo }}</td> 
@@ -148,6 +180,7 @@ export default {
   data () {
     return {
       search_1: '',
+      search_2: '',
       inventoryValue: 200,
       pagination: {
         sortBy: 'Codigo'
@@ -161,7 +194,8 @@ export default {
       inventoryChartData: {
         datasets: []
       },
-      items: [],
+      productsIn: [],
+      productsOut: [],
       chartOptions: ChartOptions.options,
       dateBegin: null,
       dateEnd: null
@@ -189,7 +223,14 @@ export default {
 
     this.$nextTick(async () => {
       const res = await Products.getInventory(this.dateBegin, this.dateEnd)
-      this.items = res.data
+
+      for (var i = 0; i < res.data.length; i++) {
+        if (res.data[i].InOut === 'E') {
+          this.productsIn.push(res.data[i])
+        } else {
+          this.productsOut.push(res.data[i])
+        }
+      }
     })
   }
 }
