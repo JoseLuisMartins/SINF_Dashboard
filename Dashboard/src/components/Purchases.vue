@@ -77,17 +77,18 @@
         <v-card>
           <v-card-title>
             <div class="headline"> Purchases </div>
+            <div class="ml-3"><b>Total Purchases : {{totalAmount}}€</b></div>
           </v-card-title>
           <v-card-text>
             <div class="limitHeight chartHolder" v-if="purchasesChartData.datasets.length == 0"> 
               <v-layout justify-center>
                 <v-flex class="loading a blue ">L</v-flex> 
-                <v-flex class="loading b blue">o</v-flex> 
-                <v-flex class="loading c blue">a</v-flex> 
-                <v-flex class="loading d blue">d</v-flex> 
-                <v-flex class="loading e blue">i</v-flex> 
-                <v-flex class="loading f blue">n</v-flex> 
-                <v-flex class="loading g blue">g</v-flex> 
+                <v-flex class="loading b blue">O</v-flex> 
+                <v-flex class="loading c blue">A</v-flex> 
+                <v-flex class="loading d blue">D</v-flex> 
+                <v-flex class="loading e blue">I</v-flex> 
+                <v-flex class="loading f blue">N</v-flex> 
+                <v-flex class="loading g blue">G</v-flex> 
               
               </v-layout>
               </div>
@@ -215,6 +216,7 @@ export default {
     return {
       search_1: '',
       search_2: '',
+      totalAmount: 0,
       linhasDoc: [
         {text: 'Code', value: 'CodArtigo', align: 'left'},
         {text: 'Description', value: 'DescArtigo'},
@@ -260,10 +262,14 @@ export default {
     dateBegin: async function (val) {
       const res = await PurchasesService.request(this.dateBegin, this.dateEnd)
       this.currentDataSet = res.data
+      const total = await PurchasesService.getTotalAmount(this.dateBegin, this.dateEnd)
+      this.totalAmount = total.data
     },
     dateEnd: async function (val) {
       const res = await PurchasesService.request(this.dateBegin, this.dateEnd)
       this.currentDataSet = res.data
+      const total = await PurchasesService.getTotalAmount(this.dateBegin, this.dateEnd)
+      this.totalAmount = total.data
     },
     currentDataSet: function (val) {
       let data = []
