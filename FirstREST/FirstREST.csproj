@@ -233,6 +233,7 @@
     <Compile Include="Controllers\ComprasController.cs" />
     <Compile Include="Controllers\DocCompraController.cs" />
     <Compile Include="Controllers\DocVendaController.cs" />
+    <Compile Include="Lib_Primavera\Model\ArtStock.cs" />
     <Compile Include="Lib_Primavera\Model\Fornecedor.cs" />
     <Compile Include="Controllers\FornecedorController.cs" />
     <Compile Include="Controllers\HomeController.cs" />

@@ -474,6 +474,87 @@ namespace FirstREST.Lib_Primavera
 
         }
 
+        public static List<Model.ArtStock> ListInventoryByDate(string date)
+        {
+            StdBELista objList;
+
+            Model.ArtStock art = null;
+            List<Model.ArtStock> listArts = new List<Model.ArtStock>();
+
+            if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
+            {
+
+                objList = PriEngine.Engine.Comercial.Artigos.LstArtigos();
+
+
+
+                DateTime dateObj;
+                
+                DateTime.TryParse(date, out dateObj);
+
+                StdBELista armsList = PriEngine.Engine.Comercial.Armazens.LstArmazens();
+            
+
+                string arms = "";
+
+                while (!armsList.NoFim())
+                {
+                    arms += "[" + armsList.Valor("Armazem") + "]";
+                    armsList.Seguinte();
+                }
+
+                string table = "tempdb.dbo.##RecalculoStk";
+                string error = "";
+
+                short res = PriEngine.Engine.Comercial.Stocks.RecalculoStocks(
+                    enumTipoRecalculoCusteio.trcRecalculoData,
+                    strExtArms: arms, 
+                    dtData: dateObj, 
+                    blnArtNecRecalcPCM: false,
+                    blnRecalcQtdReservada: false,
+                    blnExtRecalculo: false);
+
+                string query = @"
+                    SELECT DISTINCT
+                        Artigo.Familia Familia,
+                        Familias.Descricao NomeFamilia,
+                        Artigo.Artigo Artigo,
+                        Artigo.Descricao Descricao,
+                        Artigo.UnidadeBase UnidadeBase,
+                        Recalculo.PCMedio PCMedio,
+                        Artigo.SubFamilia SubFamilia,
+                        Artigo.STKActual STKActual,
+                        Recalculo.QuantidadeArm Actual,
+                        Artigo.TratamentoDim,
+                        Recalculo.Artigo rArtigo
+                    FROM (Artigo Artigo LEFT OUTER JOIN tempdb.dbo.##RecalculoStk Recalculo ON Artigo.Artigo=Recalculo.Artigo)
+                        LEFT OUTER JOIN Familias Familias ON Artigo.Familia=Familias.Familia
+                    WHERE Artigo.TratamentoDIM<>1
+                    ORDER BY Artigo.Artigo, Artigo.SubFamilia";
+
+                objList = PriEngine.Engine.Consulta(query);
+
+                while (!objList.NoFim())
+                {
+                    art = new Model.ArtStock();
+                    art.ProductID = objList.Valor("Artigo");
+                    art.ProductDesc = objList.Valor("Descricao");
+                    Double.TryParse(objList.Valor("Actual") != null ? objList.Valor("Actual") : "0.0", out art.ActualSTK);
+                    art.Family = objList.Valor("NomeFamilia");
+                    art.SubFamily = objList.Valor("SubFamilia");
+                    Double.TryParse(objList.Valor("PCMedio") != null ? objList.Valor("PCMedio") : "0.0", out art.PCM);
+                    art.TotalValue = art.PCM * art.ActualSTK;
+                    art.ProductID = objList.Valor("PCMedio");
+
+                    listArts.Add(art);
+                    objList.Seguinte();
+                }
+                return listArts;
+            }
+            else
+                return null;
+        }
+
         public static List<Model.Inventory> ListInventoryByDate(string begin, string end)
         {
             StdBELista objList;

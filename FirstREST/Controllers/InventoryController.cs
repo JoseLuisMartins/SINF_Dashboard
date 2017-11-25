@@ -45,6 +45,12 @@ namespace FirstREST.Controllers
            
         }
 
+        public IEnumerable<Lib_Primavera.Model.ArtStock> Get(string date, int k)
+        {
+            return Lib_Primavera.PriIntegration.ListInventoryByDate(date);
+
+        }
+
     }
 }
 
