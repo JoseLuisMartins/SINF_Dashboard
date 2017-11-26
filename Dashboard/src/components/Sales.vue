@@ -226,7 +226,7 @@
                 
                 <td> {{props.item.Entidade }} </td>
                 <td> {{props.item.Data }} </td>
-                <td> {{props.item.TotalMerc }} </td>
+                <td> {{(parseFloat(props.item.TotalMerc.toFixed(2)) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + "€" }} </td>
 
               </template>
 

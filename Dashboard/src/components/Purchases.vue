@@ -100,7 +100,7 @@
         <v-card>
           <v-card-title>
             <div class="headline"> Purchases </div>
-            <div class="ml-3"><b>Total : {{totalAmount}}€</b></div>
+            <div class="ml-3"><b>Total : {{(totalAmount + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ")}}€</b></div>
           </v-card-title>
           <v-card-text>
             <div class="limitHeight chartHolder" v-if="purchasesChartData.datasets.length == 0"> 

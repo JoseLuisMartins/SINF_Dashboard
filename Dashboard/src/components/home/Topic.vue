@@ -10,7 +10,7 @@
           <span class="text-xs-left"> {{description}} </span>
         </v-flex>
         <v-flex d-flex> 
-          <span class="text-xs-right"> {{value}} </span>
+          <span class="text-xs-right"> {{(value + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ")}} </span>
         </v-flex>
       </v-layout>
     </v-card-text>

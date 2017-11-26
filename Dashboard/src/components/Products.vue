@@ -78,68 +78,82 @@
 
     <v-layout row wrap>
       <v-flex d-flex sm6 md6>
-        <v-card>
-          <v-card-title class="pb-0">
-            <div class="headline"> In </div>
-            <v-spacer></v-spacer>
-            <v-text-field
-              append-icon="search"
-              label="Search"
-              single-line
-              hide-details
-              v-model="search_1"
-            ></v-text-field>
-          </v-card-title>
-          <v-card-text>
-            <v-data-table
-              :search="search_1"
-              v-bind:headers="headers"
-              :items="productsIn"
-              class="elevation-1"
-              :loading="productsIn.length == 0"
-            >
-              <template slot="items" scope="props">
-                <td class="text-xs-right">{{ props.item.CodArtigo }}</td> 
-                <td class="text-xs-right">{{ props.item.Description }}</td>
-                <td class="text-xs-right">{{ props.item.Stock }}</td>
-              </template>
+        <v-expansion-panel popout>
+          <v-expansion-panel-content>
+            <div slot="header" class="headline">
+                IN   Total = {{(this.totalIn + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ")+ "€"}}
+            </div>
+            <v-card>
+              <v-card-title class="pb-0">
+                <v-spacer></v-spacer>
+                <v-text-field
+                  append-icon="search"
+                  label="Search"
+                  single-line
+                  hide-details
+                  v-model="search_1"
+                ></v-text-field>
+              </v-card-title>
+              <v-card-text>
+                <v-data-table
+                  :search="search_1"
+                  v-bind:headers="headers"
+                  :items="productsIn"
+                  class="elevation-1"
+                  :loading="productsIn.length == 0"
+                >
+                  <template slot="items" scope="props">
+                    <td class="text-xs-right">{{ props.item.CodArtigo }}</td>
+                    <td class="text-xs-right">{{ props.item.Description }}</td> 
+                    <td class="text-xs-right">{{ props.item.Stock }}</td>
+                    <td class="text-xs-right">{{ (props.item.Value.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + "€" }}</td>
+                  </template>
 
-            </v-data-table>
-          </v-card-text>
-        </v-card>
+                </v-data-table>
+              </v-card-text>
+            </v-card>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
       </v-flex>
 
       <v-flex d-flex sm6 md6>
-        <v-card>
-          <v-card-title class="pb-0">
-            <div class="headline"> Out </div>
-            <v-spacer></v-spacer>
-            <v-text-field
-              append-icon="search"
-              label="Search"
-              single-line
-              hide-details
-              v-model="search_2"
-            ></v-text-field>
-          </v-card-title>
-          <v-card-text>
-            <v-data-table
-              :search="search_2"
-              v-bind:headers="headers"
-              :items="productsOut"
-              class="elevation-1"
-              :loading="productsOut.length == 0"
-            >
-              <template slot="items" scope="props">
-                <td class="text-xs-right">{{ props.item.CodArtigo }}</td> 
-                <td class="text-xs-right">{{ props.item.Description }}</td>
-                <td class="text-xs-right">{{ props.item.Stock }}</td>
-              </template>
+        <v-expansion-panel popout>
+          <v-expansion-panel-content >
+            <div slot="header" class="headline">
+                Out   Total = {{ (this.totalOut + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + "€" }} 
+            </div>
+            <v-card>
+              <v-card-title class="pb-0">
+                <v-text-field
+                  append-icon="search"
+                  label="Search"
+                  single-line
+                  hide-details
+                  v-model="search_2"
+                ></v-text-field>
+              </v-card-title>
+              <v-card-text>
+                <v-data-table
+                  :search="search_2"
+                  v-bind:headers="headers"
+                  :items="productsOut"
+                  class="elevation-1"
+                  :loading="productsOut.length == 0"
+                >
+                  <template slot="items" scope="props">
+                    <td class="text-xs-right">{{ props.item.CodArtigo }}</td> 
+                    <td class="text-xs-right">{{ props.item.Description }}</td>
+                    <td class="text-xs-right">{{ props.item.Stock }}</td>
+                    <td class="text-xs-right">{{ (props.item.Value.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + "€" }}</td>
+                  </template>
 
-            </v-data-table>
-          </v-card-text>
-        </v-card>
+                </v-data-table>
+              </v-card-text>
+            </v-card>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
       </v-flex>
+
     </v-layout>
 
     <v-layout row wrap>
@@ -181,6 +195,8 @@ export default {
     return {
       search_1: '',
       search_2: '',
+      totalIn: 0,
+      totalOut: 0,
       inventoryValue: 200,
       pagination: {
         sortBy: 'Codigo'
@@ -189,7 +205,8 @@ export default {
       headers: [
         { text: 'Codigo', value: 'Code', align: 'left' },
         { text: 'Descrição', value: 'DescArtigo', allign: 'left' },
-        { text: 'Stock', value: 'Stock', allign: 'left' }
+        { text: 'Stock', value: 'Stock', allign: 'left' },
+        { text: 'Value', value: 'Value', allign: 'left' }
       ],
       inventoryChartData: {
         datasets: []
@@ -227,10 +244,14 @@ export default {
       for (var i = 0; i < res.data.length; i++) {
         if (res.data[i].InOut === 'E') {
           this.productsIn.push(res.data[i])
+          this.totalIn += res.data[i].Value
         } else {
           this.productsOut.push(res.data[i])
+          this.totalOut += res.data[i].Value
         }
       }
+      this.totalOut = parseFloat(this.totalOut.toFixed(2))
+      this.totalIn = parseFloat(this.totalIn.toFixed(2))
     })
   }
 }
