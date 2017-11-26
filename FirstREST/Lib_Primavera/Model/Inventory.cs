@@ -17,5 +17,7 @@ namespace FirstREST.Lib_Primavera.Model
         public string InOut;
 
         public string Lot;
+		
+		public double Value;
     }
 }
