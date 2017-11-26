@@ -8,6 +8,8 @@ using System.Web;
 using System.Xml;
 using FirstREST.Validation;
 using System.Globalization;
+using FirstREST.Lib_Primavera.Model;
+
 
 namespace FirstREST.Mongo
 {
@@ -48,19 +50,25 @@ namespace FirstREST.Mongo
             JToken suppliers = master.SelectToken("Supplier");
             JToken products = master.SelectToken("Product");
 
-            MongoConnection.AddMany("Accounts", accounts.ToString());
+            string accountsJson = JsonConvert.SerializeObject(JsonConvert.DeserializeObject<List<SaftAccount>>(accounts.ToString()));
+
+
+            MongoConnection.AddMany("Accounts", accountsJson);
             MongoConnection.AddMany("Customers", customers.ToString());
             MongoConnection.AddMany("Suppliers", suppliers.ToString());
             MongoConnection.AddMany("Products", products.ToString());
 
         }
 
+       
         public void GeneralLedgerEntries(JToken ledgerEntries)
         {
             JToken journals = ledgerEntries.SelectToken("Journal");
             JObject generalInfo = FillInfo(ledgerEntries);
 
-            MongoConnection.AddMany("Journals", journals.ToString());
+            string journalsJson = JsonConvert.SerializeObject(JsonConvert.DeserializeObject<List<SaftJournal>>(journals.ToString()));
+
+            MongoConnection.AddMany("Journals", journalsJson);
             MongoConnection.Add("LedgerEntriesInfo", generalInfo.ToString());
 
         }
@@ -78,17 +86,18 @@ namespace FirstREST.Mongo
             AddObj(ref goodsInfo, movementOfGoods, "TotalQuantityIssued");
             JToken stockMovements = movementOfGoods.SelectToken("StockMovement");
 
-            
+
+            string invoicesJson = JsonConvert.SerializeObject(JsonConvert.DeserializeObject<List<SaftInvoice>>(invoices.ToString()));
+
             MongoConnection.Add("InvoicesInfo", invoicesInfo.ToString());
-            MongoConnection.AddMany("Invoices", invoices.ToString());
+            MongoConnection.AddMany("Invoices", invoicesJson);
 
             MongoConnection.Add("GoodsInfo", goodsInfo.ToString());
             MongoConnection.AddMany("StockMovements", stockMovements.ToString());
 
         }
 
-
-
+       
         private void AddObj(ref JObject obj, JToken tkn, String desc)
         {
             obj.Add(desc, tkn.SelectToken(desc));
