@@ -55,18 +55,81 @@ namespace FirstREST.Mongo
 
     public class TransactionLines
     {
-        public TransactionLine CreditLine { get; set; }
-        public TransactionLine DebitLine { get; set; }
+
+        [JsonProperty(PropertyName = "CreditLine")]
+        public dynamic CreditLineJson { get; set; }
+        private List<CreditLine> _creditLineJson;
+        public List<CreditLine> creditLineJson
+        {
+            get
+            {
+                if (_creditLineJson == null) _creditLineJson = new List<CreditLine>();
+
+                _creditLineJson.Clear();
+
+                if (CreditLineJson is Newtonsoft.Json.Linq.JArray)
+                {
+
+                    foreach (var creditLineJson in CreditLineJson)
+                    {
+                        _creditLineJson.Add(creditLineJson.ToObject<CreditLine>());
+                    }
+                }
+                else if (CreditLineJson != null)
+                {
+                    _creditLineJson.Add(CreditLineJson.ToObject<CreditLine>());
+                }
+
+                return _creditLineJson;
+            }
+        }
+        [JsonProperty(PropertyName = "DebitLine")]
+        public dynamic DebitLineJson { get; set; }
+        private List<DebitLine> _debitLine;
+        public List<DebitLine> debitLine
+        {
+            get
+            {
+                if (_debitLine == null) _debitLine = new List<DebitLine>();
+
+                _debitLine.Clear();
+
+                if (DebitLineJson is Newtonsoft.Json.Linq.JArray)
+                {
+
+                    foreach (var transaction in DebitLineJson)
+                    {
+                        _debitLine.Add(transaction.ToObject<DebitLine>());
+                    }
+                }
+                else if (DebitLineJson != null)
+                {
+                    _debitLine.Add(DebitLineJson.ToObject<DebitLine>());
+                }
+
+                return _debitLine;
+            }
+        }
        
     }
 
-    public class TransactionLine
+    public class CreditLine
     {
         public uint RecordID { get; set; }
-        public uint AccountID { get; set; }
+        public string AccountID { get; set; }
         public string SourceDocumentID { get; set; }
         public string SystemEntryDate { get; set; }
         public string Description { get; set; }
         public double CreditAmount { get; set; }
+    }
+
+    public class DebitLine
+    {
+        public uint RecordID { get; set; }
+        public string AccountID { get; set; }
+        public string SourceDocumentID { get; set; }
+        public string SystemEntryDate { get; set; }
+        public string Description { get; set; }
+        public double DebitAmount { get; set; }
     }
 }
