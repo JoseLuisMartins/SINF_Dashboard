@@ -250,8 +250,8 @@ export default {
           this.totalOut += res.data[i].Value
         }
       }
-      this.totalOut = parseFloat(this.totalOut.toFixed(2))
-      this.totalIn = parseFloat(this.totalIn.toFixed(2))
+      this.totalOut = this.totalOut.toFixed(2)
+      this.totalIn = this.totalIn.toFixed(2)
     })
   }
 }

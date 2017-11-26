@@ -166,7 +166,7 @@ export default {
         return date.getMonth() === 11
       },
       topics: [
-         {color: 'teal darken-1', color2: 'teal lighten-3', icon: 'attach_money', title: 'Sales', value: '', description: 'Total Sales', dest: 'sales'},
+         {color: 'teal darken-1', color2: 'teal lighten-3', icon: 'euro_symbol', title: 'Sales', value: '', description: 'Total Sales', dest: 'sales'},
          {color: 'deep-orange darken-1', color2: 'deep-orange lighten-3', icon: 'shopping_cart', title: 'Purchases', value: '', description: 'Total Purchases', dest: 'purchases'},
          {color: 'light-blue darken-1', color2: 'light-blue lighten-3', icon: 'view_quilt', title: 'Inventory', value: '130€', description: 'Value in Inventory', dest: 'inventory'},
          {color: 'purple darken-1', color2: 'purple lighten-3', icon: 'account_balance_wallet', title: 'Accounting', value: '130€', description: 'Cashflow', dest: 'accounting'}
