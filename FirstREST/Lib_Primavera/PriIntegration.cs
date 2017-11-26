@@ -901,7 +901,7 @@ namespace FirstREST.Lib_Primavera
 
                 string query = String.Format("SELECT SUM(CabecCompras.TotalMerc) - SUM(CabecCompras.TotalDesc) as total FROM CabecCompras WHERE (CabecCompras.DataDoc between '{0}' and '{1}' ) and not (TipoDoc = 'COT' or TipoDoc = 'PCO' or TipoDoc='VFS' or TipoDoc='VGT' or TipoDoc='ECF')", begin, end);
 
-                return (double)PriEngine.Engine.Consulta(query).Valor("total");
+                return Convert.ToDouble(PriEngine.Engine.Consulta(query).Valor("total"));
             }
 
             return 0;
@@ -914,7 +914,7 @@ namespace FirstREST.Lib_Primavera
             {
                 string query = String.Format("SELECT SUM(CabecCompras.TotalMerc) - SUM(CabecCompras.TotalDesc) as total FROM CabecCompras WHERE (CabecCompras.DataDoc between '{0}' and '{1}' ) and not (TipoDoc = 'COT' or TipoDoc = 'PCO' or TipoDoc='VFS' or TipoDoc='VGT' or TipoDoc='ECF') and Entidade = '{2}'", begin, end,idF);
 
-                return (double)PriEngine.Engine.Consulta(query).Valor("total");
+                return Convert.ToDouble(PriEngine.Engine.Consulta(query).Valor("total"));
 
             }
 

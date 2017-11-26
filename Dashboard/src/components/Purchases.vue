@@ -6,6 +6,7 @@
       <v-card>
         <v-card-title>
           <span class="headline"> Products </span>
+          <div class="ml-3"><b>Total : {{(totalSupplierAmount + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ")}}€</b> between {{dateBegin}} and {{dateEnd}}</div>
         </v-card-title>
         <v-card-text>
           <div v-if="supplierProducts == null"> Loading... </div>
@@ -100,7 +101,7 @@
         <v-card>
           <v-card-title>
             <div class="headline"> Purchases </div>
-            <div class="ml-3"><b>Total : {{(totalAmount + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ")}}€</b></div>
+            <div class="ml-3"><b>Total : {{(totalAmount + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ")}}€</b> between {{dateBegin}} and {{dateEnd}}</div>
           </v-card-title>
           <v-card-text>
             <div class="limitHeight chartHolder" v-if="purchasesChartData.datasets.length == 0"> 
@@ -237,8 +238,12 @@ export default {
     async displaySupplierModal (id) {
       try {
         this.supplierProducts = null
+        this.totalSupplierAmount = 0
         this.supplierDialog = true
         const res = await Products.getProductsBySupplier(id)
+        const totalSupplier = await PurchasesService.getTotalAmountBySupplier(this.dateBegin, this.dateEnd, id)
+        console.log(totalSupplier)
+        this.totalSupplierAmount = totalSupplier.data
         this.supplierProducts = res.data
       } catch (err) {
       }
@@ -252,6 +257,7 @@ export default {
       search_1: '',
       search_2: '',
       totalAmount: 0,
+      totalSupplierAmount: 0,
       linhasDoc: [
         {text: 'Code', value: 'CodArtigo', align: 'left'},
         {text: 'Description', value: 'DescArtigo'},
@@ -321,7 +327,7 @@ export default {
 
       for (var i = 0; i < val.length; i++) {
         val[i].TotalMerc = Math.abs(val[i].TotalMerc)
-        const regex = /(\d{4}-\d{2}-\d{2})/
+        const regex = /(\d{4}-\d{2})/
         const date = val[i].Data.match(regex)[1]
         dict[date] = Number(val[i].TotalMerc) + (dict[date] || 0)
       }
@@ -329,7 +335,7 @@ export default {
       for (let key in dict) {
         const dataString = key.split('-')
         data.push({
-          x: new Date(Number(dataString[0]), Number(dataString[1]), Number(dataString[2])),
+          x: new Date(Number(dataString[0]), Number(dataString[1])),
           y: dict[key]
         })
       }
