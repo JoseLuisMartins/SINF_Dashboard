@@ -76,8 +76,8 @@
       </v-flex>
     </v-layout>
 
-    <v-layout row wrap>
-      <v-flex d-flex sm6 md6>
+    <v-layout row wrap class="elevation-1 white mb-1">
+      <v-flex d-flex xs12 sm12 md6>
         <v-expansion-panel popout>
           <v-expansion-panel-content>
             <div slot="header" class="headline">
@@ -116,14 +116,15 @@
         </v-expansion-panel>
       </v-flex>
 
-      <v-flex d-flex sm6 md6>
-        <v-expansion-panel popout>
-          <v-expansion-panel-content >
+      <v-flex d-flex xs12 sm12 md6>
+        <v-expansion-panel popout >
+          <v-expansion-panel-content>
             <div slot="header" class="headline">
                 Out   Total = {{ (this.totalOut + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + "€" }} 
             </div>
             <v-card>
               <v-card-title class="pb-0">
+                <v-spacer></v-spacer>
                 <v-text-field
                   append-icon="search"
                   label="Search"
