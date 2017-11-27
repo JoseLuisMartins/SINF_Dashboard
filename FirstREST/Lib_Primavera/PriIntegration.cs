@@ -350,16 +350,14 @@ namespace FirstREST.Lib_Primavera
             return null;
         }
 
-        public static List<Model.Fornecedor> ListaFornecedores()
+        public static List<Model.Fornecedor> ListaFornecedoresPorDataEValor(string beginDate, string endDate)
         {
             StdBELista objListCab;
 
             if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
             {
                 List<Model.Fornecedor> result = new List<Model.Fornecedor>();
-
-                string query = String.Format(
-                    "SELECT Fornecedor, Nome, NumContrib, Tel, NomeFiscal From Fornecedores");
+                string query = String.Format("SELECT Fornecedores.Fornecedor, Fornecedores.NomeFiscal, Fornecedores.Tel, Fornecedores.NumContrib, (SUM(CabecCompras.TotalMerc) - SUM(CabecCompras.TotalDesc)) * -1 as Total From Fornecedores inner join CabecCompras ON Fornecedores.Fornecedor = CabecCompras.Entidade and (CabecCompras.DataDoc between '{0}' and '{1}' ) and CabecCompras.TipoDoc not in ('COT','PCO', 'VFS', 'VGT','ECF') GROUP BY Fornecedores.Fornecedor, Fornecedores.NomeFiscal, Fornecedores.Tel, Fornecedores.NumContrib ORDER BY total DESC;", beginDate, endDate);
 
                 objListCab = PriEngine.Engine.Consulta(query);
 
@@ -368,9 +366,9 @@ namespace FirstREST.Lib_Primavera
                     Model.Fornecedor fc = new Model.Fornecedor();
                     fc.CodFornecedor = objListCab.Valor("Fornecedor");
                     fc.NomeFiscal = objListCab.Valor("NomeFiscal");
-                    fc.NomeFornecedor = objListCab.Valor("Nome");
                     fc.Telefone = objListCab.Valor("Tel");
                     fc.NumContribuinte = objListCab.Valor("NumContrib");
+                    fc.Total = Convert.ToString(objListCab.Valor("Total"));
                     result.Add(fc);
                     objListCab.Seguinte();
                 }
@@ -381,26 +379,6 @@ namespace FirstREST.Lib_Primavera
             return null;
             
 
-        }
-
-        public static Model.Fornecedor GetFornecedor(string id)
-        {
-            if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
-            {
-                Model.Fornecedor nf = new Model.Fornecedor();
-
-                nf.Telefone = PriEngine.Engine.Comercial.Fornecedores.DaValorAtributo(id,"Tel");
-                nf.NomeFornecedor = PriEngine.Engine.Comercial.Fornecedores.DaValorAtributo(id, "Nome");
-                nf.NomeFiscal = PriEngine.Engine.Comercial.Fornecedores.DaValorAtributo(id, "NomeFiscal");
-                nf.NumContribuinte = PriEngine.Engine.Comercial.Fornecedores.DaValorAtributo(id, "NumContrib");
-                nf.CodFornecedor = id;
-
-                return nf;
-            }
-            else
-            {
-                return null;
-            }
         }
 
         #endregion Fornecedor

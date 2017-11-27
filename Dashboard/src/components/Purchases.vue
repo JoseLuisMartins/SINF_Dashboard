@@ -6,7 +6,6 @@
       <v-card>
         <v-card-title>
           <span class="headline"> Products </span>
-          <div class="ml-3"><b>Total : {{(totalSupplierAmount + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ")}}€</b> between {{dateBegin}} and {{dateEnd}}</div>
         </v-card-title>
         <v-card-text>
           <div v-if="supplierProducts == null"> Loading... </div>
@@ -152,7 +151,7 @@
                   <td> {{props.item.Entidade}} </td>
                   <td> {{props.item.TipoDoc }} </td>
                   <td> {{props.item.Data }} </td>
-                  <td> {{props.item.TotalMerc }} </td>
+                  <td> {{(props.item.TotalMerc + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") }}€</td>
                   <td> {{props.item.Serie }} </td>
                 </tr>
               </template>
@@ -184,7 +183,8 @@
       <v-flex sm12 md6>
         <v-card>
           <v-card-title class="pb-0">
-            <div class="headline"> Suppliers </div>
+            <div class="headline"> Top Suppliers</div>
+            <p>between {{dateBegin}} and {{dateEnd}} </p>
             <v-spacer></v-spacer>
             <v-text-field
               append-icon="search"
@@ -205,9 +205,10 @@
               <template slot="items" scope="props">
                 <tr class="pointer" @click="() => {displaySupplierModal(props.item.CodFornecedor)}">
                 <td> {{props.item.CodFornecedor }} </td>
-                <td> {{props.item.NomeFornecedor }} </td>
+                <td> {{props.item.NomeFiscal }} </td>
                 <td> {{props.item.Telefone }} </td>
                 <td> {{props.item.NumContribuinte }} </td>
+                <td> {{(props.item.Total + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") }}€</td>
                 </tr>
               </template>
             </v-data-table>
@@ -231,33 +232,23 @@ export default {
     LineChart
   },
   methods: {
-    getSup: async function () {
-      const res = await PurchasesService.getSuppliers()
-      this.items = res.data
-    },
     async displaySupplierModal (id) {
       try {
         this.supplierProducts = null
-        this.totalSupplierAmount = 0
         this.supplierDialog = true
         const res = await Products.getProductsBySupplier(id)
         const totalSupplier = await PurchasesService.getTotalAmountBySupplier(this.dateBegin, this.dateEnd, id)
         console.log(totalSupplier)
-        this.totalSupplierAmount = totalSupplier.data
         this.supplierProducts = res.data
       } catch (err) {
       }
     }
-  },
-  beforeMount () {
-    this.getSup()
   },
   data () {
     return {
       search_1: '',
       search_2: '',
       totalAmount: 0,
-      totalSupplierAmount: 0,
       linhasDoc: [
         {text: 'Code', value: 'CodArtigo', align: 'left'},
         {text: 'Description', value: 'DescArtigo'},
@@ -283,9 +274,10 @@ export default {
       ],
       suppliersHeader: [
         {text: 'Fornecedor', value: 'CodFornecedor', align: 'left'},
-        {text: 'Nome', value: 'Nome', align: 'center'},
+        {text: 'Nome Fiscal', value: 'NomeFiscal', align: 'center'},
         {text: 'Telefone', value: 'Telefone', align: 'center'},
-        {text: 'NumContribuinte', value: 'NumContrib', align: 'center'}
+        {text: 'NumContribuinte', value: 'NumContrib', align: 'center'},
+        {text: 'Total', value: 'Total', align: 'center'}
       ],
       menu: false,
       dateBegin: null,
@@ -310,16 +302,20 @@ export default {
   },
   watch: {
     dateBegin: async function (val) {
-      const res = await PurchasesService.request(this.dateBegin, this.dateEnd)
-      const total = await PurchasesService.getTotalAmount(this.dateBegin, this.dateEnd)
+      const res = await PurchasesService.request(val, this.dateEnd)
+      const total = await PurchasesService.getTotalAmount(val, this.dateEnd)
+      const sups = await PurchasesService.getSuppliers(val, this.dateEnd)
       this.currentDataSet = res.data
       this.totalAmount = total.data
+      this.items = sups.data
     },
     dateEnd: async function (val) {
-      const res = await PurchasesService.request(this.dateBegin, this.dateEnd)
-      const total = await PurchasesService.getTotalAmount(this.dateBegin, this.dateEnd)
+      const res = await PurchasesService.request(this.dateBegin, val)
+      const total = await PurchasesService.getTotalAmount(this.dateBegin, val)
+      const sups = await PurchasesService.getSuppliers(this.dateBegin, val)
       this.currentDataSet = res.data
       this.totalAmount = total.data
+      this.items = sups.data
     },
     currentDataSet: function (val) {
       let data = []

@@ -9,8 +9,8 @@ export default {
 
     return Api().get(url)
   },
-  getSuppliers () {
-    return Api().get('api/Fornecedor/')
+  getSuppliers (begin, end) {
+    return Api().get(`api/Fornecedor/?begin=${begin}&end=${end}`)
   },
   getTotalAmount (begin, end) {
     return Api().get(`/api/Compras/?begin=${begin}&end=${end}`)

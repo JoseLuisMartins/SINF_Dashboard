@@ -13,12 +13,6 @@ namespace FirstREST.Lib_Primavera.Model
             set;
         }
 
-        public string NomeFornecedor
-        {
-            get;
-            set;
-        }
-
         public string NomeFiscal
         {
             get;
@@ -32,6 +26,12 @@ namespace FirstREST.Lib_Primavera.Model
         }
 
         public string NumContribuinte
+        {
+            get;
+            set;
+        }
+
+        public string Total
         {
             get;
             set;

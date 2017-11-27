@@ -12,16 +12,18 @@ namespace FirstREST.Controllers
 {
     public class FornecedorController : ApiController
     {
-        // api/Fornecedor/
-        public IEnumerable<Lib_Primavera.Model.Fornecedor> Get()
+        // api/Fornecedor/?begin=<...>&end=<...>
+        public IEnumerable<Lib_Primavera.Model.Fornecedor> Get(string begin, string end)
         {
-            return Lib_Primavera.PriIntegration.ListaFornecedores();
+            return Lib_Primavera.PriIntegration.ListaFornecedoresPorDataEValor(begin,end);
         }
 
+        /*
         // api/Fornecedor/?id=<...>
         public Lib_Primavera.Model.Fornecedor Get(string id)
         {
             return Lib_Primavera.PriIntegration.GetFornecedor(id);
         }
+         * */
     }
 }
