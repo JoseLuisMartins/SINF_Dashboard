@@ -233,27 +233,50 @@ export default {
       }
     }
   },
+
+  watch: {
+    dateBegin: async function (val) {
+      const movementOfStock = await Products.getInventory(this.dateBegin, this.dateEnd)
+
+      this.totalOut = 0
+      this.totalIn = 0
+
+      for (var i = 0; i < movementOfStock.data.length; i++) {
+        if (movementOfStock.data[i].InOut === 'E') {
+          this.productsIn.push(movementOfStock.data[i])
+          this.totalIn += movementOfStock.data[i].Value
+        } else {
+          this.productsOut.push(movementOfStock.data[i])
+          this.totalOut += movementOfStock.data[i].Value
+        }
+      }
+      this.totalOut = this.totalOut.toFixed(2)
+      this.totalIn = this.totalIn.toFixed(2)
+    },
+    dateEnd: async function (val) {
+      const movementOfStock = await Products.getInventory(this.dateBegin, this.dateEnd)
+
+      this.totalOut = 0
+      this.totalIn = 0
+
+      for (var i = 0; i < movementOfStock.data.length; i++) {
+        if (movementOfStock.data[i].InOut === 'E') {
+          this.productsIn.push(movementOfStock.data[i])
+          this.totalIn += movementOfStock.data[i].Value
+        } else {
+          this.productsOut.push(movementOfStock.data[i])
+          this.totalOut += movementOfStock.data[i].Value
+        }
+      }
+      this.totalOut = this.totalOut.toFixed(2)
+      this.totalIn = this.totalIn.toFixed(2)
+    }
+  },
   mounted: function () {
     let currentYear = new Date().getFullYear()
     this.dateEnd = `${currentYear}-01-01`
     currentYear -= 1
     this.dateBegin = `${currentYear}-01-01`
-
-    this.$nextTick(async () => {
-      const res = await Products.getInventory(this.dateBegin, this.dateEnd)
-
-      for (var i = 0; i < res.data.length; i++) {
-        if (res.data[i].InOut === 'E') {
-          this.productsIn.push(res.data[i])
-          this.totalIn += res.data[i].Value
-        } else {
-          this.productsOut.push(res.data[i])
-          this.totalOut += res.data[i].Value
-        }
-      }
-      this.totalOut = this.totalOut.toFixed(2)
-      this.totalIn = this.totalIn.toFixed(2)
-    })
   }
 }
 </script>
