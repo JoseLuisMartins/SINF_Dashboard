@@ -6,6 +6,7 @@ using MongoDB.Driver;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.IO;
+using FirstREST.Lib_Primavera.Model;
 
 namespace FirstREST.Mongo
 {
@@ -109,23 +110,6 @@ namespace FirstREST.Mongo
             return coll.FindSync(filter).ToList().ToJson(settings);
         }
 
-        public static string GetCustomerTotalSpent(string begin, string end)
-        {
-            var settings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
-
-            var coll = db.GetCollection<BsonDocument>("Invoices");
-
-            var aggregate = coll.Aggregate()
-                                         .Match(new BsonDocument 
-                                                    {{ "InvoiceDate", new BsonDocument {
-                                                        {"$gte", begin},
-                                                        {"$lt", end}
-                                                    }}}
-                                            )
-                                         .Group(new BsonDocument { { "_id", "$CustomerID" }, { "total_spent", new BsonDocument("$sum", "$DocumentTotals.NetTotal") } });
-            return aggregate.ToList().ToJson(settings);
-        }
-
 
         public static string GetProductSales(string id, string begin, string end)
         {
@@ -144,9 +128,54 @@ namespace FirstREST.Mongo
                                          .Project(new BsonDocument { { "line.ProductCode", 1 }, { "total", new BsonDocument("$multiply", new BsonArray { "$line.Quantity", "$line.UnitPrice" }) } })
                                          .Group(new BsonDocument { { "_id", "$line.ProductCode" }, { "total_sold", new BsonDocument("$sum", "$total") } })
                                          .Match(new BsonDocument { { "_id", id } });
+
+            
             return aggregate.ToList().ToJson(settings);
         }
 
+        public static string GetCustomerTotalSpent(string id, string begin, string end)
+        {
+            var settings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
+
+            var coll = db.GetCollection<BsonDocument>("Invoices");
+
+            var aggregate = coll.Aggregate()
+                                         .Match(new BsonDocument 
+                                                    {{ "InvoiceDate", new BsonDocument {
+                                                        {"$gte", begin},
+                                                        {"$lt", end}
+                                                    }}}
+                                            )
+                                         .Group(new BsonDocument { { "_id", "$CustomerID" }, { "total_spent", new BsonDocument("$sum", "$DocumentTotals.NetTotal") } })
+                                         .Match(new BsonDocument { { "_id", id } }); ;
+            return aggregate.ToList().ToJson(settings);
+        }
+
+        public static string GetCustomerBoughtProducts(string customerId)
+        {
+            var settings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
+
+            var coll = db.GetCollection<BsonDocument>("Invoices");
+
+            var aggregate = coll.Aggregate()
+                                         .Unwind(x => x["line"])
+                                         .Group(new BsonDocument { { "_id", "$CustomerID" }, { "products", new BsonDocument("$addToSet", "$line.ProductCode") } })
+                                         .Match(new BsonDocument { { "_id", customerId } }); ;
+            return aggregate.ToList().ToJson(settings);
+        }
+
+        public static string GetProductCustomers(string productId)
+        {
+            var settings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
+
+            var coll = db.GetCollection<BsonDocument>("Invoices");
+
+            var aggregate = coll.Aggregate()
+                                         .Unwind(x => x["line"])
+                                         .Group(new BsonDocument { { "_id", "$line.ProductCode" }, { "customers", new BsonDocument("$addToSet", "$CustomerID") } })
+                                         .Match(new BsonDocument { { "_id", productId } }); ;
+            return aggregate.ToList().ToJson(settings);
+        } 
         
         
     }
