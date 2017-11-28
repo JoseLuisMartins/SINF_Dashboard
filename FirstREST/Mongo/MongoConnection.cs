@@ -70,8 +70,84 @@ namespace FirstREST.Mongo
 
             var coll = db.GetCollection<BsonDocument>(collection);
 
-            var filter = "{" + field + ": {$gte:'" + begin + "', $lt:'" + end + "'}}";
+            var aggregate = coll.Aggregate()
+                                         .Match(new BsonDocument 
+                                                    {{ field, new BsonDocument {
+                                                        {"$gte", begin},
+                                                        {"$lt", end}
+                                                    }}}
+                                            );
+            return aggregate.ToList().ToJson(settings);
+        }
+
+        public static string GetTotalNetSales(string begin, string end)
+        {
+            var settings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
+
+            var coll = db.GetCollection<BsonDocument>("Invoices");
+
+            var aggregate = coll.Aggregate()
+                                         .Match(new BsonDocument 
+                                                    {{ "InvoiceDate", new BsonDocument {
+                                                        {"$gte", begin},
+                                                        {"$lt", end}
+                                                    }}}
+                                            )
+                                         .Group(new BsonDocument { { "_id", "null" }, { "total", new BsonDocument("$sum", "$DocumentTotals.NetTotal") } });            
+            return aggregate.ToList().ToJson(settings);
+        }
+
+
+        public static string GetCollectionById(string collection, string field, string id)
+        {
+            var settings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
+
+            var coll = db.GetCollection<BsonDocument>(collection);
+
+            var filter = "{" + field + ": '" + id + "'}";
+
             return coll.FindSync(filter).ToList().ToJson(settings);
         }
+
+        public static string GetCustomerTotalSpent(string begin, string end)
+        {
+            var settings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
+
+            var coll = db.GetCollection<BsonDocument>("Invoices");
+
+            var aggregate = coll.Aggregate()
+                                         .Match(new BsonDocument 
+                                                    {{ "InvoiceDate", new BsonDocument {
+                                                        {"$gte", begin},
+                                                        {"$lt", end}
+                                                    }}}
+                                            )
+                                         .Group(new BsonDocument { { "_id", "$CustomerID" }, { "total_spent", new BsonDocument("$sum", "$DocumentTotals.NetTotal") } });
+            return aggregate.ToList().ToJson(settings);
+        }
+
+
+        public static string GetProductSales(string id, string begin, string end)
+        {
+            var settings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
+
+            var coll = db.GetCollection<BsonDocument>("Invoices");
+
+            var aggregate = coll.Aggregate()
+                                         .Match(new BsonDocument 
+                                                    {{ "InvoiceDate", new BsonDocument {
+                                                        {"$gte", begin},
+                                                        {"$lt", end}
+                                                    }}}
+                                            )
+                                         .Unwind(x => x["line"])
+                                         .Project(new BsonDocument { { "line.ProductCode", 1 }, { "total", new BsonDocument("$multiply", new BsonArray { "$line.Quantity", "$line.UnitPrice" }) } })
+                                         .Group(new BsonDocument { { "_id", "$line.ProductCode" }, { "total_sold", new BsonDocument("$sum", "$total") } })
+                                         .Match(new BsonDocument { { "_id", id } });
+            return aggregate.ToList().ToJson(settings);
+        }
+
+        
+        
     }
 }

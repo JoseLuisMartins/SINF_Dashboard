@@ -36,28 +36,40 @@ namespace FirstREST.Controllers
             return response;
         }
 
-      
 
-        // api/saft/TotalNetSales?begin=2016-01-01&end=2017-01-01
-        // api/saft/SalesInvoices?begin=2016-01-01&end=2017-01-01
-        // api/saft/StockMovements?begin=2016-01-01&end=2017-01-01 
-        public HttpResponseMessage Get(string id, string begin, string end)
+
+        // api/saft/TotalNetSales?arg1=2016-01-01&arg2=2017-01-01
+        // api/saft/SalesInvoices?arg1=2016-01-01&arg2=2017-01-01
+        // api/saft/StockMovements?arg1=2016-01-01&arg2=2017-01-01 
+        // api/saft/Accounts?arg1=AccountID&arg2=11
+        // api/saft/Customers?arg1=CustomerID&arg2=ES989922456_C
+        // api/saft/Products?arg1=ProductCode&arg2=A0001
+        // api/saft/CustomerSpentValue?arg1=2016-01-01&arg2=2017-01-01
+        public HttpResponseMessage Get(string id, string arg1, string arg2)
         {
             HttpResponseMessage response = null;
             string body = "";
 
-
+            
             switch (id){
                 case "TotalNetSales":
-                    string salesInvoices = MongoConnection.GetCollectionByDate("Invoices", "InvoiceDate", begin, end);
-                    body = getSalesValue(salesInvoices);
+                    body = MongoConnection.GetTotalNetSales(arg1, arg2);
                     break;
                 case "SalesInvoices":
-                    body = MongoConnection.GetCollectionByDate("Invoices", "InvoiceDate", begin, end);         
+                    body = MongoConnection.GetCollectionByDate("Invoices", "InvoiceDate", arg1, arg2);         
                     break;
                 case "StockMovements":
-                    body = MongoConnection.GetCollectionByDate("StockMovements", "MovementDate", begin, end);
-                    break;         
+                    body = MongoConnection.GetCollectionByDate("StockMovements", "MovementDate", arg1, arg2);
+                    break;   
+                case "Accounts":
+                case "Customers":
+                case "Products":
+                    body = MongoConnection.GetCollectionById(id, arg1, arg2);
+                    break;
+                case "CustomerSpentValue":
+                    body = MongoConnection.GetCustomerTotalSpent(arg1, arg2);
+                    break; 
+
             }
                   
             response = this.Request.CreateResponse(HttpStatusCode.OK);
@@ -66,45 +78,19 @@ namespace FirstREST.Controllers
             return response;
         }
 
-
-        //auxiliary
-        private string getSalesValue(string salesInvoices)
+        // api/saft/ProductSales?id=C0001&begin=2016-01-01&end=2017-01-01
+        public HttpResponseMessage Get(string api, string id, string begin, string end)
         {
-            double total = 0;
+            HttpResponseMessage response = null;
+            string body = MongoConnection.GetProductSales(id,begin,end);
+                      
 
-            JArray array = JArray.Parse(salesInvoices);
-            foreach (JObject invoice in array.Children<JObject>())
-            {
+            response = this.Request.CreateResponse(HttpStatusCode.OK);
+            response.Content = new StringContent(body, Encoding.UTF8, "application/json");
 
-                string invoiceType = invoice.SelectToken("InvoiceType").ToString();
-                double netTotal = double.Parse(invoice.SelectToken("DocumentTotals")["NetTotal"].ToString(), CultureInfo.InvariantCulture);
-                total += (invoiceType.Equals("NC", StringComparison.Ordinal)) ? -netTotal : netTotal;
-            }
-
-            JObject obj = new JObject();
-            obj.Add("TotalNetSales", total);
-
-            return obj.ToString();
+            return response;
         }
 
-        //get product sales value 
-        private string getProductSalesValue(string salesInvoices)
-        {
-            double total = 0;
-
-            JArray array = JArray.Parse(salesInvoices);
-            foreach (JObject invoice in array.Children<JObject>())
-            {
-
-                string invoiceType = invoice.SelectToken("InvoiceType").ToString();
-                double netTotal = double.Parse(invoice.SelectToken("DocumentTotals")["NetTotal"].ToString(), CultureInfo.InvariantCulture);
-                total += (invoiceType.Equals("NC", StringComparison.Ordinal)) ? -netTotal : netTotal;
-            }
-
-            JObject obj = new JObject();
-            obj.Add("TotalNetSales", total);
-
-            return obj.ToString();
-        }
+      
     }
 }
