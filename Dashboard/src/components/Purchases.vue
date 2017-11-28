@@ -96,7 +96,7 @@
       </v-flex>
     </v-layout>
     <v-layout row wrap>
-      <v-flex d-flex xs12>
+      <v-flex d-flex xs10 offset-xs1>
         <v-card>
           <v-card-title>
             <div class="headline"> Purchases </div>
@@ -123,6 +123,7 @@
         </v-card>
       </v-flex>
     </v-layout>
+    <div class="mt-2"></div>
     <v-layout row wrap>
       <v-flex sm12 md6>
         <v-card>
@@ -160,16 +161,14 @@
                   <v-card-text>
                     <table>
                       <tr>
-                      <th>Art</th><th>Descr</th><th>Quantity</th><th>UnitPrice</th><th>LiquidPrice</th><th>Warehouse</th><th>Lot</th>
+                      <th>Artigo</th><th>Descr</th><th>Quantidade</th><th>PreçoUn</th><th>Armazem</th>
                       </tr>
                       <tr flat v-for="line in props.item.LinhasDoc" :key="line.id">
                         <td>{{line.CodArtigo}}</td>
                         <td>{{line.DescArtigo}}</td>
                         <td>{{Math.abs(line.Quantidade)}}</td>
                         <td>{{Math.abs(line.PrecoUnitario)}}</td>
-                        <td>{{Math.abs(line.TotalLiquido)}}</td>
                         <td>{{line.Armazem}}</td>
-                        <td>{{line.Lote}}</td>
                       </tr>
                     </table>
                   </v-card-text>
@@ -215,7 +214,6 @@
           </v-card-text>
         </v-card>
       </v-flex>
-      </v-flex>
     </v-layout>
   </v-container>
 </template>
@@ -256,21 +254,19 @@ export default {
         {text: 'Unity', value: 'Unidade'},
         {text: 'Discount', value: 'Desconto'},
         {text: 'Unit Price', value: 'PrecoUnitario'},
-        {text: 'Total Liquid', value: 'TotalLiquido'},
-        {text: 'Warehouse', value: 'Armazem'},
-        {text: 'Lot', value: 'Lote'}
+        {text: 'Warehouse', value: 'Armazem'}
       ],
       purchasesHeader: [
-        {text: 'Entity', value: 'Entidade', align: 'left'},
-        {text: 'TypeDoc', value: 'TipoDoc', align: 'center'},
-        {text: 'Date', value: 'Data', align: 'center'},
+        {text: 'Entidade', value: 'Entidade', align: 'left'},
+        {text: 'Tipo Doc', value: 'TipoDoc', align: 'center'},
+        {text: 'Data', value: 'Data', align: 'center'},
         {text: 'Total Merc', value: 'TotalMerc', align: 'center'},
         {text: 'Serie', value: 'Serie', align: 'center'}
       ],
       supplierProductsHeader: [
-        {text: 'Product', value: 'CodArtigo', align: 'left'},
-        {text: 'Description', value: 'DescArtigo', align: 'center'},
-        {text: 'Actual Stock', value: 'STKAtual', align: 'center'}
+        {text: 'Produto', value: 'CodArtigo', align: 'left'},
+        {text: 'Descrição', value: 'DescArtigo', align: 'center'},
+        {text: 'Stock Atual', value: 'STKAtual', align: 'center'}
       ],
       suppliersHeader: [
         {text: 'Fornecedor', value: 'CodFornecedor', align: 'left'},
