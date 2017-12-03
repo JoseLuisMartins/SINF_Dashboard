@@ -160,8 +160,10 @@ namespace FirstREST.Mongo
             var aggregate = coll.Aggregate()
                                          .Unwind(x => x["line"])
                                          .Group(new BsonDocument { { "_id", "$CustomerID" }, { "products", new BsonDocument("$addToSet", "$line.ProductCode") } })
-                                         .Match(new BsonDocument { { "_id", customerId } }); ;
-            return aggregate.ToList().ToJson(settings);
+                                         .Match(new BsonDocument { { "_id", customerId } });
+            var ids = aggregate.ToList()[0].ToBsonDocument()["products"].AsBsonArray;
+            
+            return GetCollectionsByIds("Products", "ProductCode", ids);
         }
 
         public static string GetProductCustomers(string productId)
@@ -174,9 +176,21 @@ namespace FirstREST.Mongo
                                          .Unwind(x => x["line"])
                                          .Group(new BsonDocument { { "_id", "$line.ProductCode" }, { "customers", new BsonDocument("$addToSet", "$CustomerID") } })
                                          .Match(new BsonDocument { { "_id", productId } }); ;
-            return aggregate.ToList().ToJson(settings);
-        } 
-        
-        
+            
+            var ids = aggregate.ToList()[0].ToBsonDocument()["customers"].AsBsonArray;
+
+            return GetCollectionsByIds("Customers", "CustomerID", ids);           
+        }
+
+        public static string GetCollectionsByIds(string collection, string field, BsonArray ids)
+        {
+            var settings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
+
+            var coll = db.GetCollection<BsonDocument>(collection);
+
+            var query = new BsonDocument(field, new BsonDocument("$in", ids));
+
+            return coll.FindSync(query).ToList().ToJson(settings);
+        }
     }
 }
