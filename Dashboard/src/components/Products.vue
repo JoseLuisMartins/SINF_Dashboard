@@ -95,12 +95,12 @@
                 ></v-text-field>
               </v-card-title>
               <v-card-text>
-                <v-data-table
+                <v-data-table 
                   :search="search_1"
                   v-bind:headers="headers"
                   :items="productsIn"
                   class="elevation-1"
-                  :loading="productsIn.length == 0"
+                  :loading="productsIn == null"
                 >
                   <template slot="items" scope="props">
                     <td class="text-xs-right">{{ props.item.CodArtigo }}</td>
@@ -139,7 +139,7 @@
                   v-bind:headers="headers"
                   :items="productsOut"
                   class="elevation-1"
-                  :loading="productsOut.length == 0"
+                  :loading="productsOut == null"
                 >
                   <template slot="items" scope="props">
                     <td class="text-xs-right">{{ props.item.CodArtigo }}</td> 
@@ -190,8 +190,12 @@
 <script>
 import Products from '@/services/Products'
 import ChartOptions from '@/components/charts/config'
+import LineChart from '@/components/charts/LineChart'
 
 export default {
+  components: {
+    LineChart
+  },
   data () {
     return {
       search_1: '',
@@ -216,7 +220,10 @@ export default {
       productsOut: [],
       chartOptions: ChartOptions.options,
       dateBegin: null,
-      dateEnd: null
+      menu: false,
+      dateEnd: null,
+
+      error: null
     }
   },
   methods: {
@@ -231,45 +238,37 @@ export default {
         this.pagination.sortBy = column
         this.pagination.descending = false
       }
+    },
+    async getSTKMovements () {
+      try {
+        this.productsIn = await Products.getMovements(this.dateBegin, this.dateEnd, 'IN')
+        this.productsIn = this.productsIn.data
+
+        this.productsOut = await Products.getMovements(this.dateBegin, this.dateEnd, 'OUT')
+        this.productsOut = this.productsOut.data
+
+        this.totalOut = this.totalIn = 0
+
+        for (let product of this.productsIn) {
+          this.totalIn += product.Value
+        }
+
+        for (let product of this.productsOut) {
+          this.totalOut += product.Value
+        }
+        this.totalOut = this.totalOut.toFixed(2)
+        this.totalIn = this.totalIn.toFixed(2)
+      } catch (error) {
+        this.error = error
+      }
     }
   },
-
   watch: {
-    dateBegin: async function (val) {
-      const movementOfStock = await Products.getInventory(this.dateBegin, this.dateEnd)
-
-      this.totalOut = 0
-      this.totalIn = 0
-
-      for (var i = 0; i < movementOfStock.data.length; i++) {
-        if (movementOfStock.data[i].InOut === 'E') {
-          this.productsIn.push(movementOfStock.data[i])
-          this.totalIn += movementOfStock.data[i].Value
-        } else {
-          this.productsOut.push(movementOfStock.data[i])
-          this.totalOut += movementOfStock.data[i].Value
-        }
-      }
-      this.totalOut = this.totalOut.toFixed(2)
-      this.totalIn = this.totalIn.toFixed(2)
+    dateBegin: function (val) {
+      this.getSTKMovements()
     },
-    dateEnd: async function (val) {
-      const movementOfStock = await Products.getInventory(this.dateBegin, this.dateEnd)
-
-      this.totalOut = 0
-      this.totalIn = 0
-
-      for (var i = 0; i < movementOfStock.data.length; i++) {
-        if (movementOfStock.data[i].InOut === 'E') {
-          this.productsIn.push(movementOfStock.data[i])
-          this.totalIn += movementOfStock.data[i].Value
-        } else {
-          this.productsOut.push(movementOfStock.data[i])
-          this.totalOut += movementOfStock.data[i].Value
-        }
-      }
-      this.totalOut = this.totalOut.toFixed(2)
-      this.totalIn = this.totalIn.toFixed(2)
+    dateEnd: function (val) {
+      this.getSTKMovements()
     }
   },
   mounted: function () {

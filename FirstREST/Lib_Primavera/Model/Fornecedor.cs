@@ -31,7 +31,7 @@ namespace FirstREST.Lib_Primavera.Model
             set;
         }
 
-        public string Total
+        public double Total
         {
             get;
             set;

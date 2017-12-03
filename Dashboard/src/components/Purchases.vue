@@ -207,7 +207,7 @@
                 <td> {{props.item.NomeFiscal }} </td>
                 <td> {{props.item.Telefone }} </td>
                 <td> {{props.item.NumContribuinte }} </td>
-                <td> {{(props.item.Total + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") }}€</td>
+                <td> {{ props.item.Total.toFixed(2 + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") }} €</td>
                 </tr>
               </template>
             </v-data-table>

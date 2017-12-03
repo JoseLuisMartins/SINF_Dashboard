@@ -331,7 +331,7 @@ namespace FirstREST.Lib_Primavera
                 List<Model.Artigo> result = new List<Model.Artigo>();
 
                 string query = String.Format(
-                    "SELECT Artigo, Descricao From Artigo where Fornecedor = '{0}'", idFornecedor);
+                    "SELECT Artigo, Descricao, STKActual From Artigo where Fornecedor = '{0}'", idFornecedor);
 
                 objListCab = PriEngine.Engine.Consulta(query);
 
@@ -340,6 +340,7 @@ namespace FirstREST.Lib_Primavera
                     Model.Artigo fc = new Model.Artigo();
                     fc.CodArtigo = objListCab.Valor("Artigo");
                     fc.DescArtigo = objListCab.Valor("Descricao");
+                    fc.STKAtual = objListCab.Valor("STKActual");
                     result.Add(fc);
                     objListCab.Seguinte();
                 }
@@ -368,7 +369,7 @@ namespace FirstREST.Lib_Primavera
                     fc.NomeFiscal = objListCab.Valor("NomeFiscal");
                     fc.Telefone = objListCab.Valor("Tel");
                     fc.NumContribuinte = objListCab.Valor("NumContrib");
-                    fc.Total = Convert.ToString(objListCab.Valor("Total"));
+                    fc.Total = objListCab.Valor("Total");
                     result.Add(fc);
                     objListCab.Seguinte();
                 }
@@ -462,68 +463,149 @@ namespace FirstREST.Lib_Primavera
             if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
             {
 
+                PriEngine.Engine.Consulta("EXEC [dbo].[STD_DropTempTable] @NomeTabela = '##RecalculoStk'");
+                PriEngine.Engine.Consulta(String.Format("EXEC [dbo].[GCP_CST_RecalculoStocks] @Posto='00', @Data='{0}'",date));
+                string query = String.Format(@"
+                    SELECT Distinct Artigo, Descricao, Quantidade, PCMedio, PCMedio*Quantidade FROM 
+                    (SELECT DISTINCT 
+	                    Artigo.Artigo, Quantidade, tmpRecalculoStk.PCMedio, Artigo.Descricao 
+                    FROM   (Artigo Artigo LEFT OUTER JOIN tempdb.dbo.##RecalculoStk tmpRecalculoStk ON Artigo.Artigo=tmpRecalculoStk.Artigo) 
+                    LEFT OUTER JOIN Familias Familias ON Artigo.Familia=Familias.Familia 
+                    WHERE  Artigo.TratamentoDim<>1 ) a
+                    ORDER BY Artigo
+                    ", date);
+
+                System.Diagnostics.Debug.WriteLine(query);
+                objList = PriEngine.Engine.Consulta(query);
+
+                while (!objList.NoFim())
+                {
+                    
+                    art = new Model.ArtStock();
+                    art.ProductID = objList.Valor("Artigo");
+                    art.ProductDesc = objList.Valor("Descricao");
+
+                    if (objList.Valor("Quantidade").GetType() == typeof(string))
+                    {
+                        objList.Seguinte();
+                        continue;
+                    }
+                    art.ActualSTK = objList.Valor("Quantidade");
+                    
+                    if (art.ActualSTK == 0.0)
+                        continue;
+                    art.PCM = objList.Valor("PCMedio");
+                    art.TotalValue = art.PCM * art.ActualSTK;
+
+                    listArts.Add(art);
+                    objList.Seguinte();
+                }
+                return listArts;
+            }
+            else
+                return null;
+        }
+
+        public static List<Model.Inventory> ListSTKIn(string begin, string end)
+        {
+            StdBELista objList;
+
+            Model.Inventory art = null;
+            List<Model.Inventory> listArts = new List<Model.Inventory>();
+
+            if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
+            {
+
                 objList = PriEngine.Engine.Comercial.Artigos.LstArtigos();
 
-
-
-                DateTime dateObj;
-                
-                DateTime.TryParse(date, out dateObj);
-
-                StdBELista armsList = PriEngine.Engine.Comercial.Armazens.LstArmazens();
-            
-
-                string arms = "";
-
-                while (!armsList.NoFim())
-                {
-                    arms += "[" + armsList.Valor("Armazem") + "]";
-                    armsList.Seguinte();
-                }
-
-                string table = "tempdb.dbo.##RecalculoStk";
-                string error = "";
-
-                short res = PriEngine.Engine.Comercial.Stocks.RecalculoStocks(
-                    enumTipoRecalculoCusteio.trcRecalculoData,
-                    strExtArms: arms, 
-                    dtData: dateObj, 
-                    blnArtNecRecalcPCM: false,
-                    blnRecalcQtdReservada: false,
-                    blnExtRecalculo: false);
-
-                string query = @"
-                    SELECT DISTINCT
-                        Artigo.Familia Familia,
-                        Familias.Descricao NomeFamilia,
-                        Artigo.Artigo Artigo,
-                        Artigo.Descricao Descricao,
-                        Artigo.UnidadeBase UnidadeBase,
-                        Recalculo.PCMedio PCMedio,
-                        Artigo.SubFamilia SubFamilia,
-                        Artigo.STKActual STKActual,
-                        Recalculo.QuantidadeArm Actual,
-                        Artigo.TratamentoDim,
-                        Recalculo.Artigo rArtigo
-                    FROM (Artigo Artigo LEFT OUTER JOIN tempdb.dbo.##RecalculoStk Recalculo ON Artigo.Artigo=Recalculo.Artigo)
-                        LEFT OUTER JOIN Familias Familias ON Artigo.Familia=Familias.Familia
-                    WHERE Artigo.TratamentoDIM<>1
-                    ORDER BY Artigo.Artigo, Artigo.SubFamilia";
+                string query = String.Format(
+                    @"SELECT 
+                     Artigo.Artigo, Artigo.Descricao, 
+                     SUM(LinhasSTK.Quantidade) as Quantidade,
+                     SUM(
+                     Case LinhasSTK.TipoDoc When 'VNC' then (1)else 1 end *
+                     round(isnull(LinhasSTK.Quantidade * LinhasSTK.FactorConv ,'0'),Arred)* round(PCM + DifPCMedio, Arred) ) as Total
+                     FROM   
+                     (((((LinhasSTK LinhasSTK INNER JOIN Artigo Artigo ON LinhasSTK.Artigo=Artigo.Artigo) 
+	                    LEFT OUTER JOIN CabecSTK CabecSTK ON LinhasSTK.IdCabecOrig=CabecSTK.Id) 
+		                    LEFT OUTER JOIN CabecDoc CabecDoc ON LinhasSTK.IdCabecOrig=CabecDoc.Id) 
+			                    LEFT OUTER JOIN CabecCompras CabecCompras ON LinhasSTK.IdCabecOrig=CabecCompras.Id) 
+				                    LEFT OUTER JOIN CabecInternos CabecInternos ON LinhasSTK.IdCabecOrig=CabecInternos.Id) 
+					                    LEFT OUTER JOIN Familias Familias ON Artigo.Familia=Familias.Familia 
+                    WHERE  
+	                    (LinhasSTK.Data between '{0}' AND '{1}')
+	                    AND 
+	                    LinhasSTK.TipoDoc in ('VFA','VFP', 'AIP', 'VD')
+	                    AND
+	                    (LinhasSTK.EntradaSaida=N'E' OR LinhasSTK.EntradaSaida=N'I') 
+                    GROUP BY Artigo.Artigo, Artigo.Descricao
+                    ",
+                    begin, end);
 
                 objList = PriEngine.Engine.Consulta(query);
 
                 while (!objList.NoFim())
                 {
-                    art = new Model.ArtStock();
-                    art.ProductID = objList.Valor("Artigo");
-                    art.ProductDesc = objList.Valor("Descricao");
-                    Double.TryParse(objList.Valor("Actual") != null ? objList.Valor("Actual") : "0.0", out art.ActualSTK);
-                    art.Family = objList.Valor("NomeFamilia");
-                    art.SubFamily = objList.Valor("SubFamilia");
-                    Double.TryParse(objList.Valor("PCMedio") != null ? objList.Valor("PCMedio") : "0.0", out art.PCM);
-                    art.TotalValue = art.PCM * art.ActualSTK;
-                    art.ProductID = objList.Valor("PCMedio");
+                    art = new Model.Inventory();
+                    art.CodArtigo = objList.Valor("Artigo");
+                    art.Description = objList.Valor("Descricao");
+                    art.Stock = objList.Valor("Quantidade");
+                    art.Value = objList.Valor("Total");
+                    listArts.Add(art);
+                    objList.Seguinte();
+                }
+                return listArts;
+            }
+            else
+                return null;
+        }
 
+        public static List<Model.Inventory> ListSTKOut(string begin, string end)
+        {
+            StdBELista objList;
+
+            Model.Inventory art = null;
+            List<Model.Inventory> listArts = new List<Model.Inventory>();
+
+            if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
+            {
+
+                objList = PriEngine.Engine.Comercial.Artigos.LstArtigos();
+
+                string query = String.Format(
+                    @"SELECT 
+                     Artigo.Artigo, Artigo.Descricao, 
+                     SUM(LinhasSTK.Quantidade) as Quantidade,
+                     SUM(
+                     Case LinhasSTK.TipoDoc When 'VNC' then (1)else 1 end *
+                     round(isnull(LinhasSTK.Quantidade * LinhasSTK.FactorConv ,'0'),Arred)* round(PCM + DifPCMedio, Arred) ) as Total
+                     FROM   
+                     (((((LinhasSTK LinhasSTK INNER JOIN Artigo Artigo ON LinhasSTK.Artigo=Artigo.Artigo) 
+	                    LEFT OUTER JOIN CabecSTK CabecSTK ON LinhasSTK.IdCabecOrig=CabecSTK.Id) 
+		                    LEFT OUTER JOIN CabecDoc CabecDoc ON LinhasSTK.IdCabecOrig=CabecDoc.Id) 
+			                    LEFT OUTER JOIN CabecCompras CabecCompras ON LinhasSTK.IdCabecOrig=CabecCompras.Id) 
+				                    LEFT OUTER JOIN CabecInternos CabecInternos ON LinhasSTK.IdCabecOrig=CabecInternos.Id) 
+					                    LEFT OUTER JOIN Familias Familias ON Artigo.Familia=Familias.Familia 
+                    WHERE  
+	                    (LinhasSTK.Data between '{0}' AND '{1}')
+	                    AND
+	                    NOT LinhasSTK.TipoDoc in ('GR')
+	                    AND 
+	                    (LinhasSTK.EntradaSaida=N'S' OR LinhasSTK.EntradaSaida=N'S') 
+                    GROUP BY Artigo.Artigo, Artigo.Descricao
+                    ",
+                    begin, end);
+
+
+                objList = PriEngine.Engine.Consulta(query);
+
+                while (!objList.NoFim())
+                {
+                    art = new Model.Inventory();
+                    art.CodArtigo = objList.Valor("Artigo");
+                    art.Stock = objList.Valor("Quantidade");
+                    art.Description = objList.Valor("Descricao");
+                    art.Value = objList.Valor("Total");
                     listArts.Add(art);
                     objList.Seguinte();
                 }
@@ -557,7 +639,6 @@ namespace FirstREST.Lib_Primavera
                     art = new Model.Inventory();
                     art.CodArtigo = objList.Valor("Artigo");
                     art.Stock = objList.Valor("Quantidade");
-                    art.InOut = objList.Valor("EntradaSaida");
                     art.Value = objList.Valor("Valor");
                     listArts.Add(art);
                     objList.Seguinte();
