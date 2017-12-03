@@ -161,9 +161,14 @@ namespace FirstREST.Mongo
                                          .Unwind(x => x["line"])
                                          .Group(new BsonDocument { { "_id", "$CustomerID" }, { "products", new BsonDocument("$addToSet", "$line.ProductCode") } })
                                          .Match(new BsonDocument { { "_id", customerId } });
-            var ids = aggregate.ToList()[0].ToBsonDocument()["products"].AsBsonArray;
+            var list = aggregate.ToList();
+
+            if (list.Count > 0) { 
+                var ids = aggregate.ToList()[0].ToBsonDocument()["products"].AsBsonArray;
+                return GetCollectionsByIds("Products", "ProductCode", ids);
+            }
             
-            return GetCollectionsByIds("Products", "ProductCode", ids);
+           return "";
         }
 
         public static string GetProductCustomers(string productId)

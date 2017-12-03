@@ -40,6 +40,9 @@ namespace FirstREST.Controllers
 
         // api/saft/ProductCustomers?vid=C0001
         // api/saft/CustomersBoughtProducts?vid=PT505678900_C
+        // api/saft/Accounts/?vid=11
+        // api/saft/Customers/?vid=ES989922456_C
+        // api/saft/Products/?vid=A0001
         public HttpResponseMessage Get(string id, string vid)
         {
 
@@ -55,6 +58,15 @@ namespace FirstREST.Controllers
                 case "CustomersBoughtProducts":
                     body = MongoConnection.GetCustomerBoughtProducts(vid);
                     break;
+                case "Accounts":
+                    body = MongoConnection.GetCollectionById(id, "AccountID", vid);
+                    break;  
+                case "Customers":
+                    body = MongoConnection.GetCollectionById(id, "CustomerID", vid);
+                    break;  
+                case "Products":
+                    body = MongoConnection.GetCollectionById(id, "ProductCode", vid);
+                    break;   
 
             }
 
@@ -67,9 +79,6 @@ namespace FirstREST.Controllers
         // api/saft/TotalNetSales?arg1=2016-01-01&arg2=2017-01-01
         // api/saft/SalesInvoices?arg1=2016-01-01&arg2=2017-01-01
         // api/saft/StockMovements?arg1=2016-01-01&arg2=2017-01-01 
-        // api/saft/Accounts?arg1=AccountID&arg2=11
-        // api/saft/Customers?arg1=CustomerID&arg2=ES989922456_C
-        // api/saft/Products?arg1=ProductCode&arg2=A0001
         public HttpResponseMessage Get(string id, string arg1, string arg2)
         {
            
@@ -86,12 +95,7 @@ namespace FirstREST.Controllers
                     break;
                 case "StockMovements":
                     body = MongoConnection.GetCollectionByDate("StockMovements", "MovementDate", arg1, arg2);
-                    break;   
-                case "Accounts":
-                case "Customers":
-                case "Products":
-                    body = MongoConnection.GetCollectionById(id, arg1, arg2);
-                    break;                
+                    break;                      
 
             }
                   

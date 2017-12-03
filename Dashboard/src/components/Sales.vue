@@ -6,21 +6,49 @@
       scrollable
       max-width="1000"
     >
-      <invoice v-if="dialogItem!==null"
-        :ShipFromAddressDetail="dialogItem.ShipFrom.Address.AddressDetail"
-        :ShipFromCity="dialogItem.ShipFrom.Address.City"
-        :ShipFromPostalCode="dialogItem.ShipFrom.Address.PostalCode"
-        :ShipToAddressDetail="dialogItem.ShipTo.Address.AddressDetail"
-        :ShipToCity="dialogItem.ShipTo.Address.City"
-        :ShipToPostalCode="dialogItem.ShipTo.Address.PostalCode"
-        :InvoiceDate="dialogItem.InvoiceDate"
-        :InvoiceNo="dialogItem.InvoiceNo"
-        :CustomerID="dialogItem.CustomerID"
-        :Lines="dialogItem.Line"
-        :NetTotal="dialogItem.DocumentTotals.NetTotal"
-        :GrossTotal="dialogItem.DocumentTotals.GrossTotal"
+      <invoice v-if="invoiceItem!==null"
+        :ShipFromAddressDetail="invoiceItem.ShipFrom.Address.AddressDetail"
+        :ShipFromCity="invoiceItem.ShipFrom.Address.City"
+        :ShipFromPostalCode="invoiceItem.ShipFrom.Address.PostalCode"
+        :ShipToAddressDetail="invoiceItem.ShipTo.Address.AddressDetail"
+        :ShipToCity="invoiceItem.ShipTo.Address.City"
+        :ShipToPostalCode="invoiceItem.ShipTo.Address.PostalCode"
+        :InvoiceDate="invoiceItem.InvoiceDate"
+        :InvoiceNo="invoiceItem.InvoiceNo"
+        :CustomerID="invoiceItem.CustomerID"
+        :Lines="invoiceItem.Line"
+        :NetTotal="invoiceItem.DocumentTotals.NetTotal"
+        :GrossTotal="invoiceItem.DocumentTotals.GrossTotal"
       >
       </invoice>
+    </v-dialog>
+
+  
+    <v-dialog
+      v-model="showProductDetailsDialog"
+      scrollable
+      max-width="1000"
+    >
+      <sales-product-details v-if="productitem!==null"
+        :Item="productitem"
+        :Begin="dateBegin"
+        :End="dateEnd"
+      >
+      </sales-product-details>
+    </v-dialog>
+
+
+    <v-dialog
+      v-model="showCustomerDetailsDialog"
+      scrollable
+      max-width="1000"
+    >
+      <sales-customer-details v-if="customerItem!==null"
+        :Item="customerItem"
+        :Begin="dateBegin"
+        :End="dateEnd"
+      >
+      </sales-customer-details>
     </v-dialog>
 
 
@@ -35,7 +63,7 @@
                   :close-on-content-click="false"
                   transition="scale-transition"
                   full-width
-                  v-model="menu"
+                  v-model="menuDateBegin"
                   offset-y
                   :nudge-right="40"
                   max-width="290px"
@@ -67,6 +95,7 @@
                   :clonse-on-content-click="false"
                   transition="scale-transition"
                   full-width
+                  v-model="menuDateEnd"
                   :nudge-right="40"
                   max-width="290px"
                   max-height="600px"
@@ -105,7 +134,7 @@
           <v-card-text >
             <div class="limitHeight chartHolder" v-if="salesChartData.datasets.length == 0"> 
               <v-layout justify-center>
-              <v-flex class="loading a blue ">L</v-flex> 
+              <v-flex class="loading a blue">L</v-flex> 
               <v-flex class="loading b blue">o</v-flex> 
               <v-flex class="loading c blue">a</v-flex> 
               <v-flex class="loading d blue">d</v-flex> 
@@ -115,9 +144,10 @@
             
               </v-layout>
               </div>
-            <line-chart class="chartHolder"
-             v-if="salesChartData.datasets.length !== 0"
-             :chartData="salesChartData" :options="chartOptions"> </line-chart>
+            <div v-if="salesChartData.datasets.length !== 0"> 
+              <line-chart class="chartHolder"
+              :chartData="salesChartData" :options="chartOptions"> </line-chart>
+            </div>
           </v-card-text>
         </v-card>
       </v-flex>
@@ -144,15 +174,16 @@
               :items="productsDataSet"
               :search="search_1"
               class="elevation-1"
+              item-key="ProductCode"
               :loading="productsDataSet.length == 0"
               >
 
               <template slot="items" scope="props">
-                
-                <td> {{props.item.ProductGroup }} </td>
-                <td> {{props.item.ProductDescription }} </td>
-                <td> {{props.item.ProductNumberCode }} </td>
-               
+                <tr class="cursor-pointer" @click="() => { showProductDetailsDialog=true, productitem=props.item }">
+                  <td> {{props.item.ProductGroup }} </td>
+                  <td> {{props.item.ProductDescription }} </td>
+                  <td> {{props.item.ProductNumberCode }} </td>
+                </tr>
               </template>
 
             </v-data-table>
@@ -181,14 +212,15 @@
               v-bind:headers="customersHeader"
               :items="customersDataSet"
               class="elevation-1"
+              item-key="CustomerID"
               :loading="customersDataSet.length == 0"
               >
 
               <template slot="items" scope="props">
-                
-                <td> {{props.item.CustomerID }} </td>
-                <td> {{props.item.CompanyName }} </td>
-
+                 <tr class="cursor-pointer" @click="() => { showCustomerDetailsDialog=true, customerItem=props.item }">
+                  <td> {{props.item.CustomerID }} </td>
+                  <td> {{props.item.CompanyName }} </td>
+                </tr>
               </template>
 
             </v-data-table>
@@ -262,7 +294,7 @@
               :loading="invoicesDataSet.length == 0"
               >
               <template slot="items" scope="props">
-                <tr class="cursor-pointer" @click="() => { showInvoiceDialog=true, dialogItem=props.item }">
+                <tr class="cursor-pointer" @click="() => { showInvoiceDialog=true, invoiceItem=props.item }">
                   <td> {{props.item.InvoiceNo }} </td>
                   <td> {{props.item.InvoiceDate }} </td>
                   <td> {{props.item.InvoiceType }} </td>
@@ -281,6 +313,8 @@
 
 <script>
 import Invoice from '@/components/dialogs/Invoice'
+import SalesCustomerDetails from '@/components/dialogs/SalesCustomerDetails'
+import SalesProductDetails from '@/components/dialogs/SalesProductDetails'
 import LineChart from '@/components/charts/LineChart'
 import SalesService from '@/services/Sales'
 import ChartOptions from '@/components/charts/config'
@@ -292,7 +326,8 @@ export default {
       search_2: '',
       search_3: '',
       search_4: '',
-      menu: false,
+      menuDateBegin: false,
+      menuDateEnd: false,
       productDetail: false,
       invoiceHeader: [
         {text: 'Invoice Number', value: 'InvoiceNo', align: 'left'},
@@ -322,14 +357,19 @@ export default {
       productsDataSet: [],
       backlogDataSet: [],
       showInvoiceDialog: false,
-      dialogItem: null,
+      showCustomerDetailsDialog: false,
+      showProductDetailsDialog: false,
+      invoiceItem: null,
+      productitem: null,
+      customerItem: null,
       dateBegin: null,
       dateEnd: null
     }
   },
   mounted: async function () {
     let currentYear = new Date().getFullYear()
-    this.dateEnd = `${currentYear}-01-01`
+    // this.dateEnd = `${currentYear}-01-01`
+    this.dateEnd = `2016-04-01`
     currentYear -= 1
     this.dateBegin = `${currentYear}-01-01`
 
@@ -393,7 +433,9 @@ export default {
   },
   components: {
     LineChart,
-    Invoice
+    Invoice,
+    SalesCustomerDetails,
+    SalesProductDetails
   }
 }
 </script>

@@ -96,7 +96,6 @@
 export default {
   data () {
     return {
-      dialogStatus: false,
       invoiceLineHeader: [
         {text: 'Description', value: 'ProductDescription', align: 'left'},
         {text: 'Quantity', value: 'Quantity'},
@@ -126,24 +125,8 @@ export default {
     'NetTotal',
     'GrossTotal',
     'showDialog'
-  ],
-  watch: {
-    dialogStatus (val) {
-      if (this.showDialog !== val) {
-        this.showDialog = val
-      }
-    },
-    showDialog (val) {
-      if (this.dialogStatus !== val) {
-        this.dialogStatus = val
-      }
-    }
-  }
+  ]
 }
 </script>
 
-<style scoped>
-
-
-</style>
 
