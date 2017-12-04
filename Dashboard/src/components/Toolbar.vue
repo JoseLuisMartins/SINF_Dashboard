@@ -8,15 +8,6 @@
     <v-icon class="pointer" @click="loadPage" dark large> track_changes </v-icon>
     <v-toolbar-title class="pointer" @click="loadPage"> {{title}}</v-toolbar-title>
     <v-spacer></v-spacer>
-    <v-btn icon>
-      <v-icon>search</v-icon>
-    </v-btn>
-    <v-btn icon>
-      <v-icon>favorite</v-icon>
-    </v-btn>
-    <v-btn icon>
-      <v-icon>more_vert</v-icon>
-    </v-btn>
   </v-toolbar>  
 </template>
 
