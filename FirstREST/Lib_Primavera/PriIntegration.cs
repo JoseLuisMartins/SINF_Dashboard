@@ -506,7 +506,130 @@ namespace FirstREST.Lib_Primavera
                 return null;
         }
 
-        public static List<Model.Inventory> ListSTKIn(string begin, string end)
+        private static List<Lib_Primavera.Model.MovementSummary> ListSTKMovementIn(string begin, string end){
+            StdBELista objList;
+
+            Model.MovementSummary sum = null;
+            List<Model.MovementSummary> listSums = new List<Model.MovementSummary>();
+
+            if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
+            {
+
+                objList = PriEngine.Engine.Comercial.Artigos.LstArtigos();
+
+                string query = String.Format(
+                    @"SELECT 
+	                CONVERT(NVARCHAR(7), LinhasSTK.Data, 120) Month, 
+	                SUM(LinhasSTK.Quantidade) as Quantidade,
+	                SUM(
+	                Case LinhasSTK.TipoDoc When 'VNC' then (1)else 1 end *
+	                round(isnull(LinhasSTK.Quantidade * LinhasSTK.FactorConv ,'0'),Arred)* round(PCM + DifPCMedio, Arred) ) as Total
+	                FROM   
+	                (((((LinhasSTK LinhasSTK INNER JOIN Artigo Artigo ON LinhasSTK.Artigo=Artigo.Artigo) 
+	                LEFT OUTER JOIN CabecSTK CabecSTK ON LinhasSTK.IdCabecOrig=CabecSTK.Id) 
+		                LEFT OUTER JOIN CabecDoc CabecDoc ON LinhasSTK.IdCabecOrig=CabecDoc.Id) 
+			                LEFT OUTER JOIN CabecCompras CabecCompras ON LinhasSTK.IdCabecOrig=CabecCompras.Id) 
+				                LEFT OUTER JOIN CabecInternos CabecInternos ON LinhasSTK.IdCabecOrig=CabecInternos.Id) 
+					                LEFT OUTER JOIN Familias Familias ON Artigo.Familia=Familias.Familia 
+	                WHERE  
+	                (LinhasSTK.Data between '{0}' AND '{1}')
+	                AND 
+	                LinhasSTK.TipoDoc in ('VFA','VFP', 'AIP', 'VD')
+	                AND
+	                (LinhasSTK.EntradaSaida=N'E' OR LinhasSTK.EntradaSaida=N'I') 
+                    GROUP BY CONVERT(NVARCHAR(7), LinhasSTK.Data, 120)",
+                    begin, end);
+
+                objList = PriEngine.Engine.Consulta(query);
+
+                while (!objList.NoFim())
+                {
+                    sum = new Model.MovementSummary();
+
+                    string[] contents = ((string)objList.Valor("Month")).Split('-');
+
+                    sum.month = contents[1];
+                    sum.year = contents[0];
+                    sum.value = objList.Valor("Total");
+                    sum.quantity = objList.Valor("Quantidade");
+
+                    listSums.Add(sum);
+                    objList.Seguinte();
+                }
+                return listSums;
+            }
+            else
+                return null;
+
+        }
+
+        private static List<Lib_Primavera.Model.MovementSummary> ListSTKMovementOut(string begin, string end)
+        {
+            StdBELista objList;
+
+            Model.MovementSummary sum = null;
+            List<Model.MovementSummary> listSums = new List<Model.MovementSummary>();
+
+            if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
+            {
+
+                objList = PriEngine.Engine.Comercial.Artigos.LstArtigos();
+
+                string query = String.Format(
+                    @"SELECT 
+	                CONVERT(NVARCHAR(7), LinhasSTK.Data, 120) Month, 
+	                SUM(LinhasSTK.Quantidade) as Quantidade,
+	                SUM(
+	                Case LinhasSTK.TipoDoc When 'VNC' then (1)else 1 end *
+	                round(isnull(LinhasSTK.Quantidade * LinhasSTK.FactorConv ,'0'),Arred)* round(PCM + DifPCMedio, Arred) ) as Total
+	                FROM   
+	                (((((LinhasSTK LinhasSTK INNER JOIN Artigo Artigo ON LinhasSTK.Artigo=Artigo.Artigo) 
+	                LEFT OUTER JOIN CabecSTK CabecSTK ON LinhasSTK.IdCabecOrig=CabecSTK.Id) 
+		                LEFT OUTER JOIN CabecDoc CabecDoc ON LinhasSTK.IdCabecOrig=CabecDoc.Id) 
+			                LEFT OUTER JOIN CabecCompras CabecCompras ON LinhasSTK.IdCabecOrig=CabecCompras.Id) 
+				                LEFT OUTER JOIN CabecInternos CabecInternos ON LinhasSTK.IdCabecOrig=CabecInternos.Id) 
+					                LEFT OUTER JOIN Familias Familias ON Artigo.Familia=Familias.Familia 
+	                WHERE  
+	                (LinhasSTK.Data between '{0}' AND '{1}')
+	                AND 
+	                NOT LinhasSTK.TipoDoc in ('GR')
+	                AND
+	                (LinhasSTK.EntradaSaida=N'S' OR LinhasSTK.EntradaSaida=N'S') 
+                    GROUP BY CONVERT(NVARCHAR(7), LinhasSTK.Data, 120)",
+                    begin, end);
+
+                objList = PriEngine.Engine.Consulta(query);
+                
+                while (!objList.NoFim())
+                {
+                    sum = new Model.MovementSummary();
+
+                    string[] contents = ((string)objList.Valor("Month")).Split('-');
+                    sum.month = contents[1];
+                    sum.year = contents[0];
+                    sum.value = objList.Valor("Total");
+                    sum.quantity = objList.Valor("Quantidade");
+
+                    listSums.Add(sum);
+                    objList.Seguinte();
+                }
+                return listSums;
+            }
+            else
+                return null;
+
+        }
+
+        public static Lib_Primavera.Model.MovementLists ListSTKMovementSum (string begin, string end) {
+            Lib_Primavera.Model.MovementLists lists = new Lib_Primavera.Model.MovementLists();
+
+            lists.movementsIn = ListSTKMovementIn(begin, end);
+            lists.movementsOut = ListSTKMovementOut(begin, end);
+
+            return lists;
+        }
+
+        public static List<Model.Inventory> ListSTKIn (string begin, string end)
         {
             StdBELista objList;
 

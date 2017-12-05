@@ -246,6 +246,8 @@
     </Compile>
     <Compile Include="Lib_Primavera\Model\Inventory.cs" />
     <Compile Include="Lib_Primavera\Model\Invoice.cs" />
+    <Compile Include="Lib_Primavera\Model\MovementLists.cs" />
+    <Compile Include="Lib_Primavera\Model\MovementSummary.cs" />
     <Compile Include="Lib_Primavera\Model\Saft.cs" />
     <Compile Include="Lib_Primavera\Model\SaftAccount.cs" />
     <Compile Include="Lib_Primavera\Model\SaftInvoice.cs" />

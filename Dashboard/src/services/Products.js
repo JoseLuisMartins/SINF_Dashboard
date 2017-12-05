@@ -16,6 +16,9 @@ export default{
   },
   getProductsBySupplier (id) {
     return Api().get(`api/Artigos/?fornecedor=${id}`)
+  },
+  getMovementsGraph (begin, end) {
+    return Api().get(`api/Inventory/?begin=${begin}&end=${end}`)
   }
 
 }

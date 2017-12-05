@@ -45,6 +45,13 @@ namespace FirstREST.Controllers
             }
         }
 
+        public Lib_Primavera.Model.MovementLists Get(string begin, string end)
+        {
+            return Lib_Primavera.PriIntegration.ListSTKMovementSum(begin, end);
+
+        }
+
+
         public IEnumerable<Lib_Primavera.Model.ArtStock> Get(string date, int k)
         {
             return Lib_Primavera.PriIntegration.ListInventoryByDate(date);

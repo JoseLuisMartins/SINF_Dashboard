@@ -164,7 +164,7 @@
             <div class="headline"> Inventory Value </div>
           </v-card-title>
           <v-card-text >
-            <div class="limitHeight chartHolder" v-if="1 != 0"> 
+            <div class="limitHeight chartHolder" v-if="movementsGraph == null"> 
               <v-layout justify-center>
                 <v-flex class="loading a blue ">L</v-flex> 
                 <v-flex class="loading b blue">o</v-flex> 
@@ -176,8 +176,8 @@
               </v-layout>
             </div>
             <line-chart class="chartHolder"
-             v-if="1 == 1"
-             :chartData="inventoryChartData" :options="chartOptions"> 
+             v-if="movementsGraph != null"
+             :chartData="movementsGraph" :options="chartOptions"> 
             </line-chart>
           </v-card-text>
         </v-card>
@@ -218,7 +218,10 @@ export default {
       },
       productsIn: [],
       productsOut: [],
-      chartOptions: ChartOptions.options,
+      chartOptions: ChartOptions.options2,
+
+      movementsGraph: null,
+
       dateBegin: null,
       menu: false,
       dateEnd: null,
@@ -261,14 +264,66 @@ export default {
       } catch (error) {
         this.error = error
       }
+    },
+    sortData (movements) {
+      let contents = []
+
+      for (var movement of movements) {
+        contents.push({
+          x: new Date(movement.year, movement.month),
+          y: movement.value
+        })
+      }
+      contents.sort((x, y) => (x.x > y.x) ? 1 : -1)
+      return contents
+    },
+    async getGraphData () {
+      try {
+        let tempData = await Products.getMovementsGraph(this.dateBegin, this.dateEnd)
+        tempData = tempData.data
+
+        this.movementsGraph = {
+          datasets: [
+            {
+              pointRadius: 3,
+              pointHoverRadius: 6,
+              pointBackgroundColor: '#FF5522',
+              backgroundColor: '#FF5522',
+              borderColor: '#FF5522',
+              borderWidth: 3,
+              showLine: true,
+              label: 'Movements In',
+              snapGaps: false,
+              data: this.sortData(tempData.movementsIn)
+            },
+            {
+              pointRadius: 3,
+              pointHoverRadius: 6,
+              pointBackgroundColor: '#2255FF',
+              backgroundColor: '#2255FF',
+              borderColor: '#2255FF',
+              borderWidth: 3,
+              showLine: true,
+              label: 'Movements Out',
+              snapGaps: false,
+              data: this.sortData(tempData.movementsOut)
+            }
+          ]
+        }
+      } catch (error) {
+        console.log(error)
+        this.error = error
+      }
     }
   },
   watch: {
     dateBegin: function (val) {
       this.getSTKMovements()
+      this.getGraphData()
     },
     dateEnd: function (val) {
       this.getSTKMovements()
+      this.getGraphData()
     }
   },
   mounted: function () {
