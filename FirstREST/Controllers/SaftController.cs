@@ -18,8 +18,8 @@ namespace FirstREST.Controllers
         // GET: /Saft/
         public HttpResponseMessage Get()
         {
-            
-            string res = MongoConnection.GetCollection("Header");
+
+            string res = MongoConnection.GetBalanceSheet();
             var response = this.Request.CreateResponse(HttpStatusCode.OK);
             response.Content = new StringContent(res, Encoding.UTF8, "application/json");
 
@@ -66,6 +66,9 @@ namespace FirstREST.Controllers
                     break;  
                 case "Products":
                     body = MongoConnection.GetCollectionById(id, "ProductCode", vid);
+                    break;
+                case "BalanceSheet":
+                    body = MongoConnection.GetBalanceSheet();
                     break;   
 
             }
