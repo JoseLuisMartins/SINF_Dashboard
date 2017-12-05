@@ -491,9 +491,12 @@ namespace FirstREST.Lib_Primavera
                         continue;
                     }
                     art.ActualSTK = objList.Valor("Quantidade");
-                    
+
                     if (art.ActualSTK == 0.0)
+                    {
+                        objList.Seguinte();
                         continue;
+                    }
                     art.PCM = objList.Valor("PCMedio");
                     art.TotalValue = art.PCM * art.ActualSTK;
 

@@ -99,10 +99,11 @@
               :loading="inventory.length == 0"
             >
               <template slot="items" scope="props">
-                <td class="text-xs-right">{{ props.item.Artigo }}</td>
-                <td class="text-xs-right">{{ props.item.Descricao }}</td> 
-                <td class="text-xs-right">{{ props.item.Quantidade }}</td>
-                <td class="text-xs-right">{{ (props.item.PCmedio.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + "€" }}</td>
+                <td class="text-xs-right">{{ props.item.ProductID }}</td>
+                <td class="text-xs-right">{{ props.item.ProductDesc }}</td> 
+                <td class="text-xs-right">{{ props.item.ActualSTK }}</td>
+                <td class="text-xs-right">{{ (props.item.PCM.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + "€" }}</td>
+                <td class="text-xs-right">{{ (props.item.TotalValue.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + "€" }}</td>
               </template>
 
             </v-data-table>
@@ -250,10 +251,11 @@ export default {
         { text: 'Value', value: 'Value', allign: 'left' }
       ],
       stockHeader: [
-        { text: 'Artigo', value: 'Artigo', allign: 'left' },
-        { text: 'Descrição', value: 'Descricao', allign: 'left' },
-        { text: 'Quantidade', value: 'Quantidade', allign: 'left' },
-        { text: 'Preço medio', value: 'PCmedio', allign: 'left' }
+        { text: 'Artigo', value: 'ProductID', allign: 'left' },
+        { text: 'Descrição', value: 'ProductDesc', allign: 'left' },
+        { text: 'Quantidade', value: 'ActualSTK', allign: 'left' },
+        { text: 'Preço medio', value: 'PCM', allign: 'left' },
+        { text: 'Total', value: 'TotalValue', allign: 'left' }
       ],
       inventoryChartData: {
         datasets: []
@@ -286,28 +288,39 @@ export default {
         this.pagination.descending = false
       }
     },
-    async getSTKMovements () {
+    async getSTKIn () {
       try {
         this.productsIn = await Products.getMovements(this.dateBegin, this.dateEnd, 'IN')
         this.productsIn = this.productsIn.data
-
-        this.productsOut = await Products.getMovements(this.dateBegin, this.dateEnd, 'OUT')
-        this.productsOut = this.productsOut.data
-
-        this.totalOut = this.totalIn = 0
+        this.totalIn = 0
 
         for (let product of this.productsIn) {
           this.totalIn += product.Value
         }
 
-        for (let product of this.productsOut) {
-          this.totalOut += product.Value
-        }
-        this.totalOut = this.totalOut.toFixed(2)
         this.totalIn = this.totalIn.toFixed(2)
       } catch (error) {
         this.error = error
       }
+    },
+    async getSTKOut () {
+      try {
+        this.productsOut = await Products.getMovements(this.dateBegin, this.dateEnd, 'OUT')
+        this.productsOut = this.productsOut.data
+        this.totalOut = 0
+
+        for (let product of this.productsOut) {
+          this.totalOut += product.Value
+        }
+
+        this.totalOut = this.totalOut.toFixed(2)
+      } catch (error) {
+        this.error = error
+      }
+    },
+    getSTKMovements () {
+      this.getSTKIn()
+      this.getSTKOut()
     },
     sortData (movements) {
       let contents = []
@@ -356,13 +369,12 @@ export default {
         }
       } catch (error) {
         this.error = error
-        console.log(error)
       }
     },
     async getInventory () {
       try {
-        this.inventory = await Products.getInventory(this.dateEnd)
-        this.inventory = this.invetory.data
+        let response = await Products.getInventory(this.dateEnd)
+        this.inventory = response.data
       } catch (error) {
         this.error = error
       }
@@ -376,6 +388,7 @@ export default {
     dateEnd: function (val) {
       this.getSTKMovements()
       this.getGraphData()
+      this.getInventory()
     }
   },
   mounted: function () {
