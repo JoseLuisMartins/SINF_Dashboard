@@ -19,6 +19,9 @@ export default{
   },
   getMovementsGraph (begin, end) {
     return Api().get(`api/Inventory/?begin=${begin}&end=${end}`)
+  },
+  getTotalValueInventory (date) {
+    return Api().get(`api/Inventory/?date=${date}&k=1`)
   }
 
 }

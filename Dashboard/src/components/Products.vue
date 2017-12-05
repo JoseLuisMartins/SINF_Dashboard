@@ -76,39 +76,46 @@
       </v-flex>
     </v-layout>
 
-    <v-layout row wrap>
+    <v-layout row wrap class="elevation-1 white mb-1">
       <v-flex d-flex xs12 sm12 md12>
-        <v-card>
-          <v-card-title class="pb-0">
-            <div class="headline"> Inventory </div>
-            <v-spacer></v-spacer>
-            <v-text-field
-              append-icon="search"
-              label="Search"
-              single-line
-              hide-details
-              v-model="search_3"
-            ></v-text-field>
-          </v-card-title>
-          <v-card-text>
-            <v-data-table 
-              :search="search_3"
-              v-bind:headers="stockHeader"
-              :items="inventory"
-              class="elevation-1"
-              :loading="inventory.length == 0"
-            >
-              <template slot="items" scope="props">
-                <td class="text-xs-right">{{ props.item.ProductID }}</td>
-                <td class="text-xs-right">{{ props.item.ProductDesc }}</td> 
-                <td class="text-xs-right">{{ props.item.ActualSTK }}</td>
-                <td class="text-xs-right">{{ (props.item.PCM.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + "€" }}</td>
-                <td class="text-xs-right">{{ (props.item.TotalValue.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + "€" }}</td>
-              </template>
+        <v-expansion-panel popout>
+          <v-expansion-panel-content>
+            <div slot="header" class="headline">
+            Total = {{(this.totalInventoryValue + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ")+ "€"}}
+            </div>
+            <v-card>
+              <v-card-title class="pb-0">
+                <div class="headline"> Inventory </div>
+                <v-spacer></v-spacer>
+                <v-text-field
+                  append-icon="search"
+                  label="Search"
+                  single-line
+                  hide-details
+                  v-model="search_3"
+                ></v-text-field>
+              </v-card-title>
+              <v-card-text>
+                <v-data-table 
+                  :search="search_3"
+                  v-bind:headers="stockHeader"
+                  :items="inventory"
+                  class="elevation-1"
+                  :loading="inventory.length == 0"
+                >
+                  <template slot="items" scope="props">
+                    <td class="text-xs-right">{{ props.item.ProductID }}</td>
+                    <td class="text-xs-right">{{ props.item.ProductDesc }}</td> 
+                    <td class="text-xs-right">{{ props.item.ActualSTK }}</td>
+                    <td class="text-xs-right">{{ (props.item.PCM.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + "€" }}</td>
+                    <td class="text-xs-right">{{ (props.item.TotalValue.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + "€" }}</td>
+                  </template>
 
-            </v-data-table>
-          </v-card-text>
-        </v-card>
+                </v-data-table>
+              </v-card-text>
+            </v-card>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
       </v-flex>
     </v-layout>
    
@@ -267,7 +274,7 @@ export default {
       movementsGraph: null,
 
       inventory: [],
-
+      totalInventoryValue: 0,
       dateBegin: null,
       menu: false,
       dateEnd: null,
@@ -375,6 +382,14 @@ export default {
       try {
         let response = await Products.getInventory(this.dateEnd)
         this.inventory = response.data
+
+        this.totalInventoryValue = 0
+
+        for (let article of this.inventory) {
+          this.totalInventoryValue += article.TotalValue
+        }
+
+        this.totalInventoryValue = this.totalInventoryValue.toFixed(2)
       } catch (error) {
         this.error = error
       }

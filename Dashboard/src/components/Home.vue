@@ -96,6 +96,7 @@ import Topic from '@/components/home/Topic'
 import LineChart from '@/components/charts/LineChart'
 import PurchasesService from '@/services/Purchases'
 import SalesService from '@/services/Sales'
+import ProductService from '@/services/Products'
 
 export default {
   name: 'HelloWorld',
@@ -168,7 +169,7 @@ export default {
       topics: [
          {color: 'teal darken-1', color2: 'teal lighten-3', icon: 'euro_symbol', title: 'Sales', value: '', description: 'Total Sales', dest: 'sales'},
          {color: 'deep-orange darken-1', color2: 'deep-orange lighten-3', icon: 'shopping_cart', title: 'Purchases', value: '', description: 'Total Purchases', dest: 'purchases'},
-         {color: 'light-blue darken-1', color2: 'light-blue lighten-3', icon: 'view_quilt', title: 'Inventory', value: '130€', description: 'Value in Inventory', dest: 'inventory'},
+         {color: 'light-blue darken-1', color2: 'light-blue lighten-3', icon: 'view_quilt', title: 'Inventory', value: '', description: 'Value in Inventory', dest: 'inventory'},
          {color: 'purple darken-1', color2: 'purple lighten-3', icon: 'account_balance_wallet', title: 'Accounting', value: '130€', description: 'Cashflow', dest: 'accounting'}
       ]
     }
@@ -196,6 +197,9 @@ export default {
 
       let totalSalesValue = await SalesService.getTotalNetSales(this.dateBegin, this.dateEnd)
       this.topics[0].value = `${parseFloat(totalSalesValue.data[0].total).toFixed(0)}€`
+
+      let totalInventoryValue = await ProductService.getTotalValueInventory(this.dateEnd)
+      this.topics[2].value = `${parseFloat(totalInventoryValue.data.TotalValue).toFixed(0)}€`
     }
   }
 }
