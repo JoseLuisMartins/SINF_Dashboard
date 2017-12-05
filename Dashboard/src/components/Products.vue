@@ -76,6 +76,41 @@
       </v-flex>
     </v-layout>
 
+    <v-layout row wrap>
+      <v-flex d-flex xs12 sm12 md12>
+        <v-card>
+          <v-card-title class="pb-0">
+            <div class="headline"> Inventory </div>
+            <v-spacer></v-spacer>
+            <v-text-field
+              append-icon="search"
+              label="Search"
+              single-line
+              hide-details
+              v-model="search_3"
+            ></v-text-field>
+          </v-card-title>
+          <v-card-text>
+            <v-data-table 
+              :search="search_3"
+              v-bind:headers="stockHeader"
+              :items="inventory"
+              class="elevation-1"
+              :loading="inventory.length == 0"
+            >
+              <template slot="items" scope="props">
+                <td class="text-xs-right">{{ props.item.Artigo }}</td>
+                <td class="text-xs-right">{{ props.item.Descricao }}</td> 
+                <td class="text-xs-right">{{ props.item.Quantidade }}</td>
+                <td class="text-xs-right">{{ (props.item.PCmedio.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + "€" }}</td>
+              </template>
+
+            </v-data-table>
+          </v-card-text>
+        </v-card>
+      </v-flex>
+    </v-layout>
+   
     <v-layout row wrap class="elevation-1 white mb-1">
       <v-flex d-flex xs12 sm12 md6>
         <v-expansion-panel popout>
@@ -200,6 +235,7 @@ export default {
     return {
       search_1: '',
       search_2: '',
+      search_3: '',
       totalIn: 0,
       totalOut: 0,
       inventoryValue: 200,
@@ -213,6 +249,12 @@ export default {
         { text: 'Stock', value: 'Stock', allign: 'left' },
         { text: 'Value', value: 'Value', allign: 'left' }
       ],
+      stockHeader: [
+        { text: 'Artigo', value: 'Artigo', allign: 'left' },
+        { text: 'Descrição', value: 'Descricao', allign: 'left' },
+        { text: 'Quantidade', value: 'Quantidade', allign: 'left' },
+        { text: 'Preço medio', value: 'PCmedio', allign: 'left' }
+      ],
       inventoryChartData: {
         datasets: []
       },
@@ -221,6 +263,8 @@ export default {
       chartOptions: ChartOptions.options2,
 
       movementsGraph: null,
+
+      inventory: [],
 
       dateBegin: null,
       menu: false,
@@ -311,7 +355,15 @@ export default {
           ]
         }
       } catch (error) {
+        this.error = error
         console.log(error)
+      }
+    },
+    async getInventory () {
+      try {
+        this.inventory = await Products.getInventory(this.dateEnd)
+        this.inventory = this.invetory.data
+      } catch (error) {
         this.error = error
       }
     }
