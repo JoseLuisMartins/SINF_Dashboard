@@ -52,9 +52,12 @@ namespace FirstREST.Controllers
         }
 
 
-        public IEnumerable<Lib_Primavera.Model.ArtStock> Get(string date, int k)
+        public dynamic Get(string date, int k)
         {
-            return Lib_Primavera.PriIntegration.ListInventoryByDate(date);
+            if (k == 1)
+                return Lib_Primavera.PriIntegration.TotalInventoryValueByDate(date);
+            else
+                return Lib_Primavera.PriIntegration.ListInventoryByDate(date);
 
         }
 

@@ -245,6 +245,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Lib_Primavera\Model\Inventory.cs" />
+    <Compile Include="Lib_Primavera\Model\InventoryValue.cs" />
     <Compile Include="Lib_Primavera\Model\Invoice.cs" />
     <Compile Include="Lib_Primavera\Model\MovementLists.cs" />
     <Compile Include="Lib_Primavera\Model\MovementSummary.cs" />

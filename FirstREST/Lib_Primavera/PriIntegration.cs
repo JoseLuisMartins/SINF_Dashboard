@@ -509,6 +509,41 @@ namespace FirstREST.Lib_Primavera
                 return null;
         }
 
+        public static Model.InventoryValue TotalInventoryValueByDate(string date)
+        {
+            StdBELista objList;
+
+            Model.InventoryValue art = null;
+
+            if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
+            {
+
+                PriEngine.Engine.Consulta("EXEC [dbo].[STD_DropTempTable] @NomeTabela = '##RecalculoStk'");
+                PriEngine.Engine.Consulta(String.Format("EXEC [dbo].[GCP_CST_RecalculoStocks] @Posto='00', @Data='{0}'", date));
+                string query = String.Format(@"
+                    SELECT SUM(Value) Total
+                    FROM(
+                    SELECT Distinct Artigo, Descricao, Quantidade, PCMedio, PCMedio*Quantidade as Value FROM 
+                    (SELECT DISTINCT 
+	                    Artigo.Artigo, Quantidade, tmpRecalculoStk.PCMedio, Artigo.Descricao 
+                    FROM   (Artigo Artigo LEFT OUTER JOIN tempdb.dbo.##RecalculoStk tmpRecalculoStk ON Artigo.Artigo=tmpRecalculoStk.Artigo) 
+                    LEFT OUTER JOIN Familias Familias ON Artigo.Familia=Familias.Familia 
+                    WHERE  Artigo.TratamentoDim<>1 ) a
+                    ) b
+                    ", date);
+
+                System.Diagnostics.Debug.WriteLine(query);
+                objList = PriEngine.Engine.Consulta(query);
+
+                art = new Model.InventoryValue();
+                art.TotalValue = objList.Valor("Total");
+
+                return art;
+            }
+            else
+                return null;
+        }
+
         private static List<Lib_Primavera.Model.MovementSummary> ListSTKMovementIn(string begin, string end){
             StdBELista objList;
 
