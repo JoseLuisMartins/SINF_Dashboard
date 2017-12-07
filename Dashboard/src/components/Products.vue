@@ -1,5 +1,5 @@
 <template>
-  <v-container mt-5 grid-list-xs>
+  <v-container mt-5 fluid grid-list-xs>
 
     <v-layout>
       <v-flex mb-4 d-flex sm6 offset-sm3 xs12>
@@ -76,9 +76,9 @@
       </v-flex>
     </v-layout>
 
-    <v-layout row wrap class="elevation-1 white mb-1">
-      <v-flex d-flex xs12 sm12 md12>
-        <v-expansion-panel popout>
+    <v-layout row wrap class="mb-4">
+      <v-flex d-flex xs12 sm12 offset-md3 md6 >
+        <v-expansion-panel >
           <v-expansion-panel-content>
             <div slot="header" class="headline">
             Total = {{(this.totalInventoryValue + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ")+ "€"}}
@@ -117,11 +117,30 @@
           </v-expansion-panel-content>
         </v-expansion-panel>
       </v-flex>
+
+      <v-flex d-flex xs12 sm12 offset-md3 md6 >
+
+        <v-card>
+          <v-card-title class="headline"> Total Inventory Chart </v-card-title>
+          <v-card-text>
+
+            <div class="limitHeight chartHolder" > 
+              <transition name="fade">
+                <loading color="teal" v-if="movementsGraph == null"> </loading>
+              </transition>
+              <transition name="fade">
+                <div class="red" v-if="movementsGraph == null"> Ola </div>
+              </transition>
+            </div>
+          </v-card-text>
+        </v-card>
+
+      </v-flex>
     </v-layout>
    
-    <v-layout row wrap class="elevation-1 white mb-1">
-      <v-flex d-flex xs12 sm12 md6>
-        <v-expansion-panel popout>
+    <v-layout row wrap class="mb-1">
+      <v-flex d-flex xs12 sm12 offset-lg2 lg4 md6 class="elevation-1">
+        <v-expansion-panel>
           <v-expansion-panel-content>
             <div slot="header" class="headline">
                 IN   Total = {{(this.totalIn + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ")+ "€"}}
@@ -159,8 +178,8 @@
         </v-expansion-panel>
       </v-flex>
 
-      <v-flex d-flex xs12 sm12 md6>
-        <v-expansion-panel popout >
+      <v-flex d-flex xs12 sm12 lg4 md6 class="elevation-1">
+        <v-expansion-panel >
           <v-expansion-panel-content>
             <div slot="header" class="headline">
                 Out   Total = {{ (this.totalOut + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + "€" }} 
@@ -201,28 +220,23 @@
     </v-layout>
 
     <v-layout row wrap>
-      <v-flex d-flex xs12 md12>
+      <v-flex d-flex xs12 offset-lg2 lg8>
         <v-card>
           <v-card-title>
             <div class="headline"> Inventory Value </div>
           </v-card-title>
-          <v-card-text >
-            <div class="limitHeight chartHolder" v-if="movementsGraph == null"> 
-              <v-layout justify-center>
-                <v-flex class="loading a blue ">L</v-flex> 
-                <v-flex class="loading b blue">o</v-flex> 
-                <v-flex class="loading c blue">a</v-flex> 
-                <v-flex class="loading d blue">d</v-flex> 
-                <v-flex class="loading e blue">i</v-flex> 
-                <v-flex class="loading f blue">n</v-flex> 
-                <v-flex class="loading g blue">g</v-flex> 
-              </v-layout>
-            </div>
-            <line-chart class="chartHolder"
-             v-if="movementsGraph != null"
-             :chartData="movementsGraph" :options="chartOptions"> 
-            </line-chart>
-          </v-card-text>
+          <div class="relative limitHeight chartHolder pa-0" style="min-height:400px">
+            <transition name="fade">
+              <loading class="transition" color="teal" v-if="movementsGraph == null"> 
+              </loading>
+            </transition>
+            <transition name="fade">
+              <line-chart class="transition chartHolder" style="min-height:400px"
+              v-if="movementsGraph != null"
+              :chartData="movementsGraph" :options="chartOptions"> 
+              </line-chart>
+            </transition>
+          </div>
         </v-card>
       </v-flex>
     </v-layout>
@@ -234,10 +248,14 @@
 import Products from '@/services/Products'
 import ChartOptions from '@/components/charts/config'
 import LineChart from '@/components/charts/LineChart'
+import PieChart from '@/components/charts/PieChart'
+import Loading from '@/components/loadings/Loading'
 
 export default {
   components: {
-    LineChart
+    LineChart,
+    PieChart,
+    Loading
   },
   data () {
     return {
@@ -272,6 +290,7 @@ export default {
       chartOptions: ChartOptions.options2,
 
       movementsGraph: null,
+      inventoryChart: null,
 
       inventory: [],
       totalInventoryValue: 0,
@@ -341,7 +360,7 @@ export default {
       contents.sort((x, y) => (x.x > y.x) ? 1 : -1)
       return contents
     },
-    async getGraphData () {
+    async getMovementGraphData () {
       try {
         let tempData = await Products.getMovementsGraph(this.dateBegin, this.dateEnd)
         tempData = tempData.data
@@ -398,11 +417,11 @@ export default {
   watch: {
     dateBegin: function (val) {
       this.getSTKMovements()
-      this.getGraphData()
+      this.getMovementGraphData()
     },
     dateEnd: function (val) {
       this.getSTKMovements()
-      this.getGraphData()
+      this.getMovementGraphData()
       this.getInventory()
     }
   },
@@ -417,5 +436,22 @@ export default {
 
 <style scoped>
 
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0
+}
+
+.relative {
+  position: relative;
+}
+
+.transition {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
 </style>
 

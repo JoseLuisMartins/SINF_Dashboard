@@ -509,6 +509,60 @@ namespace FirstREST.Lib_Primavera
                 return null;
         }
 
+        public static List<Model.Familia> TotalInventoryByFamilies(string date)
+        {
+            StdBELista objList;
+
+            Model.Familia art = null;
+
+            List<Model.Familia> fam = new List<Model.Familia>();
+
+            if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
+            {
+
+                PriEngine.Engine.Consulta("EXEC [dbo].[STD_DropTempTable] @NomeTabela = '##RecalculoStk'");
+                PriEngine.Engine.Consulta(String.Format("EXEC [dbo].[GCP_CST_RecalculoStocks] @Posto='00', @Data='{0}'", date));
+                string query = String.Format(@"
+                    SELECT Distinct SUM(PCMedio*Quantidade) as Total, FamiliaDesc
+                    FROM
+                    (SELECT DISTINCT 
+	                    Artigo.Artigo, Quantidade, tmpRecalculoStk.PCMedio, Artigo.Descricao, Familias.Descricao as FamiliaDesc
+                    FROM   (Artigo Artigo LEFT OUTER JOIN tempdb.dbo.##RecalculoStk tmpRecalculoStk ON Artigo.Artigo=tmpRecalculoStk.Artigo) 
+                    LEFT OUTER JOIN Familias Familias ON Artigo.Familia=Familias.Familia 
+                    WHERE  Artigo.TratamentoDim<>1) a
+                    GROUP BY a.FamiliaDesc
+                    ", date);
+
+                
+
+                System.Diagnostics.Debug.WriteLine(query);
+                objList = PriEngine.Engine.Consulta(query);
+
+                while (!objList.NoFim())
+                {
+
+                    art = new Model.Familia();
+                    art.description = objList.Valor("FamiliaDesc") == "" ? "Desconhecido" : objList.Valor("FamiliaDesc");
+
+                    if (objList.Valor("Total").GetType() == typeof(string))
+                    {
+                        objList.Seguinte();
+                        continue;
+                    }
+                    
+                    art.value = objList.Valor("Total");
+
+                    fam.Add(art);
+
+                    objList.Seguinte();
+                }
+                return fam;
+
+            }
+            else
+                return null;
+        }
+
         public static Model.InventoryValue TotalInventoryValueByDate(string date)
         {
             StdBELista objList;

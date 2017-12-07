@@ -54,10 +54,17 @@ namespace FirstREST.Controllers
 
         public dynamic Get(string date, int k)
         {
-            if (k == 1)
-                return Lib_Primavera.PriIntegration.TotalInventoryValueByDate(date);
-            else
-                return Lib_Primavera.PriIntegration.ListInventoryByDate(date);
+            switch (k)
+            {
+                case 1:
+                    return Lib_Primavera.PriIntegration.TotalInventoryValueByDate(date);
+                case 2:
+                    return Lib_Primavera.PriIntegration.ListInventoryByDate(date);
+                case 3:
+                    return Lib_Primavera.PriIntegration.TotalInventoryByFamilies(date);
+            }
+
+            return null;
 
         }
 
