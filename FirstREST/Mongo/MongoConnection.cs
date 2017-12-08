@@ -164,8 +164,8 @@ namespace FirstREST.Mongo
                                          .Match(new BsonDocument { { "_id", customerId } });
             var list = aggregate.ToList();
 
-            if (list.Count > 0) { 
-                var ids = aggregate.ToList()[0].ToBsonDocument()["products"].AsBsonArray;
+            if (list.Count > 0) {
+                var ids = list[0].ToBsonDocument()["products"].AsBsonArray;
                 return GetCollectionsByIds("Products", "ProductCode", ids);
             }
             
@@ -182,10 +182,16 @@ namespace FirstREST.Mongo
                                          .Unwind(x => x["line"])
                                          .Group(new BsonDocument { { "_id", "$line.ProductCode" }, { "customers", new BsonDocument("$addToSet", "$CustomerID") } })
                                          .Match(new BsonDocument { { "_id", productId } }); ;
-            
-            var ids = aggregate.ToList()[0].ToBsonDocument()["customers"].AsBsonArray;
+                                                       
+            var list = aggregate.ToList();
 
-            return GetCollectionsByIds("Customers", "CustomerID", ids);           
+            if (list.Count > 0) {
+                var ids = list[0].ToBsonDocument()["customers"].AsBsonArray;
+                return  GetCollectionsByIds("Customers", "CustomerID", ids);
+            }
+
+
+            return "";  
         }
 
         public static string GetCollectionsByIds(string collection, string field, BsonArray ids)
@@ -199,7 +205,7 @@ namespace FirstREST.Mongo
             return coll.FindSync(query).ToList().ToJson(settings);
         }
 
-        public static double GetAccountValue(string accountId, string field)
+        public static double GetAccountValue(int accountId)
         {
             var settings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
             JToken balaceSheet = new JObject();
@@ -211,9 +217,61 @@ namespace FirstREST.Mongo
             var query = coll.FindSync(filter).ToList();
 
             if (query.Count > 0)
-                return query[0].ToBsonDocument()[field].AsDouble;
+                return query[0].ToBsonDocument()["ClosingDebitBalance"].AsDouble - query[0].ToBsonDocument()["ClosingCreditBalance"].AsDouble;
             
             return 0;
+        }
+
+        public static string GetTop10Products(string begin, string end)
+        {
+            var settings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
+
+            var coll = db.GetCollection<BsonDocument>("Invoices");
+
+            var aggregate = coll.Aggregate()
+                                         .Match(new BsonDocument 
+                                                    {{ "InvoiceDate", new BsonDocument {
+                                                        {"$gte", begin},
+                                                        {"$lt", end}
+                                                    }}}
+                                            )
+                                         .Unwind(x => x["line"])
+                                         .Project(new BsonDocument { 
+                                                                    { "line.ProductCode", 1 }, 
+                                                                    { "line.ProductDescription", 1 }, 
+                                                                    { "total", 
+                                                                        new BsonDocument("$multiply", new BsonArray { "$line.Quantity", "$line.UnitPrice" }) }
+                                                                    })
+                                         .Group(new BsonDocument { 
+                                                            { "_id", "$line.ProductCode" }, 
+                                                            { "total_sold", new BsonDocument("$sum", "$total") }, 
+                                                            { "product_description", new BsonDocument("$first", "$line.ProductDescription") } 
+                                                            })
+                                         .Sort(new BsonDocument { { "total_sold", -1 } })
+                                         .Limit(10);
+
+
+            return aggregate.ToList().ToJson(settings);
+        }
+
+        public static string GetTop10Customers(string begin, string end)
+        {
+            var settings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
+
+            var coll = db.GetCollection<BsonDocument>("Invoices");
+
+            var aggregate = coll.Aggregate()
+                                         .Match(new BsonDocument 
+                                                    {{ "InvoiceDate", new BsonDocument {
+                                                        {"$gte", begin},
+                                                        {"$lt", end}
+                                                    }}}
+                                            )
+                                         .Group(new BsonDocument { { "_id", "$CustomerID" }, { "total_spent", new BsonDocument("$sum", "$DocumentTotals.NetTotal") } })
+                                         .Sort(new BsonDocument { { "total_spent", -1 } })
+                                         .Limit(10);
+
+            return aggregate.ToList().ToJson(settings);
         }
         
 
@@ -222,60 +280,60 @@ namespace FirstREST.Mongo
             JObject obj = new JObject();
 
             JObject ativos_nao_correntes = new JObject();
-            ativos_nao_correntes.Add("Ativos fixos tangíveis", GetAccountValue(43 + "", "ClosingDebitBalance") + GetAccountValue(453 + "", "ClosingDebitBalance"));
-            ativos_nao_correntes.Add("Propriedades de investimento", GetAccountValue(42 + "", "ClosingDebitBalance"));
-            ativos_nao_correntes.Add("Activos intangíveis", GetAccountValue(44 + "", "ClosingDebitBalance") - GetAccountValue(441 + "", "ClosingDebitBalance") + GetAccountValue(454 + "", "ClosingDebitBalance"));
-            ativos_nao_correntes.Add("Activos biológicos", GetAccountValue(37 + "", "ClosingDebitBalance"));
-            ativos_nao_correntes.Add("Participações financeiras - método eq. patrimonial", GetAccountValue(411 + "", "ClosingDebitBalance") + GetAccountValue(2 + "", "ClosingDebitBalance") + GetAccountValue(3 + "", "ClosingDebitBalance"));
-            ativos_nao_correntes.Add("Participações financeiras - outros métodos", GetAccountValue(414 + "", "ClosingDebitBalance") + GetAccountValue(9 + "", "ClosingDebitBalance"));
-            ativos_nao_correntes.Add("Accionistas / sócios", GetAccountValue(26 + "", "ClosingDebitBalance"));
-            ativos_nao_correntes.Add("Outros activos financeiros", GetAccountValue(1421 + "", "ClosingDebitBalance") + GetAccountValue(1431 + "", "ClosingDebitBalance") + GetAccountValue(415 + "", "ClosingDebitBalance") + GetAccountValue(416 + "", "ClosingDebitBalance") + GetAccountValue(417 + "", "ClosingDebitBalance") + GetAccountValue(418 + "", "ClosingDebitBalance") + GetAccountValue(419 + "", "ClosingDebitBalance"));
-            ativos_nao_correntes.Add("Activos por impostos diferidos", GetAccountValue(274 + "", "ClosingDebitBalance"));
+            ativos_nao_correntes.Add("Ativos fixos tangíveis", GetAccountValue(43) + GetAccountValue(453));
+            ativos_nao_correntes.Add("Propriedades de investimento", GetAccountValue(42));
+            ativos_nao_correntes.Add("Activos intangíveis", GetAccountValue(44) - GetAccountValue(441) + GetAccountValue(454));
+            ativos_nao_correntes.Add("Activos biológicos", GetAccountValue(37));
+            ativos_nao_correntes.Add("Participações financeiras - método eq. patrimonial", GetAccountValue(411) + GetAccountValue(2) + GetAccountValue(3));
+            ativos_nao_correntes.Add("Participações financeiras - outros métodos", GetAccountValue(414) + GetAccountValue(9));
+            ativos_nao_correntes.Add("Accionistas / sócios", GetAccountValue(26));
+            ativos_nao_correntes.Add("Outros activos financeiros", GetAccountValue(1421) + GetAccountValue(1431) + GetAccountValue(415) + GetAccountValue(416) + GetAccountValue(417) + GetAccountValue(418) + GetAccountValue(419));
+            ativos_nao_correntes.Add("Activos por impostos diferidos", GetAccountValue(274));
 
             JObject ativos_correntes = new JObject();
-            ativos_correntes.Add("Inventários", GetAccountValue(32 + "", "ClosingDebitBalance") + GetAccountValue(33 + "", "ClosingDebitBalance") + GetAccountValue(34 + "", "ClosingDebitBalance") + GetAccountValue(35 + "", "ClosingDebitBalance") + GetAccountValue(36 + "", "ClosingDebitBalance") + GetAccountValue(39 + "", "ClosingDebitBalance"));
-            ativos_correntes.Add("Activos Biológicos", GetAccountValue(37 + "", "ClosingDebitBalance"));
-            ativos_correntes.Add("Clientes", GetAccountValue(21 + "", "ClosingDebitBalance") - GetAccountValue(218 + "", "ClosingDebitBalance"));
-            ativos_correntes.Add("Adiantamentos a fornecedores", GetAccountValue(228 + "", "ClosingDebitBalance") + GetAccountValue(229 + "", "ClosingDebitBalance"));
-            ativos_correntes.Add("Estado e outros entres públicos", GetAccountValue(24 + "", "ClosingDebitBalance"));
-            ativos_correntes.Add("Accionistas / Sócios", GetAccountValue(26 + "", "ClosingDebitBalance") - GetAccountValue(261 + "", "ClosingDebitBalance") - GetAccountValue(262 + "", "ClosingDebitBalance"));
-            ativos_correntes.Add("Outras contas a receber", GetAccountValue(22 + "", "ClosingDebitBalance") + GetAccountValue(23 + "", "ClosingDebitBalance") + GetAccountValue(27 + "", "ClosingDebitBalance") + GetAccountValue(29 + "", "ClosingDebitBalance"));
-            ativos_correntes.Add("Diferimentos", GetAccountValue(28 + "", "ClosingDebitBalance"));
-            ativos_correntes.Add("Activos financeiros detidos para negociação", GetAccountValue(1421 + "", "ClosingDebitBalance"));
-            ativos_correntes.Add("Outros activos financeiros", GetAccountValue(1431 + "", "ClosingDebitBalance"));
-            ativos_correntes.Add("Activos não correntes detidos para venda", GetAccountValue(46 + "", "ClosingDebitBalance") + GetAccountValue(49 + "", "ClosingDebitBalance"));
-            ativos_correntes.Add("Caixa e depósitos bancários", GetAccountValue(11 + "", "ClosingDebitBalance") + GetAccountValue(12 + "", "ClosingDebitBalance") + GetAccountValue(13 + "", "ClosingDebitBalance"));
+            ativos_correntes.Add("Inventários", GetAccountValue(32) + GetAccountValue(33) + GetAccountValue(34) + GetAccountValue(35) + GetAccountValue(36) + GetAccountValue(39));
+            ativos_correntes.Add("Activos Biológicos", GetAccountValue(37));
+            ativos_correntes.Add("Clientes", GetAccountValue(21) - GetAccountValue(218));
+            ativos_correntes.Add("Adiantamentos a fornecedores", GetAccountValue(228) + GetAccountValue(229));
+            ativos_correntes.Add("Estado e outros entres públicos", GetAccountValue(24));
+            ativos_correntes.Add("Accionistas / Sócios", GetAccountValue(26) - GetAccountValue(261) - GetAccountValue(262));
+            ativos_correntes.Add("Outras contas a receber", GetAccountValue(22) + GetAccountValue(23) + GetAccountValue(27) + GetAccountValue(29));
+            ativos_correntes.Add("Diferimentos", GetAccountValue(28 ));
+            ativos_correntes.Add("Activos financeiros detidos para negociação", GetAccountValue(1421));
+            ativos_correntes.Add("Outros activos financeiros", GetAccountValue(1431));
+            ativos_correntes.Add("Activos não correntes detidos para venda", GetAccountValue(46) + GetAccountValue(49));
+            ativos_correntes.Add("Caixa e depósitos bancários", GetAccountValue(11) + GetAccountValue(12) + GetAccountValue(13));
 
             JObject capitais_proprios = new JObject();
-            capitais_proprios.Add("Capital realizado", GetAccountValue(51 + "", "ClosingDebitBalance") + GetAccountValue(261 + "", "ClosingDebitBalance") + GetAccountValue(262 + "", "ClosingDebitBalance"));
-            capitais_proprios.Add("Ações (quotas) próprias", GetAccountValue(52 + "", "ClosingDebitBalance"));
-            capitais_proprios.Add("Outros instrumentos de capital próprio", GetAccountValue(53 + "", "ClosingDebitBalance"));
-            capitais_proprios.Add("Prémios de emissão", GetAccountValue(54 + "", "ClosingDebitBalance"));
-            capitais_proprios.Add("Reservas legais", GetAccountValue(551 + "", "ClosingDebitBalance"));
-            capitais_proprios.Add("Outras reservas", GetAccountValue(552 + "", "ClosingDebitBalance"));
-            capitais_proprios.Add("Resultados transitados", GetAccountValue(56 + "", "ClosingDebitBalance"));
-            capitais_proprios.Add("Ajustamentos em ativos financeiros", GetAccountValue(57 + "", "ClosingDebitBalance"));
-            capitais_proprios.Add("Excedentes de revalorização", GetAccountValue(58 + "", "ClosingDebitBalance"));
-            capitais_proprios.Add("Outras variações no capital próprio", GetAccountValue(59 + "", "ClosingDebitBalance"));
-            capitais_proprios.Add("Resultado líquido do exercício", GetAccountValue(818 + "", "ClosingDebitBalance"));
+            capitais_proprios.Add("Capital realizado", GetAccountValue(51) + GetAccountValue(261) + GetAccountValue(262));
+            capitais_proprios.Add("Ações (quotas) próprias", GetAccountValue(52));
+            capitais_proprios.Add("Outros instrumentos de capital próprio", GetAccountValue(53));
+            capitais_proprios.Add("Prémios de emissão", GetAccountValue(54));
+            capitais_proprios.Add("Reservas legais", GetAccountValue(551));
+            capitais_proprios.Add("Outras reservas", GetAccountValue(552));
+            capitais_proprios.Add("Resultados transitados", GetAccountValue(56));
+            capitais_proprios.Add("Ajustamentos em ativos financeiros", GetAccountValue(57));
+            capitais_proprios.Add("Excedentes de revalorização", GetAccountValue(58));
+            capitais_proprios.Add("Outras variações no capital próprio", GetAccountValue(59));
+            capitais_proprios.Add("Resultado líquido do exercício", GetAccountValue(818));
 
             JObject passivos_nao_correntes = new JObject();
-            passivos_nao_correntes.Add("Provisões", GetAccountValue(29 + "", "ClosingDebitBalance"));
-            passivos_nao_correntes.Add("Financiamentos obtidos", GetAccountValue(25 + "", "ClosingDebitBalance"));
-            passivos_nao_correntes.Add("Responsabilidades por benefícios pós-emprego", GetAccountValue(273 + "", "ClosingDebitBalance"));
-            passivos_nao_correntes.Add("Passivos por impostas diferidos", GetAccountValue(2742 + "", "ClosingDebitBalance"));
-            passivos_nao_correntes.Add("Outras contas a pagar", GetAccountValue(21 + "", "ClosingDebitBalance") + GetAccountValue(23 + "", "ClosingDebitBalance") + GetAccountValue(26 + "", "ClosingDebitBalance") + GetAccountValue(27 + "", "ClosingDebitBalance"));
+            passivos_nao_correntes.Add("Provisões", GetAccountValue(29));
+            passivos_nao_correntes.Add("Financiamentos obtidos", GetAccountValue(25));
+            passivos_nao_correntes.Add("Responsabilidades por benefícios pós-emprego", GetAccountValue(273));
+            passivos_nao_correntes.Add("Passivos por impostas diferidos", GetAccountValue(2742));
+            passivos_nao_correntes.Add("Outras contas a pagar", GetAccountValue(21) + GetAccountValue(23) + GetAccountValue(26) + GetAccountValue(27));
 
             JObject passivos_correntes = new JObject();
-            passivos_correntes.Add("Fornecedores", GetAccountValue(22 + "", "ClosingDebitBalance"));
-            passivos_correntes.Add("Adiantamento de clientes", GetAccountValue(218 + "", "ClosingDebitBalance"));
-            passivos_correntes.Add("Estado e outros entes públicos", GetAccountValue(24 + "", "ClosingDebitBalance"));
-            passivos_correntes.Add("Accionistas/Sócios", GetAccountValue(26 + "", "ClosingDebitBalance") - GetAccountValue(261 + "", "ClosingDebitBalance") - GetAccountValue(262 + "", "ClosingDebitBalance"));
-            passivos_correntes.Add("Financiamentos obtidos", GetAccountValue(25 + "", "ClosingDebitBalance"));
-            passivos_correntes.Add("Outras contas a pagar", GetAccountValue(21 + "", "ClosingDebitBalance") + GetAccountValue(23 + "", "ClosingDebitBalance") + GetAccountValue(27 + "", "ClosingDebitBalance"));
-            passivos_correntes.Add("Diferimentos", GetAccountValue(28 + "", "ClosingDebitBalance"));
-            passivos_correntes.Add("Passivos financeiros detidos para negociação", GetAccountValue(1422 + "", "ClosingDebitBalance"));
-            passivos_correntes.Add("Outros passivos financeiros", GetAccountValue(1432 + "", "ClosingDebitBalance"));
+            passivos_correntes.Add("Fornecedores", GetAccountValue(22));
+            passivos_correntes.Add("Adiantamento de clientes", GetAccountValue(218));
+            passivos_correntes.Add("Estado e outros entes públicos", GetAccountValue(24));
+            passivos_correntes.Add("Accionistas/Sócios", GetAccountValue(26) - GetAccountValue(261) - GetAccountValue(262));
+            passivos_correntes.Add("Financiamentos obtidos", GetAccountValue(25));
+            passivos_correntes.Add("Outras contas a pagar", GetAccountValue(21) + GetAccountValue(23) + GetAccountValue(27));
+            passivos_correntes.Add("Diferimentos", GetAccountValue(28));
+            passivos_correntes.Add("Passivos financeiros detidos para negociação", GetAccountValue(1422));
+            passivos_correntes.Add("Outros passivos financeiros", GetAccountValue(1432));
             
             obj.Add("Ativos não correntes", ativos_nao_correntes);
             obj.Add("Ativos correntes", ativos_correntes);

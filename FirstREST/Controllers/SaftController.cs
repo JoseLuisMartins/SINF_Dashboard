@@ -66,11 +66,7 @@ namespace FirstREST.Controllers
                     break;  
                 case "Products":
                     body = MongoConnection.GetCollectionById(id, "ProductCode", vid);
-                    break;
-                case "BalanceSheet":
-                    body = MongoConnection.GetBalanceSheet();
-                    break;   
-
+                    break;               
             }
 
             response = this.Request.CreateResponse(HttpStatusCode.OK);
@@ -82,6 +78,8 @@ namespace FirstREST.Controllers
         // api/saft/TotalNetSales?arg1=2016-01-01&arg2=2017-01-01
         // api/saft/SalesInvoices?arg1=2016-01-01&arg2=2017-01-01
         // api/saft/StockMovements?arg1=2016-01-01&arg2=2017-01-01 
+        // api/saft/Top10Products?arg1=2016-01-01&arg2=2017-01-01 
+        // api/saft/Top10Customers?arg1=2016-01-01&arg2=2017-01-01 
         public HttpResponseMessage Get(string id, string arg1, string arg2)
         {
            
@@ -98,7 +96,13 @@ namespace FirstREST.Controllers
                     break;
                 case "StockMovements":
                     body = MongoConnection.GetCollectionByDate("StockMovements", "MovementDate", arg1, arg2);
-                    break;                      
+                    break;
+                case "Top10Products":
+                    body = MongoConnection.GetTop10Products(arg1, arg2);
+                    break;
+                case "Top10Customers":
+                    body = MongoConnection.GetTop10Customers(arg1, arg2);
+                    break; 
 
             }
                   
