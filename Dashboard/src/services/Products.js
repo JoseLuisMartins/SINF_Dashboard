@@ -22,6 +22,9 @@ export default{
   },
   getTotalValueInventory (date) {
     return Api().get(`api/Inventory/?date=${date}&k=1`)
+  },
+  getTotalInventoryByFamilies (date) {
+    return Api().get(`api/Inventory/?date=${date}&k=3`)
   }
 
 }

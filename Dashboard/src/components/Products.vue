@@ -77,7 +77,7 @@
     </v-layout>
 
     <v-layout row wrap class="mb-4">
-      <v-flex d-flex xs12 sm12 offset-md3 md6 >
+      <v-flex d-flex xs12 sm12 offset-lg2 lg8 >
         <v-expansion-panel >
           <v-expansion-panel-content>
             <div slot="header" class="headline">
@@ -118,18 +118,21 @@
         </v-expansion-panel>
       </v-flex>
 
-      <v-flex d-flex xs12 sm12 offset-md3 md6 >
+      <v-flex d-flex xs12 sm12 offset-lg2 lg8 >
 
         <v-card>
-          <v-card-title class="headline"> Total Inventory Chart </v-card-title>
+          <v-card-title class="headline"> Total Inventory Chart (In €)</v-card-title>
           <v-card-text>
 
-            <div class="limitHeight chartHolder" > 
+            <div style="min-height: 400px"> 
               <transition name="fade">
-                <loading color="teal" v-if="movementsGraph == null"> </loading>
+                <loading color="teal" v-if="inventoryChartData.datasets == null"> </loading>
               </transition>
               <transition name="fade">
-                <div class="red" v-if="movementsGraph == null"> Ola </div>
+                <pie-chart class="chartHolder" style="min-height: 400px" 
+                  v-if="inventoryChartData.datasets != null" 
+                  :chartData="inventoryChartData.datasets" :options="pieChartOptions">
+                </pie-chart>
               </transition>
             </div>
           </v-card-text>
@@ -139,82 +142,122 @@
     </v-layout>
    
     <v-layout row wrap class="mb-1">
-      <v-flex d-flex xs12 sm12 offset-lg2 lg4 md6 class="elevation-1">
-        <v-expansion-panel>
-          <v-expansion-panel-content>
-            <div slot="header" class="headline">
-                IN   Total = {{(this.totalIn + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ")+ "€"}}
-            </div>
-            <v-card>
-              <v-card-title class="pb-0">
-                <v-spacer></v-spacer>
-                <v-text-field
-                  append-icon="search"
-                  label="Search"
-                  single-line
-                  hide-details
-                  v-model="search_1"
-                ></v-text-field>
-              </v-card-title>
-              <v-card-text>
-                <v-data-table 
-                  :search="search_1"
-                  v-bind:headers="headers"
-                  :items="productsIn"
-                  class="elevation-1"
-                  :loading="productsIn == null"
-                >
-                  <template slot="items" scope="props">
-                    <td class="text-xs-right">{{ props.item.CodArtigo }}</td>
-                    <td class="text-xs-right">{{ props.item.Description }}</td> 
-                    <td class="text-xs-right">{{ props.item.Stock }}</td>
-                    <td class="text-xs-right">{{ (props.item.Value.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + "€" }}</td>
-                  </template>
+      <v-flex xs12 sm12 offset-lg2 lg4 md6 class="elevation-1">
+        <v-layout collumn wrap>
+          <v-flex xs12>
+            <v-expansion-panel>
+              <v-expansion-panel-content>
+                <div slot="header" class="headline">
+                    IN   Total = {{(this.totalIn + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ")+ "€"}}
+                </div>
+                <v-card>
+                  <v-card-title class="pb-0">
+                    <v-spacer></v-spacer>
+                    <v-text-field
+                      append-icon="search"
+                      label="Search"
+                      single-line
+                      hide-details
+                      v-model="search_1"
+                    ></v-text-field>
+                  </v-card-title>
+                  <v-card-text>
+                    <v-data-table 
+                      :search="search_1"
+                      v-bind:headers="headers"
+                      :items="productsIn"
+                      class="elevation-1"
+                      :loading="productsIn == null"
+                    >
+                      <template slot="items" scope="props">
+                        <td class="text-xs-right">{{ props.item.CodArtigo }}</td>
+                        <td class="text-xs-right">{{ props.item.Description }}</td> 
+                        <td class="text-xs-right">{{ props.item.Stock }}</td>
+                        <td class="text-xs-right">{{ (props.item.Value.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + "€" }}</td>
+                      </template>
 
-                </v-data-table>
-              </v-card-text>
+                    </v-data-table>
+                  </v-card-text>
+                </v-card>
+              </v-expansion-panel-content>
+            </v-expansion-panel>
+          </v-flex>
+          <v-flex xs12>
+            <v-card>
+              <v-card-title class="headline"> By Families </v-card-title>
+              <div style="min-height: 400px"> 
+                <transition name="fade">
+                  <loading color="teal" v-if="inventoryChartData.familiesIN == null"> </loading>
+                </transition>
+                <transition name="fade">
+                  <pie-chart class="chartHolder" style="min-height: 400px" 
+                    v-if="inventoryChartData.familiesIN != null" 
+                    :chartData="inventoryChartData.familiesIN" :options="pieChartOptions">
+                  </pie-chart>
+                </transition>
+              </div>
             </v-card>
-          </v-expansion-panel-content>
-        </v-expansion-panel>
+          </v-flex>
+        </v-layout>
       </v-flex>
 
-      <v-flex d-flex xs12 sm12 lg4 md6 class="elevation-1">
-        <v-expansion-panel >
-          <v-expansion-panel-content>
-            <div slot="header" class="headline">
-                Out   Total = {{ (this.totalOut + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + "€" }} 
-            </div>
-            <v-card>
-              <v-card-title class="pb-0">
-                <v-spacer></v-spacer>
-                <v-text-field
-                  append-icon="search"
-                  label="Search"
-                  single-line
-                  hide-details
-                  v-model="search_2"
-                ></v-text-field>
-              </v-card-title>
-              <v-card-text>
-                <v-data-table
-                  :search="search_2"
-                  v-bind:headers="headers"
-                  :items="productsOut"
-                  class="elevation-1"
-                  :loading="productsOut == null"
-                >
-                  <template slot="items" scope="props">
-                    <td class="text-xs-right">{{ props.item.CodArtigo }}</td> 
-                    <td class="text-xs-right">{{ props.item.Description }}</td>
-                    <td class="text-xs-right">{{ props.item.Stock }}</td>
-                    <td class="text-xs-right">{{ (props.item.Value.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + "€" }}</td>
-                  </template>
+      <v-flex xs12 sm12 lg4 md6 class="elevation-1">
+        <v-layout collumn wrap>
+          <v-flex xs12> 
+            <v-expansion-panel >
+              <v-expansion-panel-content>
+                <div slot="header" class="headline">
+                    Out   Total = {{ (this.totalOut + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + "€" }} 
+                </div>
+                <v-card>
+                  <v-card-title class="pb-0">
+                    <v-spacer></v-spacer>
+                    <v-text-field
+                      append-icon="search"
+                      label="Search"
+                      single-line
+                      hide-details
+                      v-model="search_2"
+                    ></v-text-field>
+                  </v-card-title>
+                  <v-card-text>
+                    <v-data-table
+                      :search="search_2"
+                      v-bind:headers="headers"
+                      :items="productsOut"
+                      class="elevation-1"
+                      :loading="productsOut == null"
+                    >
+                      <template slot="items" scope="props">
+                        <td class="text-xs-right">{{ props.item.CodArtigo }}</td> 
+                        <td class="text-xs-right">{{ props.item.Description }}</td>
+                        <td class="text-xs-right">{{ props.item.Stock }}</td>
+                        <td class="text-xs-right">{{ (props.item.Value.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + "€" }}</td>
+                      </template>
 
-                </v-data-table>
-              </v-card-text>
+                    </v-data-table>
+                  </v-card-text>
+                </v-card>
+              </v-expansion-panel-content>
+            </v-expansion-panel>
+          </v-flex>
+          <v-flex xs12>
+            <v-card>
+              <v-card-title class="headline"> By Families </v-card-title>
+              <div style="min-height: 400px"> 
+                <transition name="fade">
+                  <loading color="teal" v-if="inventoryChartData.familiesOut == null"> </loading>
+                </transition>
+                <transition name="fade">
+                  <pie-chart class="chartHolder" style="min-height: 400px" 
+                    v-if="inventoryChartData.familiesOut != null" 
+                    :chartData="inventoryChartData.familiesOut" :options="pieChartOptions">
+                  </pie-chart>
+                </transition>
+              </div>
             </v-card>
-          </v-expansion-panel-content>
-        </v-expansion-panel>
+          </v-flex>
+        </v-layout>
       </v-flex>
 
     </v-layout>
@@ -283,11 +326,14 @@ export default {
         { text: 'Total', value: 'TotalValue', allign: 'left' }
       ],
       inventoryChartData: {
-        datasets: []
+        datasets: null,
+        familiesIN: null,
+        familiesOut: null
       },
       productsIn: [],
       productsOut: [],
       chartOptions: ChartOptions.options2,
+      pieChartOptions: ChartOptions.pieOptions,
 
       movementsGraph: null,
       inventoryChart: null,
@@ -344,10 +390,56 @@ export default {
         this.error = error
       }
     },
+    prepareFamilyChart (contents) {
+      let labels = []
+      let data = []
+      let backgroundColor = []
+      for (let element of contents) {
+        if (element.value <= 0) continue
+        labels.push(element.description)
+        data.push(element.value.toFixed(0))
+        let color = `#${((1 << 24) * Math.random() | 0).toString(16)}`
+
+        backgroundColor.push(color)
+      }
+      return {
+        labels: labels,
+        datasets: [{
+          data: data,
+          backgroundColor: backgroundColor
+        }]
+      }
+    },
+
+    async getSTKInChart () {
+      try {
+        let response = await Products.getMovements(this.dateBegin, this.dateEnd, 'INC')
+        this.inventoryChartData.familiesIN = this.prepareFamilyChart(response.data)
+      } catch (error) {
+        this.error = error
+      }
+    },
+
+    async getSTKOutChart () {
+      try {
+        console.log('HEREA')
+        let response = await Products.getMovements(this.dateBegin, this.dateEnd, 'OUTC')
+        console.log('HERE')
+        this.inventoryChartData.familiesOut = this.prepareFamilyChart(response.data)
+        console.log('HEREC')
+      } catch (error) {
+        console.log(error)
+        this.error = error
+      }
+    },
+
     getSTKMovements () {
       this.getSTKIn()
       this.getSTKOut()
+      this.getSTKInChart()
+      this.getSTKOutChart()
     },
+
     sortData (movements) {
       let contents = []
 
@@ -360,6 +452,7 @@ export default {
       contents.sort((x, y) => (x.x > y.x) ? 1 : -1)
       return contents
     },
+
     async getMovementGraphData () {
       try {
         let tempData = await Products.getMovementsGraph(this.dateBegin, this.dateEnd)
@@ -397,6 +490,15 @@ export default {
         this.error = error
       }
     },
+    async getInventoryByFamilies () {
+      try {
+        let response = await Products.getTotalInventoryByFamilies(this.dateEnd)
+        let contents = response.data
+        this.inventoryChartData.datasets = this.prepareFamilyChart(contents)
+      } catch (error) {
+        this.error = error
+      }
+    },
     async getInventory () {
       try {
         let response = await Products.getInventory(this.dateEnd)
@@ -423,6 +525,7 @@ export default {
       this.getSTKMovements()
       this.getMovementGraphData()
       this.getInventory()
+      this.getInventoryByFamilies()
     }
   },
   mounted: function () {
@@ -439,6 +542,7 @@ export default {
 .fade-enter-active, .fade-leave-active {
   transition: opacity .5s
 }
+
 .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
   opacity: 0
 }

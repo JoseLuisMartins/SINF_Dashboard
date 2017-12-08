@@ -8,27 +8,7 @@ export default {
   mixins: [reactiveProp],
   props: ['options'],
   mounted () {
-    this.renderChart(this.chartData, {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        yAxes: [{
-          ticks: {
-            beginAtZero: false
-          }
-        }],
-        xAxes: [{
-          ticks: {
-          }
-        }]
-      },
-      legend: {
-        display: false,
-        labels: {
-          fontColor: '#FFF'
-        }
-      }
-    })
+    this.renderChart(this.chartData, this.options)
   }
 }
 </script>

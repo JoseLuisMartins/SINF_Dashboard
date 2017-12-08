@@ -22,12 +22,22 @@ namespace FirstREST.Controllers
             return Lib_Primavera.PriIntegration.ListInventory();
         }
 
-        public IEnumerable<Lib_Primavera.Model.Inventory> Get(string begin, string end, string inout)
+        public dynamic Get(string begin, string end, string inout)
         {
-            if (inout == "IN") 
-                return Lib_Primavera.PriIntegration.ListSTKIn(begin, end);
-            else
-                return Lib_Primavera.PriIntegration.ListSTKOut(begin, end);
+            System.Diagnostics.Debug.WriteLine("HERREERERER" + inout);
+            switch (inout)
+            {
+                case "IN":
+                    return Lib_Primavera.PriIntegration.ListSTKIn(begin, end);
+                case "OUT":
+                    return Lib_Primavera.PriIntegration.ListSTKOut(begin, end);
+                case "INC":
+                    return Lib_Primavera.PriIntegration.ListSTKMovementInByFamilies(begin, end);
+                case "OUTC":
+                    return Lib_Primavera.PriIntegration.ListSTKMovementOutByFamilies(begin, end);
+            }
+
+            return null;
         }
 
         // GET api/Inventory/A001    

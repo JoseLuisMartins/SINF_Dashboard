@@ -598,6 +598,66 @@ namespace FirstREST.Lib_Primavera
                 return null;
         }
 
+        public static List<Lib_Primavera.Model.Familia> ListSTKMovementInByFamilies(string begin, string end)
+        {
+            StdBELista objList;
+
+            Model.Familia fam = null;
+            List<Model.Familia> fams = new List<Model.Familia>();
+
+            if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
+            {
+
+                objList = PriEngine.Engine.Comercial.Artigos.LstArtigos();
+
+                string query = String.Format(
+                    @"SELECT  
+                    Familias.Descricao as FamiliaDesc,
+                    SUM(
+                    round(isnull(LinhasSTK.Quantidade * LinhasSTK.FactorConv ,'0'),Arred)* round(PCM + DifPCMedio, Arred) ) as Total
+	                FROM   
+	                (((((LinhasSTK LinhasSTK INNER JOIN Artigo Artigo ON LinhasSTK.Artigo=Artigo.Artigo) 
+	                LEFT OUTER JOIN CabecSTK CabecSTK ON LinhasSTK.IdCabecOrig=CabecSTK.Id) 
+		                LEFT OUTER JOIN CabecDoc CabecDoc ON LinhasSTK.IdCabecOrig=CabecDoc.Id) 
+			                LEFT OUTER JOIN CabecCompras CabecCompras ON LinhasSTK.IdCabecOrig=CabecCompras.Id) 
+				                LEFT OUTER JOIN CabecInternos CabecInternos ON LinhasSTK.IdCabecOrig=CabecInternos.Id) 
+					                LEFT OUTER JOIN Familias Familias ON Artigo.Familia=Familias.Familia 
+	                WHERE  
+	                (LinhasSTK.Data between '{0}' AND '{1}')
+	                AND 
+	                LinhasSTK.TipoDoc in ('VFA','VFP', 'AIP', 'VD')
+	                AND
+	                (LinhasSTK.EntradaSaida=N'E' OR LinhasSTK.EntradaSaida=N'I') 
+                    GROUP BY Familias.Descricao",
+                    begin, end);
+
+                objList = PriEngine.Engine.Consulta(query);
+
+                while (!objList.NoFim())
+                {
+
+                    fam = new Model.Familia();
+                    fam.description = objList.Valor("FamiliaDesc") == "" ? "Desconhecido" : objList.Valor("FamiliaDesc");
+
+                    if (objList.Valor("Total").GetType() == typeof(string))
+                    {
+                        objList.Seguinte();
+                        continue;
+                    }
+
+                    fam.value = objList.Valor("Total");
+
+                    fams.Add(fam);
+
+                    objList.Seguinte();
+                }
+                return fams;
+            }
+            else
+                return null;
+
+        }
+
         private static List<Lib_Primavera.Model.MovementSummary> ListSTKMovementIn(string begin, string end){
             StdBELista objList;
 
@@ -649,6 +709,66 @@ namespace FirstREST.Lib_Primavera
                     objList.Seguinte();
                 }
                 return listSums;
+            }
+            else
+                return null;
+
+        }
+
+        public static List<Lib_Primavera.Model.Familia> ListSTKMovementOutByFamilies(string begin, string end)
+        {
+            StdBELista objList;
+
+            Model.Familia fam = null;
+            List<Model.Familia> fams = new List<Model.Familia>();
+
+            if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
+            {
+
+                objList = PriEngine.Engine.Comercial.Artigos.LstArtigos();
+
+                string query = String.Format(
+                    @"SELECT  
+                    Familias.Descricao as FamiliaDesc,
+                    SUM(
+                    round(isnull(LinhasSTK.Quantidade * LinhasSTK.FactorConv ,'0'),Arred)* round(PCM + DifPCMedio, Arred) ) as Total
+                    FROM   
+                    (((((LinhasSTK LinhasSTK INNER JOIN Artigo Artigo ON LinhasSTK.Artigo=Artigo.Artigo) 
+                    LEFT OUTER JOIN CabecSTK CabecSTK ON LinhasSTK.IdCabecOrig=CabecSTK.Id) 
+	                    LEFT OUTER JOIN CabecDoc CabecDoc ON LinhasSTK.IdCabecOrig=CabecDoc.Id) 
+		                    LEFT OUTER JOIN CabecCompras CabecCompras ON LinhasSTK.IdCabecOrig=CabecCompras.Id) 
+			                    LEFT OUTER JOIN CabecInternos CabecInternos ON LinhasSTK.IdCabecOrig=CabecInternos.Id) 
+				                    LEFT OUTER JOIN Familias Familias ON Artigo.Familia=Familias.Familia 
+                    WHERE  
+                    (LinhasSTK.Data between '2015-01-01' AND '2017-01-01')
+                    AND 
+                    NOT LinhasSTK.TipoDoc in ('GR')
+                    AND
+                    (LinhasSTK.EntradaSaida=N'S' OR LinhasSTK.EntradaSaida=N'S') 
+                    GROUP BY Familias.Descricao",
+                    begin, end);
+
+                objList = PriEngine.Engine.Consulta(query);
+
+                while (!objList.NoFim())
+                {
+
+                    fam = new Model.Familia();
+                    fam.description = objList.Valor("FamiliaDesc") == "" ? "Desconhecido" : objList.Valor("FamiliaDesc");
+
+                    if (objList.Valor("Total").GetType() == typeof(string))
+                    {
+                        objList.Seguinte();
+                        continue;
+                    }
+
+                    fam.value = objList.Valor("Total");
+
+                    fams.Add(fam);
+
+                    objList.Seguinte();
+                }
+                return fams;
             }
             else
                 return null;

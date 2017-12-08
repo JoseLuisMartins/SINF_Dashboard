@@ -66,5 +66,10 @@ export default {
         }
       }]
     }
+  },
+  pieOptions: {
+    responsive: true,
+    maintainAspectRatio: false,
+    fontColor: '#FFF'
   }
 }
