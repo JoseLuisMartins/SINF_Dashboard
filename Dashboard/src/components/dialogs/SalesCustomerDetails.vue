@@ -156,6 +156,11 @@ export default {
       ]
     }
   },
+  watch: {
+    Item: function (newVal, oldVal) {
+      console.log(this.Item)
+    }
+  },
   mounted: async function () {
     this.totalSpentValue = (await SalesService.getCustomerSpentValue(this.Item.CustomerID, this.Begin, this.End)).data[0].total_spent
     this.productsDataSet = (await SalesService.getCustomersBoughtProducts(this.Item.CustomerID)).data

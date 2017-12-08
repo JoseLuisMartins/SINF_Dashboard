@@ -39,5 +39,11 @@ export default {
   },
   getBacklog (begin, end) {
     return Api().get(`/api/DocVenda/?begin=${begin}&end=${end}`)
+  },
+  getTop10Products (begin, end) {
+    return Api().get(`/api/saft/Top10Products/?arg1=${begin}&arg2=${end}`)
+  },
+  getTop10Customers (begin, end) {
+    return Api().get(`/api/saft/Top10Customers/?arg1=${begin}&arg2=${end}`)
   }
 }
