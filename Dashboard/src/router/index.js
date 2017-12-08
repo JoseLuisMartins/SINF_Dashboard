@@ -5,6 +5,7 @@ import Products from '@/components/Products'
 import Sales from '@/components/Sales'
 import Purchases from '@/components/Purchases'
 import Invoice from '@/components/dialogs/Invoice'
+import Balance from '@/components/Balance'
 
 Vue.use(Router)
 
@@ -34,6 +35,11 @@ export default new Router({
       path: '/invoice',
       name: 'invoice',
       component: Invoice
+    },
+    {
+      path: '/accounting',
+      name: 'accounting',
+      component: Balance
     }
   ]
 })

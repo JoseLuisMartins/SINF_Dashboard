@@ -64,9 +64,11 @@ pointer {
 
 @keyframes loadinga {
   100%{
-    transform: translateY(0px) scale(0.4) rotate(-20deg);
+    transform: translateY(0px) scale(0.0) rotate(-20deg);
+    opacity: 0;
   } 
   0%{
     transform: translateY(40px) scale(1.5) rotate(20deg);
+    opacity: 1;
   }
 }
