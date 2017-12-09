@@ -140,9 +140,21 @@ export default {
       ]
     }
   },
+  watch: {
+    Item: async function () {
+      this.getData()
+    }
+  },
   mounted: async function () {
-    this.totalProductSales = (await SalesService.getProductSales(this.Item.ProductCode, this.Begin, this.End)).data[0].total_sold
-    this.customersDataSet = (await SalesService.getProductCustomers(this.Item.ProductCode)).data
+    this.getData()
+  },
+  methods: {
+    getData: async function () {
+      this.totalProductSales = null
+      this.customersDataSet = []
+      this.totalProductSales = (await SalesService.getProductSales(this.Item.ProductCode, this.Begin, this.End)).data[0].total_sold
+      this.customersDataSet = (await SalesService.getProductCustomers(this.Item.ProductCode)).data
+    }
   },
   props: [
     'Item',

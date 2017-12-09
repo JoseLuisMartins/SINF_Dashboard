@@ -5,9 +5,7 @@ export default {
     return Api().get(`/api/DocCompra/?begin=${begin}&end=${end}`)
   },
   getSupplierInfo (id) {
-    let url = `api/Fornecedor/?id=${id}`
-
-    return Api().get(url)
+    return Api().get(`api/Fornecedor/?id=${id}`)
   },
   getSuppliers (begin, end) {
     return Api().get(`api/Fornecedor/?begin=${begin}&end=${end}`)
@@ -17,5 +15,8 @@ export default {
   },
   getTotalAmountBySupplier (begin, end, supplier) {
     return Api().get(`/api/Compras/?begin=${begin}&end=${end}&fornecedor=${supplier}`)
+  },
+  getPurchasesBacklog (begin, end) {
+    return Api().get(`api/Compras/backlog?begin=${begin}&end=${end}`)
   }
 }

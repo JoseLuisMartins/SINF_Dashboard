@@ -5,7 +5,7 @@
       v-model="supplierDialog">
       <v-card>
         <v-card-title>
-          <span class="headline"> Products </span>
+          <span class="headline"> Products from {{currentSupplier}} </span>
         </v-card-title>
         <v-card-text>
           <div v-if="supplierProducts == null"> Loading... </div>
@@ -100,7 +100,7 @@
         <v-card>
           <v-card-title>
             <div class="headline"> Purchases </div>
-            <div class="ml-3"><b>Total : {{(totalAmount + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ")}}€</b> between {{dateBegin}} and {{dateEnd}}</div>
+            <div class="ml-3"><b>Total : {{(totalAmount + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ")}}€</b></div>
           </v-card-title>
           <v-card-text>
             <div class="limitHeight chartHolder" v-if="purchasesChartData.datasets.length == 0"> 
@@ -123,67 +123,11 @@
         </v-card>
       </v-flex>
     </v-layout>
-    <div class="mt-2"></div>
     <v-layout row wrap>
-      <v-flex sm12 md6>
+      <v-flex d-flex sm12 md6>
         <v-card>
           <v-card-title class="pb-0">
-            <div class="headline"> Purchases Documents </div>
-            <v-spacer></v-spacer>
-            <v-text-field
-              append-icon="search"
-              label="Search"
-              single-line
-              hide-details
-              v-model="search_1"
-            ></v-text-field>
-          </v-card-title>
-          <v-card-text>
-            <v-data-table
-              :search="search_1"
-              :headers="purchasesHeader"
-              :items="currentDataSet"
-              class="elevation-1"
-              item-key="id"
-              :loading="currentDataSet.length == 0"
-              >
-              <template slot="items" scope="props">
-                <tr @click="props.expanded = !props.expanded"> 
-                  <td> {{props.item.Entidade}} </td>
-                  <td> {{props.item.TipoDoc }} </td>
-                  <td> {{props.item.Data }} </td>
-                  <td> {{(props.item.TotalMerc + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") }}€</td>
-                  <td> {{props.item.Serie }} </td>
-                </tr>
-              </template>
-              <template slot="expand" scope="props">
-                <v-card color="grey lighten-3">
-                  <v-card-text>
-                    <table>
-                      <tr>
-                      <th>Artigo</th><th>Descr</th><th>Quantidade</th><th>PreçoUn</th><th>Armazem</th>
-                      </tr>
-                      <tr flat v-for="line in props.item.LinhasDoc" :key="line.id">
-                        <td>{{line.CodArtigo}}</td>
-                        <td>{{line.DescArtigo}}</td>
-                        <td>{{Math.abs(line.Quantidade)}}</td>
-                        <td>{{Math.abs(line.PrecoUnitario)}}</td>
-                        <td>{{line.Armazem}}</td>
-                      </tr>
-                    </table>
-                  </v-card-text>
-                </v-card>
-              </template>
-
-            </v-data-table>
-          </v-card-text>
-        </v-card>
-      </v-flex>
-      <v-flex sm12 md6>
-        <v-card>
-          <v-card-title class="pb-0">
-            <div class="headline"> Top Suppliers</div>
-            <p>between {{dateBegin}} and {{dateEnd}} </p>
+            <div class="headline">Suppliers</div>
             <v-spacer></v-spacer>
             <v-text-field
               append-icon="search"
@@ -202,7 +146,7 @@
               class="elevation-1"
               >
               <template slot="items" scope="props">
-                <tr class="pointer" @click="() => {displaySupplierModal(props.item.CodFornecedor)}">
+                <tr class="cursor-pointer" @click="() => {displaySupplierModal(props.item.CodFornecedor, props.item.NomeFiscal)}">
                 <td> {{props.item.CodFornecedor }} </td>
                 <td> {{props.item.NomeFiscal }} </td>
                 <td> {{props.item.Telefone }} </td>
@@ -214,6 +158,108 @@
           </v-card-text>
         </v-card>
       </v-flex>
+
+      <v-flex d-flex sm12 md6>
+        <v-card>
+          <v-card-title class="headline"> Top Suppliers </v-card-title>
+          <div style="min-height: 400px">
+            <transition name="fade">
+              <loading color="teal" v-if="topChartData == null"> </loading>
+            </transition>
+            <transition name="fade">
+              <pie-chart class="chartHolder" style="min-height: 400px" v-if="topChartData != null" :chartData="topChartData"
+                :options="pieChartOptions">
+              </pie-chart>
+            </transition>
+          </div>
+        </v-card>
+      </v-flex>
+    </v-layout>
+
+    <v-layout row wrap>
+      <v-flex sm12>
+          <v-card>
+            <v-card-title class="pb-0">
+              <div class="headline"> Purchases Documents </div>
+              <v-spacer></v-spacer>
+              <v-text-field
+                append-icon="search"
+                label="Search"
+                single-line
+                hide-details
+                v-model="search_1"
+              ></v-text-field>
+            </v-card-title>
+            <v-card-text>
+              <v-data-table
+                :search="search_1"
+                :headers="purchasesHeader"
+                :items="currentDataSet"
+                class="elevation-1"
+                item-key="id"
+                :loading="currentDataSet.length == 0"
+                >
+                <template slot="items" scope="props">
+                  <tr class="cursor-pointer" @click="props.expanded = !props.expanded"> 
+                    <td> {{props.item.Entidade}} </td>
+                    <td> {{props.item.TipoDoc }} </td>
+                    <td> {{props.item.Data }} </td>
+                    <td> {{(props.item.TotalMerc + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") }}€</td>
+                    <td> {{props.item.Serie }} </td>
+                  </tr>
+                </template>
+                <template slot="expand" scope="props">
+                  <v-card color="grey lighten-3">
+                    <v-card-text>
+                      <table>
+                        <tr>
+                        <th>Product</th><th>Description</th><th>Quantity</th><th>Unit Price</th><th>Warehouse</th>
+                        </tr>
+                        <tr flat v-for="line in props.item.LinhasDoc" :key="line.id">
+                          <td>{{line.CodArtigo}}</td>
+                          <td>{{line.DescArtigo}}</td>
+                          <td>{{Math.abs(line.Quantidade)}}</td>
+                          <td>{{Math.abs(line.PrecoUnitario)}}</td>
+                          <td>{{line.Armazem}}</td>
+                        </tr>
+                      </table>
+                    </v-card-text>
+                  </v-card>
+                </template>
+
+              </v-data-table>
+            </v-card-text>
+          </v-card>
+        </v-flex>
+      </v-layout>
+
+    <v-layout row wrap>
+        <v-flex sm12>
+          <v-card>
+            <v-card-title class="pb-0">
+              <div class="headline"> Purchases Backlog </div>
+              <v-spacer></v-spacer>
+              <v-text-field append-icon="search" label="Search" single-line hide-details v-model="search_3"></v-text-field>
+            </v-card-title>
+            <v-card-text>
+
+              <v-data-table :search="search_3" v-bind:headers="backlogHeader" :items="backlogData" class="elevation-1" :loading="backlogData.length == 0">
+
+                <template slot="items" scope="props">
+
+                  <td> {{props.item.Entidade }} </td>
+                  <td> {{props.item.Artigo }} </td>
+                  <td> {{props.item.DataEntrega }} </td>
+                  <td> {{props.item.Quantidade.toFixed(0) + ""}} </td>
+                  <td> {{(props.item.Total.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + "€" }} </td>
+
+                </template>
+
+              </v-data-table>
+
+            </v-card-text>
+          </v-card>
+        </v-flex>
     </v-layout>
   </v-container>
 </template>
@@ -224,21 +270,42 @@ import LineChart from '@/components/charts/LineChart'
 import PurchasesService from '@/services/Purchases'
 import Products from '@/services/Products'
 import ChartOptions from '@/components/charts/config'
+import PieChart from '@/components/charts/PieChart'
 
 export default {
   components: {
-    LineChart
+    LineChart,
+    PieChart
   },
   methods: {
-    async displaySupplierModal (id) {
+    async displaySupplierModal (id, name) {
       try {
         this.supplierProducts = null
+        this.currentSupplier = name
         this.supplierDialog = true
         const res = await Products.getProductsBySupplier(id)
-        const totalSupplier = await PurchasesService.getTotalAmountBySupplier(this.dateBegin, this.dateEnd, id)
-        console.log(totalSupplier)
         this.supplierProducts = res.data
       } catch (err) {
+      }
+    },
+    prepareFamilyChart (contents, key, value) {
+      let labels = []
+      let data = []
+      let backgroundColor = []
+      for (let element of contents) {
+        if (element[value] <= 0) continue
+        labels.push(element[key])
+        data.push(element[value].toFixed(0))
+        let color = `#${((1 << 24) * Math.random() | 0).toString(16)}`
+
+        backgroundColor.push(color)
+      }
+      return {
+        labels: labels,
+        datasets: [{
+          data: data,
+          backgroundColor: backgroundColor
+        }]
       }
     }
   },
@@ -246,6 +313,10 @@ export default {
     return {
       search_1: '',
       search_2: '',
+      search_3: '',
+      pieChartOptions: ChartOptions.pieOptions,
+      topChartData: null,
+      currentSupplier: '',
       totalAmount: 0,
       linhasDoc: [
         {text: 'Code', value: 'CodArtigo', align: 'left'},
@@ -257,24 +328,32 @@ export default {
         {text: 'Warehouse', value: 'Armazem'}
       ],
       purchasesHeader: [
-        {text: 'Entidade', value: 'Entidade', align: 'left'},
-        {text: 'Tipo Doc', value: 'TipoDoc', align: 'center'},
-        {text: 'Data', value: 'Data', align: 'center'},
+        {text: 'Supplier', value: 'Entidade', align: 'left'},
+        {text: 'Document Type', value: 'TipoDoc', align: 'center'},
+        {text: 'Date', value: 'Data', align: 'center'},
         {text: 'Total Merc', value: 'TotalMerc', align: 'center'},
         {text: 'Serie', value: 'Serie', align: 'center'}
       ],
       supplierProductsHeader: [
-        {text: 'Produto', value: 'CodArtigo', align: 'left'},
-        {text: 'Descrição', value: 'DescArtigo', align: 'center'},
-        {text: 'Stock Atual', value: 'STKAtual', align: 'center'}
+        {text: 'Product', value: 'CodArtigo', align: 'left'},
+        {text: 'Description', value: 'DescArtigo', align: 'center'},
+        {text: 'Current Stock', value: 'STKAtual', align: 'center'}
       ],
       suppliersHeader: [
-        {text: 'Fornecedor', value: 'CodFornecedor', align: 'left'},
-        {text: 'Nome Fiscal', value: 'NomeFiscal', align: 'center'},
-        {text: 'Telefone', value: 'Telefone', align: 'center'},
-        {text: 'NumContribuinte', value: 'NumContrib', align: 'center'},
+        {text: 'Supplier', value: 'CodFornecedor', align: 'left'},
+        {text: 'Fiscal Name', value: 'NomeFiscal', align: 'center'},
+        {text: 'Phone Number', value: 'Telefone', align: 'center'},
+        {text: 'VAT Number', value: 'NumContrib', align: 'center'},
         {text: 'Total', value: 'Total', align: 'center'}
       ],
+      backlogHeader: [
+        {text: 'Supplier', value: 'Entidade', align: 'left'},
+        {text: 'Product', value: 'Artigo', align: 'center'},
+        {text: 'Date', value: 'DataEntrega', align: 'center'},
+        {text: 'Quantity', value: 'Quantidade', align: 'center'},
+        {text: 'Total', value: 'Total', align: 'center'}
+      ],
+      backlogData: [],
       menu: false,
       dateBegin: null,
       dateEnd: null,
@@ -301,17 +380,23 @@ export default {
       const res = await PurchasesService.request(val, this.dateEnd)
       const total = await PurchasesService.getTotalAmount(val, this.dateEnd)
       const sups = await PurchasesService.getSuppliers(val, this.dateEnd)
+      const data = await PurchasesService.getPurchasesBacklog(val, this.dateEnd)
       this.currentDataSet = res.data
       this.totalAmount = total.data
       this.items = sups.data
+      this.backlogData = data.data
+      this.topChartData = this.prepareFamilyChart(sups.data, 'NomeFiscal', 'Total')
     },
     dateEnd: async function (val) {
       const res = await PurchasesService.request(this.dateBegin, val)
       const total = await PurchasesService.getTotalAmount(this.dateBegin, val)
       const sups = await PurchasesService.getSuppliers(this.dateBegin, val)
+      const data = await PurchasesService.getPurchasesBacklog(this.dateBegin, val)
       this.currentDataSet = res.data
       this.totalAmount = total.data
       this.items = sups.data
+      this.backlogData = data.data
+      this.topChartData = this.prepareFamilyChart(sups.data, 'NomeFiscal', 'Total')
     },
     currentDataSet: function (val) {
       let data = []
@@ -372,5 +457,10 @@ export default {
 .vertical-center{
   vertical-align: center;
 }
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
 </style>
 

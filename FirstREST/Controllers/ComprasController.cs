@@ -17,9 +17,10 @@ namespace FirstREST.Controllers
             return (int)(Lib_Primavera.PriIntegration.getDatedPurchases(begin,end) * -1);
         }
 
-        public int Get(string fornecedor, string begin = "", string end = "")
+        // /api/Compras/backlog?begin=2016-01-01&end=2018-01-01
+        public IEnumerable<Lib_Primavera.Model.PurchasesBacklog> Get(string id, string begin = "", string end = "")
         {
-            return (int)(Lib_Primavera.PriIntegration.getDatedPurchasesByFornecedor(begin,end,fornecedor) * -1);
+            return Lib_Primavera.PriIntegration.getDatedPurchasesBacklog(begin, end);
         }
     }
 }

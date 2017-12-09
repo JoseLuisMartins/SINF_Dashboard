@@ -1017,7 +1017,7 @@ namespace FirstREST.Lib_Primavera
                     dc.TotalMerc = objListCab.Valor("TotalMerc");
                     dc.Serie = objListCab.Valor("Serie");
                     dc.TipoDoc = objListCab.Valor("TipoDoc");
-                    objListLin = PriEngine.Engine.Consulta("SELECT idCabecCompras, Artigo, Descricao, Quantidade, Unidade, PrecUnit, Desconto1, TotalILiquido, PrecoLiquido, Armazem, Lote from LinhasCompras where IdCabecCompras='" + dc.id + "' order By NumLinha");
+                    objListLin = PriEngine.Engine.Consulta("SELECT idCabecCompras, Artigo, Descricao, Quantidade, Unidade, PrecUnit, Desconto1, TotalILiquido, PrecoLiquido, Armazem, Lote from LinhasCompras where IdCabecCompras='" + dc.id + "' and Artigo is not null order By NumLinha");
                     listlindc = new List<Model.LinhaDocCompra>();
 
                     while (!objListLin.NoFim())
@@ -1286,6 +1286,38 @@ namespace FirstREST.Lib_Primavera
         #endregion DocsVenda
 
         #region Compras
+
+        public static List<Model.PurchasesBacklog> getDatedPurchasesBacklog(string begin, string end) {
+
+            StdBELista objListCab;
+
+            if (PriEngine.InitializeCompany(FirstREST.Properties.Settings.Default.Company.Trim(), FirstREST.Properties.Settings.Default.User.Trim(), FirstREST.Properties.Settings.Default.Password.Trim()) == true)
+            {
+                List<Model.PurchasesBacklog> result = new List<Model.PurchasesBacklog>();
+
+                string query = String.Format(
+                    "  SELECT CabecCompras.Entidade, LinhasCompras.Artigo, LinhasCompras.DataEntrega, LinhasComprasStatus.Quantidade, LinhasCompras.PrecUnit * LinhasCompras.Quantidade as Total FROM   (((((CabecCompras CabecCompras INNER JOIN LinhasCompras LinhasCompras ON CabecCompras.Id=LinhasCompras.IdCabecCompras) LEFT OUTER JOIN Fornecedores Fornecedores ON CabecCompras.Entidade=Fornecedores.Fornecedor) LEFT OUTER JOIN OutrosTerceiros OutrosTerceiros ON CabecCompras.Entidade=OutrosTerceiros.Terceiro) INNER JOIN CabecComprasStatus CabecComprasStatus ON CabecCompras.Id=CabecComprasStatus.IdCabecCompras) INNER JOIN Artigo Artigo ON LinhasCompras.Artigo=Artigo.Artigo) INNER JOIN LinhasComprasStatus LinhasComprasStatus ON LinhasCompras.Id=LinhasComprasStatus.IdLinhasCompras WHERE  LinhasComprasStatus.EstadoTrans<>N'T' AND CabecComprasStatus.Fechado=0 AND LinhasComprasStatus.Fechado=0 AND  NOT (CabecComprasStatus.Estado=N'R' OR CabecComprasStatus.Estado=N'T') AND CabecComprasStatus.Anulado=0 AND (LinhasComprasStatus.QuantTrans<LinhasComprasStatus.Quantidade AND LinhasComprasStatus.Quantidade>=0 OR LinhasComprasStatus.Quantidade<0 AND LinhasComprasStatus.QuantTrans>LinhasComprasStatus.Quantidade) AND CabecCompras.TipoDoc=N'ECF' AND (LinhasCompras.DataEntrega>='{0}' AND LinhasCompras.DataEntrega<'{1}') AND CabecCompras.TipoEntidade=N'F' AND (LinhasCompras.TipoLinha=N'65' OR LinhasCompras.TipoLinha=N'91' OR (LinhasCompras.TipoLinha>=N'10' AND LinhasCompras.TipoLinha<=N'29')) ORDER BY LinhasCompras.DataEntrega;", begin, end);
+
+                objListCab = PriEngine.Engine.Consulta(query);
+
+                while (!objListCab.NoFim())
+                {
+                    Model.PurchasesBacklog pb = new Model.PurchasesBacklog();
+                    pb.Entidade = objListCab.Valor("Entidade");
+                    pb.Artigo = objListCab.Valor("Artigo");
+                    pb.DataEntrega = objListCab.Valor("DataEntrega");
+                    pb.Quantidade = objListCab.Valor("Quantidade");
+                    pb.Total = objListCab.Valor("Total");
+
+                    result.Add(pb);
+                    objListCab.Seguinte();
+                }
+
+                return result;
+            }
+
+            return null;
+        }
 
         public static double getDatedPurchases(string begin, string end)
         {
