@@ -48,6 +48,8 @@ export default {
   },
   getBalanceSheet () {
     return Api().get(`/api/saft/BalanceSheet`)
+  },
+  getIncomeStatement () {
+    return Api().get('/api/saft/IncomeStatement')
   }
-
 }

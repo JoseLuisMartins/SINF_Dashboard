@@ -1,5 +1,5 @@
 <template>
-        <v-card class="grey lighten-2">
+        <v-card class="grey lighten-3">
           <v-card-title>
             <div class="title">
               {{Item.ProductDescription}} details
@@ -26,7 +26,7 @@
                         <v-flex class="title" d-flex xs4 offset-xs2>
                           Product Sales:                        
                         </v-flex>
-                        <v-flex d-flex xs4>
+                        <v-flex d-flex xs4 v-if="totalProductSales!==null">
                           {{(totalProductSales.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €"}}                        
                         </v-flex>
                       </v-layout>
@@ -140,9 +140,21 @@ export default {
       ]
     }
   },
+  watch: {
+    Item: async function () {
+      this.getData()
+    }
+  },
   mounted: async function () {
-    this.totalProductSales = (await SalesService.getProductSales(this.Item.ProductCode, this.Begin, this.End)).data[0].total_sold
-    this.customersDataSet = (await SalesService.getProductCustomers(this.Item.ProductCode)).data
+    this.getData()
+  },
+  methods: {
+    getData: async function () {
+      this.totalProductSales = null
+      this.customersDataSet = []
+      this.totalProductSales = (await SalesService.getProductSales(this.Item.ProductCode, this.Begin, this.End)).data[0].total_sold
+      this.customersDataSet = (await SalesService.getProductCustomers(this.Item.ProductCode)).data
+    }
   },
   props: [
     'Item',
@@ -152,10 +164,3 @@ export default {
 }
 </script>
 
-<style scoped>
-
-.title {
-  font-weight: bold;
-}
-
-</style>

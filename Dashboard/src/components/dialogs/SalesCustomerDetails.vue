@@ -22,7 +22,7 @@
                 <v-card>
                   <v-card-text>
                     
-                      <v-layout row justify-space-between elevation-3 pb-2 pt-2>
+                      <v-layout row justify-space-between elevation-3 pb-2 pt-2 >
                         <v-flex class="title" d-flex xs4 offset-xs2>
                           Total money spent by the customer:                        
                         </v-flex>
@@ -157,13 +157,20 @@ export default {
     }
   },
   watch: {
-    Item: function (newVal, oldVal) {
-      console.log(this.Item)
+    Item: async function () {
+      this.getData()
     }
   },
   mounted: async function () {
-    this.totalSpentValue = (await SalesService.getCustomerSpentValue(this.Item.CustomerID, this.Begin, this.End)).data[0].total_spent
-    this.productsDataSet = (await SalesService.getCustomersBoughtProducts(this.Item.CustomerID)).data
+    this.getData()
+  },
+  methods: {
+    getData: async function () {
+      this.totalSpentValue = null
+      this.productsDataSet = []
+      this.totalSpentValue = (await SalesService.getCustomerSpentValue(this.Item.CustomerID, this.Begin, this.End)).data[0].total_spent
+      this.productsDataSet = (await SalesService.getCustomersBoughtProducts(this.Item.CustomerID)).data
+    }
   },
   props: [
     'Item',
@@ -173,10 +180,3 @@ export default {
 }
 </script>
 
-<style scoped>
-
-.title {
-  font-weight: bold;
-}
-
-</style>

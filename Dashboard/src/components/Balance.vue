@@ -75,32 +75,70 @@
       </v-flex>
     </v-layout>
 
+    <span class="display-2" > Balance sheet </span>
+
     <v-layout>
-      <v-flex class="elevation-1 white" md12 offset-lg2 lg8>
+      <v-flex class="elevation-1 white" md12 offset-lg2 lg8 v-if="balanceSheetData!==null">
         <v-layout row wrap>
-          <v-flex d-flex md6 sm12 xs12 v-if="balanceSheetData!==null">
-            <statements  class="elevation-1" :data="balanceSheetData.Assets" title="Assets"> </statements>
+            <v-flex d-flex md6 sm12 xs12 >
+              <statements  class="elevation-1" :data="balanceSheetData.Assets" title="Assets"> </statements>            
+            </v-flex>
+            <v-flex d-flex md6 sm12 xs12>
+              <v-layout collumn wrap>
+                <v-flex xs12 d-flex>
+                  <v-card class="elevation-1 grey lighten-1"> 
+                    <v-card-title class="headline"> 
+                      <span> Equity </span> 
+                      <v-spacer> </v-spacer>  
+                      <span>  {{((balanceSheetData.Assets.total - balanceSheetData.Liabilities.total).toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €" }}</span> 
+                    </v-card-title>
+                  </v-card>
+                </v-flex>
+                <v-flex d-flex xs12 >
+                  <statements class="elevation-1" :data="balanceSheetData.Liabilities" title="Liabilities"> </statements>              
+                </v-flex>                
+              </v-layout>
+            </v-flex>
+        </v-layout> 
+        <v-layout row wrap>
+          <v-flex d-flex md6 sm12 xs12 >
+            <v-card class="elevation-1 grey lighten-1"> 
+                <v-card-title class="headline"> 
+                  <span> Total Assets </span> 
+                  <v-spacer> </v-spacer>  
+                  <span>  {{(balanceSheetData.Assets.total.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €" }}</span> 
+                </v-card-title>
+              </v-card>
           </v-flex>
-          <v-flex d-flex md6 sm12 xs12>
-            <v-layout collumn wrap>
-              <v-flex xs12 d-flex>
-                <v-card class="elevation-1"> 
-                  <v-card-title class="headline" v-if="balanceSheetData!==null"> 
-                    <span> Equity </span> 
+           <v-flex d-flex md6 sm12 xs12 >
+              <v-card class="elevation-1 grey lighten-1"> 
+                  <v-card-title class="headline"> 
+                    <span> Total Liabilities </span> 
                     <v-spacer> </v-spacer>  
-                    <span>  {{((balanceSheetData.Assets.total - balanceSheetData.Liabilities.total).toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €" }}</span> 
+                    <span>  {{(balanceSheetData.Liabilities.total.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €" }}</span> 
                   </v-card-title>
                 </v-card>
-              </v-flex xs12>
-              <v-flex d-flex xs12 v-if="balanceSheetData!==null">
-                <statements class="elevation-1" :data="balanceSheetData.Liabilities" title="Liabilities"> </statements>
-              </v-flex>
-            </v-layout>
           </v-flex>
-        </v-layout> 
+        </v-layout>
       </v-flex>
     </v-layout>
 
+    <span class="display-2" > Income Statement </span>
+
+    <v-layout>
+      <v-flex d-flex xs6 offset-xs3>
+        <v-layout column wrap>
+          <v-card v-bind:key="item.name" v-for="item in incomeStatementData">
+            <v-card-title primary-title>
+              <v-spacer v-if="item.result"></v-spacer>
+              <p class="title mb-0" > {{ item.name }} </p>
+              <v-spacer v-if="!item.result"></v-spacer>
+              <div class="ml-5 pl-5"> {{ (item.value.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €" }} </div>
+            </v-card-title>
+          </v-card>
+        </v-layout>
+      </v-flex>
+    </v-layout>
   </v-container>
 </template>
 
@@ -126,7 +164,8 @@ export default {
       menu2: false,
       dateEnd: null,
       balanceSheetData: null,
-      error: null
+      error: null,
+      incomeStatementData: []
     }
   },
   methods: {
@@ -144,12 +183,12 @@ export default {
     this.dateBegin = `${currentYear}-01-01`
 
     this.balanceSheetData = (await SalesService.getBalanceSheet()).data
+    this.incomeStatementData = (await SalesService.getIncomeStatement()).data
   }
 }
 </script>
 
 <style scoped>
-
 .fade-enter-active, .fade-leave-active {
   transition: opacity .5s
 }
@@ -168,8 +207,4 @@ export default {
   left: 0;
   right: 0;
 }
-
-
 </style>
-
-
