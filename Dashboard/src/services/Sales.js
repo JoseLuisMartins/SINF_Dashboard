@@ -51,5 +51,8 @@ export default {
   },
   getIncomeStatement () {
     return Api().get('/api/saft/IncomeStatement')
+  },
+  getFinancialRatios () {
+    return Api().get('/api/saft/FinancialRatios')
   }
 }

@@ -178,6 +178,7 @@ export default {
     Topic, LineChart
   },
   mounted: function () {
+    setInterval(() => confirm('Vai ao Accounting João!'), 2500)
     let currentYear = new Date().getFullYear()
     this.dateEnd = `${currentYear}-01-01`
     currentYear -= 1

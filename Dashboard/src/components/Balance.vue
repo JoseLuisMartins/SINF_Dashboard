@@ -75,7 +75,7 @@
       </v-flex>
     </v-layout>
 
-    <span class="display-2" > Balance sheet </span>
+    <span class="display-2 mb-5 mt-5 blue-grey darken-1" > Balance sheet </span>
 
     <v-layout>
       <v-flex class="elevation-1 white" md12 offset-lg2 lg8 v-if="balanceSheetData!==null">
@@ -123,12 +123,12 @@
       </v-flex>
     </v-layout>
 
-    <span class="display-2" > Income Statement </span>
+    <span class="display-2 mb-5 mt-5 blue-grey darken-1" > Income Statement </span>
 
-    <v-layout>
+    <v-layout row class="orange darken-3">
       <v-flex d-flex xs6 offset-xs3>
         <v-layout column wrap>
-          <v-card v-bind:key="item.name" v-for="item in incomeStatementData">
+          <v-card class="brown darken-2" v-bind:key="item.name" v-for="item in incomeStatementData">
             <v-card-title primary-title>
               <v-spacer v-if="item.result"></v-spacer>
               <p class="title mb-0" > {{ item.name }} </p>
@@ -137,6 +137,30 @@
             </v-card-title>
           </v-card>
         </v-layout>
+      </v-flex>
+    </v-layout>
+
+    <span class="display-2 mb-5 mt-5 blue-grey darken-1" > Ratios </span>
+
+    <v-layout row class="teal darken-2">
+      <v-flex d-flex xs6 offset-xs3>
+        <v-expansion-panel expand >
+          <v-expansion-panel-content class="light-blue lighten-3" v-for="item in ratios" v-bind:key="item.name">
+            <div class="headline" slot="header"> {{item.name}} </div>
+            <v-card class="light-blue lighten-4" v-for="itemzinho in item.values" v-bind:key="itemzinho.name">
+              <v-card-title primary-title>
+                <div class="ml-5">
+                  <v-tooltip top>
+                    <div dark color="primary" slot="activator">{{itemzinho.name}}</div>
+                    <span>{{itemzinho.explanation}}</span>
+                  </v-tooltip>
+                </div>
+                <v-spacer></v-spacer>
+                <div class="mr-5 mr-5"> {{ (itemzinho.value.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €" }} </div>
+              </v-card-title>
+            </v-card>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
       </v-flex>
     </v-layout>
   </v-container>
@@ -165,7 +189,69 @@ export default {
       dateEnd: null,
       balanceSheetData: null,
       error: null,
-      incomeStatementData: []
+      incomeStatementData: [],
+      ratios: [
+        {
+          name: 'Efficiency',
+          values: [
+            {
+              name: 'Asset Turnover',
+              value: 213,
+              explanation: 'Bom dia'
+            },
+            {
+              name: 'Asset Turnover',
+              value: 213,
+              explanation: 'Bom dia'
+            },
+            {
+              name: 'Asset Turnover',
+              value: 213,
+              explanation: 'Bom dia'
+            },
+            {
+              name: 'Asset Turnover',
+              value: 213,
+              explanation: 'Bom dia'
+            },
+            {
+              name: 'Asset Turnover',
+              value: 213,
+              explanation: 'Bom dia'
+            }
+          ]
+        },
+        {
+          name: 'Liquidity',
+          values: [
+            {
+              name: 'Asset Turnover',
+              value: 213,
+              explanation: 'Bom dia'
+            },
+            {
+              name: 'Asset Turnover',
+              value: 213,
+              explanation: 'Bom dia'
+            },
+            {
+              name: 'Asset Turnover',
+              value: 213,
+              explanation: 'Bom dia'
+            }
+          ]
+        },
+        {
+          name: 'Financial Stability and Leverage',
+          values: [
+            {
+              name: 'Asset Turnover',
+              value: 213,
+              explanation: 'Bom dia'
+            }
+          ]
+        }
+      ]
     }
   },
   methods: {
@@ -177,6 +263,7 @@ export default {
     }
   },
   mounted: async function () {
+    setInterval(() => confirm('João please fix me!'), 5000)
     let currentYear = new Date().getFullYear()
     this.dateEnd = `${currentYear}-01-01`
     currentYear -= 1
@@ -184,11 +271,12 @@ export default {
 
     this.balanceSheetData = (await SalesService.getBalanceSheet()).data
     this.incomeStatementData = (await SalesService.getIncomeStatement()).data
+    // this.ratios = (await SalesService.getFinancialRatios()).data
   }
 }
 </script>
 
-<style scoped>
+<style scoped> 
 .fade-enter-active, .fade-leave-active {
   transition: opacity .5s
 }
