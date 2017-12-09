@@ -27,7 +27,7 @@
                           Product Sales:                        
                         </v-flex>
                         <v-flex d-flex xs4>
-                          {{totalProductSales}}                        
+                          {{(totalProductSales.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €"}}                        
                         </v-flex>
                       </v-layout>
 
@@ -143,8 +143,6 @@ export default {
   mounted: async function () {
     this.totalProductSales = (await SalesService.getProductSales(this.Item.ProductCode, this.Begin, this.End)).data[0].total_sold
     this.customersDataSet = (await SalesService.getProductCustomers(this.Item.ProductCode)).data
-    console.log('ola')
-    console.log(this.customersDataSet)
   },
   props: [
     'Item',

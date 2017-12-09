@@ -353,7 +353,6 @@
     methods: {
       async getTops (begin, end) {
         let top10Products = (await SalesService.getTop10Products(begin, end)).data
-        console.log(top10Products)
         this.topsChartData.topProducts = this.prepareFamilyChart(top10Products, 'product_description', 'total_sold')
 
         let top10Customers = (await SalesService.getTop10Customers(begin, end)).data
@@ -366,7 +365,7 @@
         for (let element of contents) {
           if (element[value] <= 0) continue
           labels.push(element[key])
-          data.push(element[value].toFixed(0))
+          data.push((element[value].toFixed(2) + '').replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1'))
           let color = `#${((1 << 24) * Math.random() | 0).toString(16)}`
 
           backgroundColor.push(color)
@@ -414,14 +413,15 @@
           val[i].NetTotal = val[i].DocumentTotals.NetTotal
           const mult = val[i].InvoiceType === 'NC' ? -1 : 1
 
-          const date = val[i].InvoiceDate
+          const regex = /(\d{4}-\d{2})/
+          const date = val[i].InvoiceDate.match(regex)[1]
           dict[date] = Number(val[i].NetTotal) * mult + (dict[date] || 0)
         }
 
         for (let key in dict) {
           const dataString = key.split('-')
           data.push({
-            x: new Date(Number(dataString[0]), Number(dataString[1]), Number(dataString[2])),
+            x: new Date(Number(dataString[0]), Number(dataString[1])),
             y: dict[key]
           })
         }

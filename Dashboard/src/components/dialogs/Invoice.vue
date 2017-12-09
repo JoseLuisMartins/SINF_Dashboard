@@ -73,8 +73,8 @@
                      <v-layout column wrap>
                       <v-flex d-flex offset-xs8 >
                         <v-card class="elevation-1 mt-2 ">                         
-                          <v-card-text class="pa-1"> Net Total: {{NetTotal}}</v-card-text>
-                          <v-card-text class="pa-1" > Gross Total: {{GrossTotal}}</v-card-text>                      
+                          <v-card-text class="pa-1"> Net Total: {{(NetTotal.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €"}}</v-card-text>
+                          <v-card-text class="pa-1" > Gross Total: {{(GrossTotal.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €"}}</v-card-text>                      
                         </v-card>
                       </v-flex>
                     </v-layout>

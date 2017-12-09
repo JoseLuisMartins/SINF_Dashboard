@@ -27,7 +27,7 @@
                           Total money spent by the customer:                        
                         </v-flex>
                         <v-flex d-flex xs4>
-                          {{totalSpentValue}}                        
+                          {{(totalSpentValue.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €"}}                        
                         </v-flex>
                       </v-layout>
 

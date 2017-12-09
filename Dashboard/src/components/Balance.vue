@@ -78,22 +78,22 @@
     <v-layout>
       <v-flex class="elevation-1 white" md12 offset-lg2 lg8>
         <v-layout row wrap>
-          <v-flex d-flex md6 sm12 xs12>
-            <statements class="elevation-1" :data="sampleData.assets" title="Assets"> </statements>
+          <v-flex d-flex md6 sm12 xs12 v-if="balanceSheetData!==null">
+            <statements  class="elevation-1" :data="balanceSheetData.Assets" title="Assets"> </statements>
           </v-flex>
           <v-flex d-flex md6 sm12 xs12>
             <v-layout collumn wrap>
               <v-flex xs12 d-flex>
                 <v-card class="elevation-1"> 
-                  <v-card-title class="headline"> 
+                  <v-card-title class="headline" v-if="balanceSheetData!==null"> 
                     <span> Equity </span> 
                     <v-spacer> </v-spacer>  
-                    <span> 300 Mocas</span> 
+                    <span>  {{((balanceSheetData.Assets.total - balanceSheetData.Liabilities.total).toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €" }}</span> 
                   </v-card-title>
                 </v-card>
               </v-flex xs12>
-              <v-flex d-flex xs12>
-                <statements class="elevation-1" :data="sampleData.liabilities" title="Liabilities"> </statements>
+              <v-flex d-flex xs12 v-if="balanceSheetData!==null">
+                <statements class="elevation-1" :data="balanceSheetData.Liabilities" title="Liabilities"> </statements>
               </v-flex>
             </v-layout>
           </v-flex>
@@ -109,6 +109,7 @@ import LineChart from '@/components/charts/LineChart'
 import PieChart from '@/components/charts/PieChart'
 import Loading from '@/components/loadings/Loading'
 import Statements from '@/components/balance/Statements'
+import SalesService from '@/services/Sales'
 
 export default {
   components: {
@@ -124,63 +125,7 @@ export default {
       menu1: false,
       menu2: false,
       dateEnd: null,
-
-      sampleData: {
-        assets: [
-          {
-            name: 'Total Current Assets',
-            values: [
-              { name: 'Thing', value: 23000 },
-              { name: 'Thing', value: 23000 },
-              { name: 'Thing', value: 23000 },
-              { name: 'Thing', value: 23000 }
-            ]
-          },
-          {
-            name: 'Total Non Current Assets',
-            values: [
-              { name: 'Thing', value: 23000 },
-              { name: 'Thing', value: 23000 },
-              { name: 'Thing', value: 23000 },
-              { name: 'Thing', value: 23000 },
-              { name: 'Thing', value: 23000 }
-            ]
-          },
-          {
-            name: 'Total Assets',
-            values: [
-              { name: 'Thing', value: 23000 }
-            ]
-          }
-        ],
-        liabilities: [
-          {
-            name: 'Total Current Liabilities',
-            values: [
-              { name: 'Thing', value: 23000 },
-              { name: 'Thing', value: 23000 },
-              { name: 'Thing', value: 23000 },
-              { name: 'Thing', value: 23000 }
-            ]
-          },
-          {
-            name: 'Total Long Term Debt',
-            values: [
-              { name: 'Thing', value: 23000 },
-              { name: 'Thing', value: 23000 },
-              { name: 'Thing', value: 23000 }
-            ]
-          },
-          {
-            name: 'Total Liabilities',
-            values: [
-              { name: 'Thing', value: 23000 },
-              { name: 'Thing', value: 23000 }
-            ]
-          }
-        ]
-      },
-
+      balanceSheetData: null,
       error: null
     }
   },
@@ -192,11 +137,13 @@ export default {
     dateEnd: function (val) {
     }
   },
-  mounted: function () {
+  mounted: async function () {
     let currentYear = new Date().getFullYear()
     this.dateEnd = `${currentYear}-01-01`
     currentYear -= 1
     this.dateBegin = `${currentYear}-01-01`
+
+    this.balanceSheetData = (await SalesService.getBalanceSheet()).data
   }
 }
 </script>

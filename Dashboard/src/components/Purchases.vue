@@ -319,6 +319,7 @@ export default {
 
       for (var i = 0; i < val.length; i++) {
         val[i].TotalMerc = Math.abs(val[i].TotalMerc)
+
         const regex = /(\d{4}-\d{2})/
         const date = val[i].Data.match(regex)[1]
         dict[date] = Number(val[i].TotalMerc) + (dict[date] || 0)
