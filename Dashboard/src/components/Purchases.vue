@@ -271,11 +271,13 @@ import PurchasesService from '@/services/Purchases'
 import Products from '@/services/Products'
 import ChartOptions from '@/components/charts/config'
 import PieChart from '@/components/charts/PieChart'
+import Loading from '@/components/loadings/Loading'
 
 export default {
   components: {
     LineChart,
-    PieChart
+    PieChart,
+    Loading
   },
   methods: {
     async displaySupplierModal (id, name) {

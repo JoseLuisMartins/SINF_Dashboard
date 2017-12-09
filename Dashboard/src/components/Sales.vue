@@ -67,6 +67,20 @@
         </v-card>
       </v-flex>
     </v-layout>
+   
+   <v-layout>
+      <v-flex mb-4 d-flex sm6 offset-sm3 xs12>             
+        <v-card style="color:#f2f2f2">
+          <v-card-title class="headline green darken-2" >
+            <b > Total Sales </b>
+            <v-spacer> </v-spacer>
+            <b > {{totalSales}}  <v-icon large>euro_symbol</v-icon> </b>
+          </v-card-title>
+        </v-card>
+    </v-flex>
+   </v-layout>
+
+
     <v-layout row wrap>
       <v-flex d-flex xs12 md12>
         <v-card>
@@ -94,14 +108,14 @@
       </v-flex>
     </v-layout>
 
-    <v-layout row wrap>
+    <v-layout row wrap >
       <v-expansion-panel>
-        <v-expansion-panel-content>
-          <div slot="header" class="headline">
+        <v-expansion-panel-content class="cyan darken-3" style="color:white">
+          <div slot="header" class="headline" >
             All Products and Customer details
           </div>
           <v-layout row wrap>
-            <v-flex d-flex sm12 md6>
+            <v-flex d-flex sm12 md6 pa-1>
               <v-card>
                 <v-card-title class="pb-0">
                   <div class="headline"> Products </div>
@@ -127,7 +141,7 @@
               </v-card>
             </v-flex>
 
-            <v-flex d-flex sm12 md6>
+            <v-flex d-flex sm12 md6 pa-1>
               <v-card>
                 <v-card-title class="pb-0">
                   <div class="headline"> Customers </div>
@@ -136,7 +150,12 @@
                 </v-card-title>
                 <v-card-text>
 
-                  <v-data-table :search="search_2" v-bind:headers="customersHeader" :items="customersDataSet" class="elevation-1" item-key="CustomerID"
+                  <v-data-table 
+                    :search="search_2" 
+                    v-bind:headers="customersHeader" 
+                    :items="customersDataSet" 
+                    class="elevation-1"
+                    item-key="CustomerID"
                     :loading="customersDataSet.length == 0">
 
                     <template slot="items" scope="props">
@@ -191,6 +210,38 @@
       </v-flex>
     </v-layout>
 
+    <v-layout row wrap>
+      <v-flex sm12>
+        <v-card>
+          <v-card-title class="pb-0">
+            <div class="headline"> Sales Invoices </div>
+            <v-spacer></v-spacer>
+            <v-text-field append-icon="search" label="Search" single-line hide-details v-model="search_4"></v-text-field>
+          </v-card-title>
+          <v-card-text>
+
+            <v-data-table 
+              :search="search_4" 
+              v-bind:headers="invoiceHeader" 
+              :items="invoicesDataSet" 
+              class="elevation-1" 
+              item-key="Hash"
+              :loading="invoicesDataSet.length == 0">
+
+              <template slot="items" scope="props">
+                <tr class="cursor-pointer" @click="() => { showInvoiceDialog=true, invoiceItem=props.item }">
+                  <td> {{props.item.InvoiceNo }} </td>
+                  <td> {{props.item.InvoiceDate }} </td>
+                  <td> {{props.item.InvoiceType }} </td>
+                </tr>
+              </template>
+
+            </v-data-table>
+
+          </v-card-text>
+        </v-card>
+      </v-flex>
+    </v-layout>
 
     <v-layout row wrap>
       <v-flex sm12>
@@ -202,48 +253,55 @@
           </v-card-title>
           <v-card-text>
 
-            <v-data-table :search="search_3" v-bind:headers="backlogHeader" :items="backlogDataSet" class="elevation-1" :loading="backlogDataSet.length == 0">
+            <v-data-table 
+              :search="search_3" 
+              v-bind:headers="backlogHeader" 
+              :items="backlogDataSet" 
+              class="elevation-1" 
+              item-key="id"
+              :loading="backlogDataSet.length == 0">
 
               <template slot="items" scope="props">
 
-                <td> {{props.item.Entidade }} </td>
-                <td> {{props.item.Data }} </td>
-                <td> {{(props.item.TotalMerc.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + "€" }} </td>
-
-              </template>
-
-            </v-data-table>
-
-          </v-card-text>
-        </v-card>
-      </v-flex>
-    </v-layout>
-
-    <v-layout row wrap>
-      <v-flex sm12>
-        <v-card>
-          <v-card-title class="pb-0">
-            <div class="headline"> Sales Invoices </div>
-            <v-spacer></v-spacer>
-            <v-text-field append-icon="search" label="Search" single-line hide-details v-model="search_4"></v-text-field>
-          </v-card-title>
-          <v-card-text>
-
-            <v-data-table :search="search_4" v-bind:headers="invoiceHeader" :items="invoicesDataSet" class="elevation-1" item-key="Hash"
-              :loading="invoicesDataSet.length == 0">
-              <template slot="items" scope="props">
-                <tr class="cursor-pointer" @click="() => { showInvoiceDialog=true, invoiceItem=props.item }">
-                  <td> {{props.item.InvoiceNo }} </td>
-                  <td> {{props.item.InvoiceDate }} </td>
-                  <td> {{props.item.InvoiceType }} </td>
+                <tr class="cursor-pointer" @click="() => {openBacklogDialog(props.item)}">
+                  <td> {{props.item.Entidade }} </td>
+                  <td> {{props.item.Data }} </td>
+                  <td> {{(props.item.TotalMerc.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + "€" }} </td>
                 </tr>
               </template>
+
             </v-data-table>
 
           </v-card-text>
         </v-card>
       </v-flex>
     </v-layout>
+
+
+     <v-dialog v-model="showSalesBacklogDialog"  max-width="1000px">
+      <v-card v-if="salesBacklogItem!== null">
+        <v-card-title>
+          <span class="headline">  {{salesBacklogItem.Entidade}} </span>
+          <v-spacer> </v-spacer>
+           <span class="headline">  {{salesBacklogItem.Data}} </span>
+        </v-card-title>
+        <v-card-text>          
+          <v-data-table
+            :loading="salesBacklogItem == null"
+            v-bind:headers="backlogProductsHeader"
+            :items="salesBacklogItem.LinhasDoc"           
+            >
+            <template slot="items" scope="props">
+              <td> {{props.item.CodArtigo }} </td>
+              <td> {{props.item.DescArtigo }} </td>
+              <td> {{props.item.Quantidade }} </td>
+              <td> {{(props.item.TotalLiquido.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + "€"  }} </td>
+            </template>
+          </v-data-table>
+
+        </v-card-text>
+      </v-card>
+    </v-dialog>
 
   </v-container>
 </template>
@@ -257,6 +315,7 @@
   import PieChart from '@/components/charts/PieChart'
   import SalesService from '@/services/Sales'
   import ChartOptions from '@/components/charts/config'
+  import Loading from '@/components/loadings/Loading'
 
   export default {
     data () {
@@ -327,6 +386,27 @@
           align: 'left'
         }
         ],
+        backlogProductsHeader: [{
+          text: 'Item code',
+          value: 'CodArtigo',
+          align: 'left'
+        },
+        {
+          text: 'Item description',
+          value: 'DescArtigo',
+          align: 'left'
+        },
+        {
+          text: 'Quantity',
+          value: 'Quantidade',
+          align: 'left'
+        },
+        {
+          text: 'Total (without taxes)',
+          value: 'TotalLiquido',
+          align: 'left'
+        }
+        ],
         salesChartData: {
           datasets: []
         },
@@ -343,14 +423,21 @@
         showInvoiceDialog: false,
         showCustomerDetailsDialog: false,
         showProductDetailsDialog: false,
+        showSalesBacklogDialog: false,
+        salesBacklogItem: null,
         invoiceItem: null,
         productitem: null,
         customerItem: null,
         dateBegin: null,
-        dateEnd: null
+        dateEnd: null,
+        totalSales: 0
       }
     },
     methods: {
+      openBacklogDialog (item) {
+        this.showSalesBacklogDialog = true
+        this.salesBacklogItem = item
+      },
       async getTops (begin, end) {
         let top10Products = (await SalesService.getTop10Products(begin, end)).data
         this.topsChartData.topProducts = this.prepareFamilyChart(top10Products, 'product_description', 'total_sold')
@@ -396,6 +483,8 @@
         this.backlogDataSet = backlog.data
         this.invoicesDataSet = invoices.data
         this.getTops(this.dateBegin, this.dateEnd)
+
+        this.totalSales = ((await SalesService.getTotalNetSales(this.dateBegin, this.dateEnd)).data[0].total.toFixed(2) + '').replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1 ')
       },
       dateEnd: async function (val) {
         const invoices = await SalesService.getInvoices(this.dateBegin, this.dateEnd)
@@ -404,6 +493,8 @@
         this.backlogDataSet = backlog.data
         this.invoicesDataSet = invoices.data
         this.getTops(this.dateBegin, this.dateEnd)
+
+        this.totalSales = ((await SalesService.getTotalNetSales(this.dateBegin, this.dateEnd)).data[0].total.toFixed(2) + '').replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1 ')
       },
       invoicesDataSet: function (val) {
         let data = []
@@ -449,7 +540,8 @@
       Invoice,
       SalesCustomerDetails,
       SalesProductDetails,
-      PieChart
+      PieChart,
+      Loading
     }
   }
 </script>

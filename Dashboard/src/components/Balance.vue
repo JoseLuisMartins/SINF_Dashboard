@@ -75,29 +75,51 @@
       </v-flex>
     </v-layout>
 
+    <span class="display-2" > Balance sheet </span>
+
     <v-layout>
-      <v-flex class="elevation-1 white" md12 offset-lg2 lg8>
+      <v-flex class="elevation-1 white" md12 offset-lg2 lg8 v-if="balanceSheetData!==null">
         <v-layout row wrap>
-          <v-flex d-flex md6 sm12 xs12 v-if="balanceSheetData!==null">
-            <statements  class="elevation-1" :data="balanceSheetData.Assets" title="Assets"> </statements>
+            <v-flex d-flex md6 sm12 xs12 >
+              <statements  class="elevation-1" :data="balanceSheetData.Assets" title="Assets"> </statements>            
+            </v-flex>
+            <v-flex d-flex md6 sm12 xs12>
+              <v-layout collumn wrap>
+                <v-flex xs12 d-flex>
+                  <v-card class="elevation-1 grey lighten-1"> 
+                    <v-card-title class="headline"> 
+                      <span> Equity </span> 
+                      <v-spacer> </v-spacer>  
+                      <span>  {{((balanceSheetData.Assets.total - balanceSheetData.Liabilities.total).toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €" }}</span> 
+                    </v-card-title>
+                  </v-card>
+                </v-flex>
+                <v-flex d-flex xs12 >
+                  <statements class="elevation-1" :data="balanceSheetData.Liabilities" title="Liabilities"> </statements>              
+                </v-flex>                
+              </v-layout>
+            </v-flex>
+        </v-layout> 
+        <v-layout row wrap>
+          <v-flex d-flex md6 sm12 xs12 >
+            <v-card class="elevation-1 grey lighten-1"> 
+                <v-card-title class="headline"> 
+                  <span> Total Assets </span> 
+                  <v-spacer> </v-spacer>  
+                  <span>  {{(balanceSheetData.Assets.total.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €" }}</span> 
+                </v-card-title>
+              </v-card>
           </v-flex>
-          <v-flex d-flex md6 sm12 xs12>
-            <v-layout collumn wrap>
-              <v-flex xs12 d-flex>
-                <v-card class="elevation-1"> 
-                  <v-card-title class="headline" v-if="balanceSheetData!==null"> 
-                    <span> Equity </span> 
+           <v-flex d-flex md6 sm12 xs12 >
+              <v-card class="elevation-1 grey lighten-1"> 
+                  <v-card-title class="headline"> 
+                    <span> Total Liabilities </span> 
                     <v-spacer> </v-spacer>  
-                    <span>  {{((balanceSheetData.Assets.total - balanceSheetData.Liabilities.total).toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €" }}</span> 
+                    <span>  {{(balanceSheetData.Liabilities.total.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €" }}</span> 
                   </v-card-title>
                 </v-card>
-              </v-flex xs12>
-              <v-flex d-flex xs12 v-if="balanceSheetData!==null">
-                <statements class="elevation-1" :data="balanceSheetData.Liabilities" title="Liabilities"> </statements>
-              </v-flex>
-            </v-layout>
           </v-flex>
-        </v-layout> 
+        </v-layout>
       </v-flex>
     </v-layout>
 

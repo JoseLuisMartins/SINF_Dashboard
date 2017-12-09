@@ -1,5 +1,5 @@
 <template>
-        <v-card class="grey lighten-2">
+        <v-card class="grey lighten-3">
           <v-card-title>
             <div class="title">
               {{Item.ProductDescription}} details
@@ -26,7 +26,7 @@
                         <v-flex class="title" d-flex xs4 offset-xs2>
                           Product Sales:                        
                         </v-flex>
-                        <v-flex d-flex xs4>
+                        <v-flex d-flex xs4 v-if="totalProductSales!==null">
                           {{(totalProductSales.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €"}}                        
                         </v-flex>
                       </v-layout>
@@ -164,10 +164,3 @@ export default {
 }
 </script>
 
-<style scoped>
-
-.title {
-  font-weight: bold;
-}
-
-</style>

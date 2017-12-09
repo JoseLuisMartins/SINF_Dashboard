@@ -22,7 +22,7 @@
                 <v-card>
                   <v-card-text>
                     
-                      <v-layout row justify-space-between elevation-3 pb-2 pt-2>
+                      <v-layout row justify-space-between elevation-3 pb-2 pt-2 >
                         <v-flex class="title" d-flex xs4 offset-xs2>
                           Total money spent by the customer:                        
                         </v-flex>
@@ -180,10 +180,3 @@ export default {
 }
 </script>
 
-<style scoped>
-
-.title {
-  font-weight: bold;
-}
-
-</style>
