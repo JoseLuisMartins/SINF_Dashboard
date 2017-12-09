@@ -40,6 +40,9 @@ namespace FirstREST.Controllers
                 case "BalanceSheet":
                     body = MongoConnection.GetBalanceSheet();
                     break;
+                case "IncomeStatement":
+                    body = MongoConnection.GetIncomeStatement();
+                    break;
                 default:
                     body = MongoConnection.GetCollection(id);
                     break;

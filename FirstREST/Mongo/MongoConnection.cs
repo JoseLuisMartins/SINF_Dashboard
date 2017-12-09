@@ -283,6 +283,79 @@ namespace FirstREST.Mongo
             return obj;
         }
 
+        private static JObject getIncomeStatementObject(string name, double value, Boolean result)
+        {
+            JObject obj = new JObject();
+
+            obj.Add("name", name);
+            obj.Add("value", value);
+            obj.Add("result", result);
+
+            return obj;
+        }
+
+        public static string GetIncomeStatement()
+        {
+            JArray obj = new JArray();
+
+            double account71 = GetAccountValue(71);
+            double account72 = GetAccountValue(72);
+            double account73 = GetAccountValue(73);
+            double account74 = GetAccountValue(74);
+            double account75 = GetAccountValue(75);
+            double account78 = GetAccountValue(78);
+            double account79 = GetAccountValue(79);
+            double account761 = GetAccountValue(761);
+            double account762 = GetAccountValue(762);
+            double account763 = GetAccountValue(763);         
+            double account61 = GetAccountValue(61);
+            double account62 = GetAccountValue(62);
+            double account63 = GetAccountValue(63);
+            double account64 = GetAccountValue(64);
+            double account65 = GetAccountValue(65);
+            double account67 = GetAccountValue(67);
+            double account68 = GetAccountValue(68);
+            double account69 = GetAccountValue(69);
+            double account812 = GetAccountValue(812);
+
+
+            obj.Add(getIncomeStatementObject("Net Sales", Math.Abs(account71 + account72), false));
+            obj.Add(getIncomeStatementObject("Exploration Subsidy", account75, false));
+            obj.Add(getIncomeStatementObject("Variation in production inventories", account73, false));
+            obj.Add(getIncomeStatementObject("Work for the entity itself", account74, false));
+            obj.Add(getIncomeStatementObject("Costs of goods sold", -account61, false));
+            obj.Add(getIncomeStatementObject("Supplies and external services", -account62, false));
+            obj.Add(getIncomeStatementObject("Expenses with people", -account63, false));
+            obj.Add(getIncomeStatementObject("Impairments (losses / reversals)", account762 - account65, false));
+            obj.Add(getIncomeStatementObject("Provisions (increases / reductions)", account763 - account67, false));
+            obj.Add(getIncomeStatementObject("Other income and gains", account78, false));
+            obj.Add(getIncomeStatementObject("Other expenses and losses", -account68, false));
+
+            double total = Math.Abs(account71 + account72) + account75 + account73 + account74 - account61 - account62 - 
+                account63 + account762 - account65 + account763 - account67 + account78 - account68;
+
+            obj.Add(getIncomeStatementObject("Result before depreciation, financing expenses and taxes", total, true));
+            //---------------           
+
+            obj.Add(getIncomeStatementObject("Depreciation and amortization expenses/reversals", account761 - account64, false));
+            total += account761 - account64;
+
+            obj.Add(getIncomeStatementObject("Operating income (before financing expenses and taxes)", total, true));
+        
+            //-----------
+            obj.Add(getIncomeStatementObject("Net financing expense", account79 - account69, false));
+            total += account79 - account69;
+            obj.Add(getIncomeStatementObject("Income before income taxes", total, true));
+
+            //---------
+            obj.Add(getIncomeStatementObject("Income taxes for the period", account812, false));
+            total += account812;
+            obj.Add(getIncomeStatementObject("Net income", total, true));
+
+            
+            return obj.ToString();
+        }
+
         public static string GetBalanceSheet()
         {
             JObject obj = new JObject();
@@ -302,7 +375,7 @@ namespace FirstREST.Mongo
 
             JArray nonCurrentAssetsValues = new JArray();
 
-            JObject investment = getFieldObject("Investimentos/Tangible Assets", class4);
+            JObject investment = getFieldObject("Investments/Tangible Assets", class4);
 
             nonCurrentAssetsValues.Add(investment);
 
@@ -316,12 +389,12 @@ namespace FirstREST.Mongo
             // current assets
            
             // sub topics
-            double class3 = GetAccountValue(31) +
-                            GetAccountValue(32) +
+            double class3 = GetAccountValue(32) +
                             GetAccountValue(33) +
                             GetAccountValue(34) +
                             GetAccountValue(35) +
-                            GetAccountValue(36);
+                            GetAccountValue(36) +
+                            GetAccountValue(39);
 
             double account21 = GetAccountValue(21);
 
@@ -365,7 +438,7 @@ namespace FirstREST.Mongo
             //Non current liabilities
 
             // sub topics
-            double account25 = GetAccountValue(25);
+            double account25 = Math.Abs(GetAccountValue(25));
 
 
             JArray nonCurrentLiabilitiesValues = new JArray();
@@ -382,9 +455,9 @@ namespace FirstREST.Mongo
 
 
             // current liabilities
-            double account22 = GetAccountValue(22);
-            double account24 = GetAccountValue(24);
-            double account26 = GetAccountValue(26);
+            double account22 = Math.Abs(GetAccountValue(22));
+            double account24 = Math.Abs(GetAccountValue(24));
+            double account26 = Math.Abs(GetAccountValue(26));
 
             JArray currentLiabilitiesValues = new JArray();
 
