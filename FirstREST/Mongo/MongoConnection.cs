@@ -274,11 +274,155 @@ namespace FirstREST.Mongo
             return aggregate.ToList().ToJson(settings);
         }
         
+        private static JObject getFieldObject(string name, double value) {
+            JObject obj = new JObject();          
+           
+            obj.Add("name", name);
+            obj.Add("value", value);
+
+            return obj;
+        }
 
         public static string GetBalanceSheet()
         {
             JObject obj = new JObject();
 
+            //ASSETS--------------------------------------------------------------------------------------------
+            JObject assets =  new JObject();
+            
+            //Non current assets----        
+
+            // sub topics
+            double class4 = GetAccountValue(41) +
+                            GetAccountValue(42) +
+                            GetAccountValue(43) +
+                            GetAccountValue(44) +
+                            GetAccountValue(45) +
+                            GetAccountValue(46);
+
+            JArray nonCurrentAssetsValues = new JArray();
+
+            JObject investment = getFieldObject("Investimentos/Tangible Assets", class4);
+
+            nonCurrentAssetsValues.Add(investment);
+
+            // object
+            JObject nonCurrentAssets = new JObject();
+                nonCurrentAssets.Add("name", "Non Current Assets");
+                nonCurrentAssets.Add("total", class4);
+                nonCurrentAssets.Add("values", nonCurrentAssetsValues);
+       
+
+            // current assets
+           
+            // sub topics
+            double class3 = GetAccountValue(31) +
+                            GetAccountValue(32) +
+                            GetAccountValue(33) +
+                            GetAccountValue(34) +
+                            GetAccountValue(35) +
+                            GetAccountValue(36);
+
+            double account21 = GetAccountValue(21);
+
+            double class1 = GetAccountValue(11) +
+                            GetAccountValue(12) +
+                            GetAccountValue(13) +
+                            GetAccountValue(14);
+           
+            JArray currentAssetsValues = new JArray();
+
+            JObject inventory = getFieldObject("Inventory", class3);     
+            JObject accountsReceivable = getFieldObject("Accounts Receivable", account21);
+            JObject liquidAssets = getFieldObject("Liquid Assets (Cash, Bank Deposits and other)", class1);  
+              
+
+            currentAssetsValues.Add(inventory);
+            currentAssetsValues.Add(accountsReceivable);
+            currentAssetsValues.Add(liquidAssets);
+
+         
+            // object
+            JObject currentAssets = new JObject();
+            currentAssets.Add("name", "Current Assets");
+            currentAssets.Add("total", class3 + account21 + class1);
+            currentAssets.Add("values", currentAssetsValues);
+                   
+            
+            //assets obj           
+            JArray assetsFields = new JArray();
+
+            assetsFields.Add(nonCurrentAssets);
+            assetsFields.Add(currentAssets);
+
+            assets.Add("total", class4 + class3 + account21 + class1);
+            assets.Add("fields", assetsFields);
+
+
+            //LIABILITIES-------------------------------------------------------------------------------------
+            JObject liabilities = new JObject();
+
+            //Non current liabilities
+
+            // sub topics
+            double account25 = GetAccountValue(25);
+
+
+            JArray nonCurrentLiabilitiesValues = new JArray();
+
+            JObject funding = getFieldObject("Obtained funding (loans and others)", account25);
+
+            nonCurrentLiabilitiesValues.Add(funding);
+
+            // object
+            JObject nonCurrentLiabilities = new JObject();
+            nonCurrentLiabilities.Add("name", "Non Current Liabilities");
+            nonCurrentLiabilities.Add("total", account25);
+            nonCurrentLiabilities.Add("values", nonCurrentLiabilitiesValues);
+
+
+            // current liabilities
+            double account22 = GetAccountValue(22);
+            double account24 = GetAccountValue(24);
+            double account26 = GetAccountValue(26);
+
+            JArray currentLiabilitiesValues = new JArray();
+
+            JObject accountsPayable = getFieldObject("Accounts Payable", account22);
+            JObject state = getFieldObject("State and other public entities", account24);
+            JObject shareholders = getFieldObject("Shareholders", account26);
+
+            currentLiabilitiesValues.Add(accountsPayable);
+            currentLiabilitiesValues.Add(state);
+            currentLiabilitiesValues.Add(shareholders);
+            
+     
+            // object
+            JObject currentLiabilities = new JObject();
+            currentLiabilities.Add("name", "Current Liabilities");
+            currentLiabilities.Add("total", account22 + account24 + account26);
+            currentLiabilities.Add("values", currentLiabilitiesValues);
+
+            //liabilities obj     
+
+            JArray liabilitiesFields = new JArray();
+
+            liabilitiesFields.Add(nonCurrentLiabilities);
+            liabilitiesFields.Add(currentLiabilities);
+
+            liabilities.Add("total", account22 + account24 + account26 + account25);
+            liabilities.Add("fields", liabilitiesFields);
+
+
+            // balance sheet
+            obj.Add("Assets", assets);
+            obj.Add("Liabilities", liabilities);
+           
+
+
+            return obj.ToString();
+            // GFK
+            /*
             JObject ativos_nao_correntes = new JObject();
             ativos_nao_correntes.Add("Ativos fixos tangíveis", GetAccountValue(43) + GetAccountValue(453));
             ativos_nao_correntes.Add("Propriedades de investimento", GetAccountValue(42));
@@ -340,8 +484,10 @@ namespace FirstREST.Mongo
             obj.Add("Capitais Próprios", capitais_proprios);
             obj.Add("Passivo não corrente", passivos_nao_correntes);
             obj.Add("Passivo corrente", passivos_correntes);
-
+            
             return obj.ToString();
+            
+            */
         }
 
     }

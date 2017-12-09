@@ -19,7 +19,7 @@ namespace FirstREST.Controllers
         public HttpResponseMessage Get()
         {
 
-            string res = MongoConnection.GetBalanceSheet();
+            string res = MongoConnection.GetCollection("Header");
             var response = this.Request.CreateResponse(HttpStatusCode.OK);
             response.Content = new StringContent(res, Encoding.UTF8, "application/json");
 
@@ -27,12 +27,25 @@ namespace FirstREST.Controllers
         }
 
 
-
+        // api/saft/BalanceSheet
+        // api/saft/SalesInvoices
+        //-----
         public HttpResponseMessage Get(string id)
         {
+            HttpResponseMessage response = null;
+            string body = "";
+
+            switch (id)
+            {
+                case "BalanceSheet":
+                    body = MongoConnection.GetBalanceSheet();
+                    break;
+                default:
+                    body = MongoConnection.GetCollection(id);
+                    break;
+            }
             
-            string body = MongoConnection.GetCollection(id);
-            var response = this.Request.CreateResponse(HttpStatusCode.OK);
+            response = this.Request.CreateResponse(HttpStatusCode.OK);
             response.Content = new StringContent(body, Encoding.UTF8, "application/json");
 
             return response;
