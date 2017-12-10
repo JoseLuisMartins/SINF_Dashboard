@@ -285,7 +285,7 @@ namespace FirstREST.Mongo
 
             return obj;
         }
-       
+
 
         public static string GetFinancialRatios()
         {
@@ -353,17 +353,20 @@ namespace FirstREST.Mongo
             
             double netSales = Math.Abs(account71 + account72) + account75 + account73 + account74 - account61 - account62 - 
                 account63 + account762 - account65 + account763 - account67 + account78 - account68;
-            double netEarnings = netSales + account812 + account79 - account69 + account761 - account64;
+            double ebit = netSales + (account761 - account64);
+            double interest = account79 - account69;
+            double netEarnings = ebit + interest + account812;
             double totalAssets = class4 + class3 + account21 + class1;
             double currentLiabilities = account22 + account24 + account26;
             double nonCurrentLiabilities = account25;
             double equity = totalAssets - currentLiabilities - nonCurrentLiabilities;            
             double inventory = class3;
             double costsOfGoodSold = account61;
-            double accountsReceivable = account21;
-            double sales = GetAccountValue(71);
+            double accountsReceivable = Math.Abs(account21);
+            double sales = Math.Abs(GetAccountValue(71));
             double accountsPayable = account22;
             double purchases = GetAccountValue(31);
+            double cash = GetAccountValue(11);
 
 
 
@@ -378,9 +381,9 @@ namespace FirstREST.Mongo
             analysisOfReturn.Add("name", "Analysis of return");
             
             JArray analysisOfReturnValues = new JArray();
-            analysisOfReturnValues.Add(getRatioObject("Return on sales", netEarnings/netSales, ""));
-            analysisOfReturnValues.Add(getRatioObject("Return on Assets", 0, ""));
-            analysisOfReturnValues.Add(getRatioObject("Return on Equity", 0, ""));
+            analysisOfReturnValues.Add(getRatioObject("Return on sales", (netEarnings/netSales) * 100, ""));
+            analysisOfReturnValues.Add(getRatioObject("Return on Assets", (netEarnings/totalAssets) * 100, ""));
+            analysisOfReturnValues.Add(getRatioObject("Return on Equity", (netEarnings/equity) * 100, ""));
 
             analysisOfReturn.Add("values", analysisOfReturnValues);
 
@@ -391,11 +394,11 @@ namespace FirstREST.Mongo
             efficiency.Add("name", "Efficiency");
 
             JArray efficiencyValues = new JArray();
-            efficiencyValues.Add(getRatioObject("Asset turnover", 0, ""));
-            efficiencyValues.Add(getRatioObject("Average inventory period", 0, ""));
-            efficiencyValues.Add(getRatioObject("Inventory turnover", 0, ""));
-            efficiencyValues.Add(getRatioObject("Average collection period", 0, ""));
-            efficiencyValues.Add(getRatioObject("Average payment period", 0, ""));
+            efficiencyValues.Add(getRatioObject("Asset turnover", (sales/totalAssets) * 100, ""));
+            efficiencyValues.Add(getRatioObject("Average inventory period", (inventory/costsOfGoodSold) * 365, ""));
+            efficiencyValues.Add(getRatioObject("Inventory turnover", (costsOfGoodSold/inventory) * 100, ""));
+            efficiencyValues.Add(getRatioObject("Average collection period", (accountsReceivable/sales) * 365, ""));
+            efficiencyValues.Add(getRatioObject("Average payment period", (accountsPayable/purchases) * 365, ""));
 
 
             efficiency.Add("values", efficiencyValues);
@@ -407,10 +410,10 @@ namespace FirstREST.Mongo
             liquidity.Add("name", "Liquidity");
 
             JArray liquidityValues = new JArray();
-            liquidityValues.Add(getRatioObject("Current ratio", 0, ""));
-            liquidityValues.Add(getRatioObject("Quick ratio (acid test)", 0, ""));
-            liquidityValues.Add(getRatioObject("Cash ratio", 0, ""));
-            liquidityValues.Add(getRatioObject("Working Capital", 0, ""));
+            liquidityValues.Add(getRatioObject("Current ratio", totalAssets/currentLiabilities, ""));
+            liquidityValues.Add(getRatioObject("Quick ratio", (totalAssets - inventory)/currentLiabilities, ""));
+            liquidityValues.Add(getRatioObject("Cash ratio", class1 / currentLiabilities, ""));
+            liquidityValues.Add(getRatioObject("Working Capital", totalAssets - currentLiabilities, ""));
 
             liquidity.Add("values", liquidityValues);
 
@@ -421,18 +424,18 @@ namespace FirstREST.Mongo
             financialStabilityAndLeverage.Add("name", "Financial stability and Leverage");
 
             JArray financialStabilityAndLeverageValues = new JArray();
-            financialStabilityAndLeverageValues.Add(getRatioObject("Equity to assets ratio", 0, ""));
-            financialStabilityAndLeverageValues.Add(getRatioObject("Debt to Equity", 0, ""));
-            financialStabilityAndLeverageValues.Add(getRatioObject("Coverage of fixed investments", 0, ""));
-            financialStabilityAndLeverageValues.Add(getRatioObject("Interest Coverage", 0, ""));
+            financialStabilityAndLeverageValues.Add(getRatioObject("Equity to assets ratio", equity/totalAssets, ""));
+            //financialStabilityAndLeverageValues.Add(getRatioObject("Debt to Equity", 0, ""));
+            //financialStabilityAndLeverageValues.Add(getRatioObject("Coverage of fixed investments", 0, ""));
+            financialStabilityAndLeverageValues.Add(getRatioObject("Interest Coverage", ebit /interest , ""));
 
             financialStabilityAndLeverage.Add("values", financialStabilityAndLeverageValues);
 
             //Growth ratios
-
+            /*
             JObject growthRatios = new JObject();
 
-            growthRatios.Add("name", "Analysis of return");
+            growthRatios.Add("name", "Growth Ratios");
 
             JArray growthRatiosValues = new JArray();
             growthRatiosValues.Add(getRatioObject("Sales", 0, ""));
@@ -441,14 +444,14 @@ namespace FirstREST.Mongo
             growthRatiosValues.Add(getRatioObject("Inventory", 0, ""));
 
             growthRatios.Add("values", growthRatiosValues);
-
+            */
 
             //--------------------- Ratios object ------------------
             ratios.Add(analysisOfReturn);
             ratios.Add(efficiency);
             ratios.Add(liquidity);
             ratios.Add(financialStabilityAndLeverage);
-            ratios.Add(growthRatios);
+            //ratios.Add(growthRatios);
             
 
             return ratios.ToString();

@@ -46,7 +46,7 @@ namespace FirstREST.Controllers
                     body = MongoConnection.GetIncomeStatement();
                     break;
                 case "FinancialRatios":
-                    body = MongoConnection.GetIncomeStatement();
+                    body = MongoConnection.GetFinancialRatios();
                     break;
                 default:
                     body = MongoConnection.GetCollection(id);
