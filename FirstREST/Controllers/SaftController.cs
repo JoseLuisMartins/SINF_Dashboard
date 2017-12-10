@@ -28,6 +28,8 @@ namespace FirstREST.Controllers
 
 
         // api/saft/BalanceSheet
+        // api/saft/IncomeStatement
+        // api/saft/FinancialRatios
         // api/saft/SalesInvoices
         //-----
         public HttpResponseMessage Get(string id)
@@ -41,6 +43,9 @@ namespace FirstREST.Controllers
                     body = MongoConnection.GetBalanceSheet();
                     break;
                 case "IncomeStatement":
+                    body = MongoConnection.GetIncomeStatement();
+                    break;
+                case "FinancialRatios":
                     body = MongoConnection.GetIncomeStatement();
                     break;
                 default:

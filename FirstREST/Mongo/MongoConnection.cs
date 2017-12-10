@@ -273,14 +273,185 @@ namespace FirstREST.Mongo
 
             return aggregate.ToList().ToJson(settings);
         }
-        
-        private static JObject getFieldObject(string name, double value) {
-            JObject obj = new JObject();          
-           
+
+
+        private static JObject getRatioObject(string name, double value, string explanation)
+        {
+            JObject obj = new JObject();
+
             obj.Add("name", name);
             obj.Add("value", value);
+            obj.Add("explanation", explanation);
 
             return obj;
+        }
+       
+
+        public static string GetFinancialRatios()
+        {
+            JArray ratios = new JArray();
+
+            //*************** Aux Values ********************
+            //Income statement--------------- 
+            double account71 = GetAccountValue(71);
+            double account72 = GetAccountValue(72);
+            double account73 = GetAccountValue(73);
+            double account74 = GetAccountValue(74);
+            double account75 = GetAccountValue(75);
+            double account78 = GetAccountValue(78);
+            double account79 = GetAccountValue(79);
+            double account761 = GetAccountValue(761);
+            double account762 = GetAccountValue(762);
+            double account763 = GetAccountValue(763);         
+            double account61 = GetAccountValue(61);
+            double account62 = GetAccountValue(62);
+            double account63 = GetAccountValue(63);
+            double account64 = GetAccountValue(64);
+            double account65 = GetAccountValue(65);
+            double account67 = GetAccountValue(67);
+            double account68 = GetAccountValue(68);
+            double account69 = GetAccountValue(69);
+            double account812 = GetAccountValue(812);
+            //-----------------------------------------
+            
+            // balance sheet-------------------------
+            // non current assets
+            double class4 = GetAccountValue(41) +
+                            GetAccountValue(42) +
+                            GetAccountValue(43) +
+                            GetAccountValue(44) +
+                            GetAccountValue(45) +
+                            GetAccountValue(46);
+
+            // current assets             
+           
+            double class3 = GetAccountValue(32) +
+                            GetAccountValue(33) +
+                            GetAccountValue(34) +
+                            GetAccountValue(35) +
+                            GetAccountValue(36) +
+                            GetAccountValue(39);
+
+            double account21 = GetAccountValue(21);
+            double class1 = GetAccountValue(11) +
+                            GetAccountValue(12) +
+                            GetAccountValue(13) +
+                            GetAccountValue(14);
+
+            // non current liabilities
+            double account25 = Math.Abs(GetAccountValue(25));
+
+
+            // current liabilities
+            double account22 = Math.Abs(GetAccountValue(22));
+            double account24 = Math.Abs(GetAccountValue(24));
+            double account26 = Math.Abs(GetAccountValue(26));
+
+          
+            //----------------------------------
+            
+            
+            double netSales = Math.Abs(account71 + account72) + account75 + account73 + account74 - account61 - account62 - 
+                account63 + account762 - account65 + account763 - account67 + account78 - account68;
+            double netEarnings = netSales + account812 + account79 - account69 + account761 - account64;
+            double totalAssets = class4 + class3 + account21 + class1;
+            double currentLiabilities = account22 + account24 + account26;
+            double nonCurrentLiabilities = account25;
+            double equity = totalAssets - currentLiabilities - nonCurrentLiabilities;            
+            double inventory = class3;
+            double costsOfGoodSold = account61;
+            double accountsReceivable = account21;
+            double sales = GetAccountValue(71);
+            double accountsPayable = account22;
+            double purchases = GetAccountValue(31);
+
+
+
+
+
+            //------------------------------------------------
+
+
+            //Analysis of return
+            JObject analysisOfReturn = new JObject();
+
+            analysisOfReturn.Add("name", "Analysis of return");
+            
+            JArray analysisOfReturnValues = new JArray();
+            analysisOfReturnValues.Add(getRatioObject("Return on sales", netEarnings/netSales, ""));
+            analysisOfReturnValues.Add(getRatioObject("Return on Assets", 0, ""));
+            analysisOfReturnValues.Add(getRatioObject("Return on Equity", 0, ""));
+
+            analysisOfReturn.Add("values", analysisOfReturnValues);
+
+            //Efficiency
+
+            JObject efficiency = new JObject();
+
+            efficiency.Add("name", "Efficiency");
+
+            JArray efficiencyValues = new JArray();
+            efficiencyValues.Add(getRatioObject("Asset turnover", 0, ""));
+            efficiencyValues.Add(getRatioObject("Average inventory period", 0, ""));
+            efficiencyValues.Add(getRatioObject("Inventory turnover", 0, ""));
+            efficiencyValues.Add(getRatioObject("Average collection period", 0, ""));
+            efficiencyValues.Add(getRatioObject("Average payment period", 0, ""));
+
+
+            efficiency.Add("values", efficiencyValues);
+
+            //Liquidity
+
+            JObject liquidity = new JObject();
+
+            liquidity.Add("name", "Liquidity");
+
+            JArray liquidityValues = new JArray();
+            liquidityValues.Add(getRatioObject("Current ratio", 0, ""));
+            liquidityValues.Add(getRatioObject("Quick ratio (acid test)", 0, ""));
+            liquidityValues.Add(getRatioObject("Cash ratio", 0, ""));
+            liquidityValues.Add(getRatioObject("Working Capital", 0, ""));
+
+            liquidity.Add("values", liquidityValues);
+
+            //Financial stability and Leverage
+
+            JObject financialStabilityAndLeverage = new JObject();
+
+            financialStabilityAndLeverage.Add("name", "Financial stability and Leverage");
+
+            JArray financialStabilityAndLeverageValues = new JArray();
+            financialStabilityAndLeverageValues.Add(getRatioObject("Equity to assets ratio", 0, ""));
+            financialStabilityAndLeverageValues.Add(getRatioObject("Debt to Equity", 0, ""));
+            financialStabilityAndLeverageValues.Add(getRatioObject("Coverage of fixed investments", 0, ""));
+            financialStabilityAndLeverageValues.Add(getRatioObject("Interest Coverage", 0, ""));
+
+            financialStabilityAndLeverage.Add("values", financialStabilityAndLeverageValues);
+
+            //Growth ratios
+
+            JObject growthRatios = new JObject();
+
+            growthRatios.Add("name", "Analysis of return");
+
+            JArray growthRatiosValues = new JArray();
+            growthRatiosValues.Add(getRatioObject("Sales", 0, ""));
+            growthRatiosValues.Add(getRatioObject("Profit", 0, ""));
+            growthRatiosValues.Add(getRatioObject("Assets", 0, ""));
+            growthRatiosValues.Add(getRatioObject("Inventory", 0, ""));
+
+            growthRatios.Add("values", growthRatiosValues);
+
+
+            //--------------------- Ratios object ------------------
+            ratios.Add(analysisOfReturn);
+            ratios.Add(efficiency);
+            ratios.Add(liquidity);
+            ratios.Add(financialStabilityAndLeverage);
+            ratios.Add(growthRatios);
+            
+
+            return ratios.ToString();
         }
 
         private static JObject getIncomeStatementObject(string name, double value, Boolean result)
@@ -354,6 +525,16 @@ namespace FirstREST.Mongo
 
             
             return obj.ToString();
+        }
+
+        private static JObject getFieldObject(string name, double value)
+        {
+            JObject obj = new JObject();
+
+            obj.Add("name", name);
+            obj.Add("value", value);
+
+            return obj;
         }
 
         public static string GetBalanceSheet()
