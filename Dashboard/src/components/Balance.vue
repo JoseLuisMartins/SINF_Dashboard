@@ -74,75 +74,106 @@
         </v-card>
       </v-flex>
     </v-layout>
+   
 
-    <span class="display-2 mb-5 mt-5 blue-grey darken-1" > Balance sheet </span>
+    
 
     <v-layout>
-      <v-flex class="elevation-1 white" md12 offset-lg2 lg8 v-if="balanceSheetData!==null">
-        <v-layout row wrap>
-            <v-flex d-flex md6 sm12 xs12 >
-              <statements  class="elevation-1" :data="balanceSheetData.Assets" title="Assets"> </statements>            
-            </v-flex>
-            <v-flex d-flex md6 sm12 xs12>
-              <v-layout collumn wrap>
-                <v-flex xs12 d-flex>
-                  <v-card class="elevation-1 grey lighten-1"> 
+      
+      <v-flex class="elevation-1 white" md12 offset-lg2 lg8 v-if="balanceSheetData!==null">       
+        <v-expansion-panel expand >
+          <v-expansion-panel-content class="light-blue darken-3">
+            <span class="display-2" slot="header" style="color:white"> Balance Sheet </span>
+            <v-layout row wrap>
+                <v-flex d-flex md6 sm12 xs12 >
+                  <statements  class="elevation-1" :data="balanceSheetData.Assets" title="Assets"> </statements>            
+                </v-flex>
+                <v-flex d-flex md6 sm12 xs12>
+                  <v-layout collumn wrap>
+                    <v-flex xs12 d-flex>
+                      <v-card class="elevation-1 blue darken-1" style="color:white"> 
+                        <v-card-title class="headline"> 
+                          <span> Equity </span> 
+                          <v-spacer> </v-spacer>  
+                          <span>  {{((balanceSheetData.Assets.total - balanceSheetData.Liabilities.total).toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €" }}</span> 
+                        </v-card-title>
+                      </v-card>
+                    </v-flex>
+                    <v-flex d-flex xs12 >
+                      <statements class="elevation-1" :data="balanceSheetData.Liabilities" title="Liabilities"> </statements>              
+                    </v-flex>  
+                    <v-flex d-flex xs12 >
+                          <v-card class="elevation-1 blue darken-1" style="color:white"> 
+                              <v-card-title class="headline"> 
+                                <span> Total Liabilities </span> 
+                                <v-spacer> </v-spacer>  
+                                <span>  {{(balanceSheetData.Liabilities.total.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €" }}</span> 
+                              </v-card-title>
+                            </v-card>
+                      </v-flex>              
+                  </v-layout>
+                </v-flex>
+            </v-layout> 
+            <v-layout row wrap>
+              <v-flex d-flex md6 sm12 xs12 >
+                <v-card class="elevation-1 blue darken-1" style="color:white"> 
                     <v-card-title class="headline"> 
-                      <span> Equity </span> 
+                      <span> Total Assets </span> 
                       <v-spacer> </v-spacer>  
-                      <span>  {{((balanceSheetData.Assets.total - balanceSheetData.Liabilities.total).toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €" }}</span> 
+                      <span>  {{(balanceSheetData.Assets.total.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €" }}</span> 
                     </v-card-title>
                   </v-card>
-                </v-flex>
-                <v-flex d-flex xs12 >
-                  <statements class="elevation-1" :data="balanceSheetData.Liabilities" title="Liabilities"> </statements>              
-                </v-flex>                
-              </v-layout>
-            </v-flex>
-        </v-layout> 
-        <v-layout row wrap>
-          <v-flex d-flex md6 sm12 xs12 >
-            <v-card class="elevation-1 grey lighten-1"> 
-                <v-card-title class="headline"> 
-                  <span> Total Assets </span> 
-                  <v-spacer> </v-spacer>  
-                  <span>  {{(balanceSheetData.Assets.total.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €" }}</span> 
-                </v-card-title>
-              </v-card>
-          </v-flex>
-           <v-flex d-flex md6 sm12 xs12 >
-              <v-card class="elevation-1 grey lighten-1"> 
-                  <v-card-title class="headline"> 
-                    <span> Total Liabilities </span> 
-                    <v-spacer> </v-spacer>  
-                    <span>  {{(balanceSheetData.Liabilities.total.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €" }}</span> 
-                  </v-card-title>
-                </v-card>
-          </v-flex>
-        </v-layout>
+              </v-flex>
+              <v-flex d-flex md6 sm12 xs12 >
+                  <v-card class="elevation-1 blue darken-1" style="color:white"> 
+                      <v-card-title class="headline"> 
+                        <span> Equity + Liabilities </span> 
+                        <v-spacer> </v-spacer>  
+                        <span>  {{(balanceSheetData.Assets.total.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €" }}</span> 
+                      </v-card-title>
+                    </v-card>
+              </v-flex>
+            </v-layout>             
+          </v-expansion-panel-content>
+        </v-expansion-panel >
       </v-flex>
     </v-layout>
 
-    <span class="display-2 mb-5 mt-5 blue-grey darken-1" > Income Statement </span>
-
-    <v-layout row class="orange darken-3">
-      <v-flex d-flex xs6 offset-xs3>
-        <v-layout column wrap>
-          <v-card class="brown darken-2" v-bind:key="item.name" v-for="item in incomeStatementData">
-            <v-card-title primary-title>
-              <v-spacer v-if="item.result"></v-spacer>
-              <p class="title mb-0" > {{ item.name }} </p>
-              <v-spacer v-if="!item.result"></v-spacer>
-              <div class="ml-5 pl-5"> {{ (item.value.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €" }} </div>
-            </v-card-title>
-          </v-card>
-        </v-layout>
+    <v-layout row>
+      <v-flex d-flex md12 offset-lg2 lg8>
+        <v-expansion-panel expand >
+          <v-expansion-panel-content class="teal darken-3">
+            <span class="display-2" slot="header" style="color:white"> Income Statement </span>
+            <v-layout column wrap class="elevation-2">
+              <div v-for='(item, index) in incomeStatementData' :key='index'>
+                <div v-if="!item.result">
+                  <v-card class="elevation-3">            
+                      <v-card-title primary-title>
+                        <b class="title" > {{ item.name }} </b>  
+                        <v-spacer ></v-spacer>                
+                        <p > {{ (item.value.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €" }} </p>          
+                      </v-card-title>
+                  </v-card>            
+                </div>
+                <div v-if="item.result">
+                  <v-card  class="cyan darken-2 elevation-10" style="color:white">            
+                    <v-card-title primary-title>
+                        <v-spacer ></v-spacer>
+                        <b class="title" > {{ item.name }} </b>  
+                        <v-spacer ></v-spacer>                    
+                        <b class="title"> {{ (item.value.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €" }} </b>
+                    </v-card-title>
+                  </v-card>            
+                </div>
+              </div>
+            </v-layout>
+          </v-expansion-panel-content> 
+        </v-expansion-panel> 
       </v-flex>
     </v-layout>
 
-    <span class="display-2 mb-5 mt-5 blue-grey darken-1" > Ratios </span>
-
-    <v-layout row class="teal darken-2">
+    <span class="display-2 mb-5 mt-5 " > Ratios </span>
+    <v-layout row >
       <v-flex d-flex xs6 offset-xs3>
         <v-expansion-panel expand >
           <v-expansion-panel-content class="light-blue lighten-3" v-for="item in ratios" v-bind:key="item.name">
@@ -156,7 +187,7 @@
                   </v-tooltip>
                 </div>
                 <v-spacer></v-spacer>
-                <div class="mr-5 mr-5"> {{ (itemzinho.value.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") + " €" }} </div>
+                <div class="mr-5 mr-5"> {{ (itemzinho.value.toFixed(2) + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ") }} </div>
               </v-card-title>
             </v-card>
           </v-expansion-panel-content>
@@ -171,7 +202,7 @@ import LineChart from '@/components/charts/LineChart'
 import PieChart from '@/components/charts/PieChart'
 import Loading from '@/components/loadings/Loading'
 import Statements from '@/components/balance/Statements'
-import SalesService from '@/services/Sales'
+import AccountingService from '@/services/Accounting'
 
 export default {
   components: {
@@ -190,68 +221,7 @@ export default {
       balanceSheetData: null,
       error: null,
       incomeStatementData: [],
-      ratios: [
-        {
-          name: 'Efficiency',
-          values: [
-            {
-              name: 'Asset Turnover',
-              value: 213,
-              explanation: 'Bom dia'
-            },
-            {
-              name: 'Asset Turnover',
-              value: 213,
-              explanation: 'Bom dia'
-            },
-            {
-              name: 'Asset Turnover',
-              value: 213,
-              explanation: 'Bom dia'
-            },
-            {
-              name: 'Asset Turnover',
-              value: 213,
-              explanation: 'Bom dia'
-            },
-            {
-              name: 'Asset Turnover',
-              value: 213,
-              explanation: 'Bom dia'
-            }
-          ]
-        },
-        {
-          name: 'Liquidity',
-          values: [
-            {
-              name: 'Asset Turnover',
-              value: 213,
-              explanation: 'Bom dia'
-            },
-            {
-              name: 'Asset Turnover',
-              value: 213,
-              explanation: 'Bom dia'
-            },
-            {
-              name: 'Asset Turnover',
-              value: 213,
-              explanation: 'Bom dia'
-            }
-          ]
-        },
-        {
-          name: 'Financial Stability and Leverage',
-          values: [
-            {
-              name: 'Asset Turnover',
-              value: 213,
-              explanation: 'Bom dia'
-            }
-          ]
-        }
-      ]
+      ratios: []
     }
   },
   methods: {
@@ -263,15 +233,14 @@ export default {
     }
   },
   mounted: async function () {
-    setInterval(() => confirm('João please fix me!'), 5000)
     let currentYear = new Date().getFullYear()
     this.dateEnd = `${currentYear}-01-01`
     currentYear -= 1
     this.dateBegin = `${currentYear}-01-01`
 
-    this.balanceSheetData = (await SalesService.getBalanceSheet()).data
-    this.incomeStatementData = (await SalesService.getIncomeStatement()).data
-    // this.ratios = (await SalesService.getFinancialRatios()).data
+    this.balanceSheetData = (await AccountingService.getBalanceSheet()).data
+    this.incomeStatementData = (await AccountingService.getIncomeStatement()).data
+    this.ratios = (await AccountingService.getFinancialRatios()).data
   }
 }
 </script>

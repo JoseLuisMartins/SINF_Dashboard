@@ -45,14 +45,5 @@ export default {
   },
   getTop10Customers (begin, end) {
     return Api().get(`/api/saft/Top10Customers/?arg1=${begin}&arg2=${end}`)
-  },
-  getBalanceSheet () {
-    return Api().get(`/api/saft/BalanceSheet`)
-  },
-  getIncomeStatement () {
-    return Api().get('/api/saft/IncomeStatement')
-  },
-  getFinancialRatios () {
-    return Api().get('/api/saft/FinancialRatios')
   }
 }

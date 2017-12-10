@@ -97,6 +97,7 @@ import LineChart from '@/components/charts/LineChart'
 import PurchasesService from '@/services/Purchases'
 import SalesService from '@/services/Sales'
 import ProductService from '@/services/Products'
+import AccountingService from '@/services/Accounting'
 
 export default {
   name: 'HelloWorld',
@@ -170,7 +171,7 @@ export default {
          {color: 'teal darken-1', color2: 'teal lighten-3', icon: 'euro_symbol', title: 'Sales', value: '', description: 'Total Sales', dest: 'sales'},
          {color: 'deep-orange darken-1', color2: 'deep-orange lighten-3', icon: 'shopping_cart', title: 'Purchases', value: '', description: 'Total Purchases', dest: 'purchases'},
          {color: 'light-blue darken-1', color2: 'light-blue lighten-3', icon: 'view_quilt', title: 'Inventory', value: '', description: 'Value in Inventory', dest: 'inventory'},
-         {color: 'purple darken-1', color2: 'purple lighten-3', icon: 'account_balance_wallet', title: 'Accounting', value: '130€', description: 'Cashflow', dest: 'accounting'}
+         {color: 'purple darken-1', color2: 'purple lighten-3', icon: 'account_balance_wallet', title: 'Accounting', value: '', description: 'NetIncome', dest: 'accounting'}
       ]
     }
   },
@@ -178,7 +179,6 @@ export default {
     Topic, LineChart
   },
   mounted: function () {
-    setInterval(() => confirm('Vai ao Accounting João!'), 2500)
     let currentYear = new Date().getFullYear()
     this.dateEnd = `${currentYear}-01-01`
     currentYear -= 1
@@ -186,21 +186,25 @@ export default {
   },
   watch: {
     dateBegin: async function (val) {
-      let totalPurchaseValue = await PurchasesService.getTotalAmount(this.dateBegin, this.dateEnd)
-      this.topics[1].value = `${totalPurchaseValue.data}€`
-
-      let totalSalesValue = await SalesService.getTotalNetSales(this.dateBegin, this.dateEnd)
-      this.topics[0].value = `${parseFloat(totalSalesValue.data[0].total).toFixed(0)}€`
+      this.getData()
     },
     dateEnd: async function (val) {
-      let totalPurchaseValue = await PurchasesService.getTotalAmount(this.dateBegin, this.dateEnd)
-      this.topics[1].value = `${totalPurchaseValue.data}€`
-
+      this.getData()
+    }
+  },
+  methods: {
+    async getData () {
       let totalSalesValue = await SalesService.getTotalNetSales(this.dateBegin, this.dateEnd)
       this.topics[0].value = `${parseFloat(totalSalesValue.data[0].total).toFixed(0)}€`
+
+      let totalPurchaseValue = await PurchasesService.getTotalAmount(this.dateBegin, this.dateEnd)
+      this.topics[1].value = `${totalPurchaseValue.data}€`
 
       let totalInventoryValue = await ProductService.getTotalValueInventory(this.dateEnd)
       this.topics[2].value = `${parseFloat(totalInventoryValue.data.TotalValue).toFixed(0)}€`
+
+      let NetIncomeValue = await AccountingService.getNetIncome()
+      this.topics[3].value = `${parseFloat(NetIncomeValue.data.value).toFixed(0)}€`
     }
   }
 }
