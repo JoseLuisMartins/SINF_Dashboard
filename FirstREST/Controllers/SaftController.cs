@@ -31,6 +31,7 @@ namespace FirstREST.Controllers
         // api/saft/IncomeStatement
         // api/saft/FinancialRatios
         // api/saft/SalesInvoices
+        // api/saft/NetIncome
         //-----
         public HttpResponseMessage Get(string id)
         {
@@ -47,6 +48,9 @@ namespace FirstREST.Controllers
                     break;
                 case "FinancialRatios":
                     body = MongoConnection.GetFinancialRatios();
+                    break;
+                case "NetIncome":
+                    body = MongoConnection.GetNetIncome();
                     break;
                 default:
                     body = MongoConnection.GetCollection(id);
@@ -135,6 +139,7 @@ namespace FirstREST.Controllers
 
         // api/saft/ProductSales?vid=C0001&begin=2016-01-01&end=2017-01-01
         // api/saft/CustomerSpentValue?vid=PT505678900_C&begin=2016-01-01&end=2017-01-01
+        // api/saft/AccountInRange?vid=11&begin=2016-01-01&end=2016-12-01
         public HttpResponseMessage Get(string id, string vid, string begin, string end)
         {
             
@@ -150,7 +155,9 @@ namespace FirstREST.Controllers
                 case "CustomerSpentValue":
                     body = MongoConnection.GetCustomerTotalSpent(vid, begin, end);
                     break;
-
+                case "AccountInRange":
+                    body = MongoConnection.GetAccountInRange(int.Parse(vid), begin, end);
+                    break;
             }
 
             response = this.Request.CreateResponse(HttpStatusCode.OK);

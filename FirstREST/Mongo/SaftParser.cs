@@ -19,11 +19,10 @@ namespace FirstREST.Mongo
         {
 
             XmlDocument doc = new XmlDocument();
+
             doc.LoadXml(System.IO.File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "Assets\\SAFT_DEMOSINF_01-01-2016_31-12-2016.xml"));
             string jsonText = JsonConvert.SerializeXmlNode(doc);
-
-
-            //XMLValidation.validation();
+                      
 
             JToken tkn = JObject.Parse(jsonText);
 
@@ -35,12 +34,12 @@ namespace FirstREST.Mongo
             GeneralLedgerEntries(auditFile.SelectToken("GeneralLedgerEntries"));
             SourceDocuments(auditFile.SelectToken("SourceDocuments"));
 
-            MongoConnection.Add("teste", "{\"Nome\":\"Batata\"}");
+            
         }
 
         public void Header(JToken header)
         {
-            MongoConnection.Add("Header", header.ToString());
+            MongoConnection.Add("Header", header.ToString());   
         }
 
         public void MasterFiles(JToken master)

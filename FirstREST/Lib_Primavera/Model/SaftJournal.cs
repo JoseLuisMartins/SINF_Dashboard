@@ -59,7 +59,7 @@ namespace FirstREST.Mongo
         [JsonProperty(PropertyName = "CreditLine")]
         public dynamic CreditLineJson { get; set; }
         private List<CreditLine> _creditLineJson;
-        public List<CreditLine> creditLineJson
+        public List<CreditLine> creditLine
         {
             get
             {
