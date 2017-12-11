@@ -225,11 +225,22 @@ export default {
     }
   },
   methods: {
+    async getData (begin, end) {
+      try {
+        this.balanceSheetData = (await AccountingService.getBalanceSheet(begin, end)).data
+        this.incomeStatementData = (await AccountingService.getIncomeStatement(begin, end)).data
+        this.ratios = (await AccountingService.getFinancialRatios(begin, end)).data
+      } catch (e) {
+        console.error(e)
+      }
+    }
   },
   watch: {
     dateBegin: function (val) {
+      this.getData(this.dateBegin, this.dateEnd)
     },
     dateEnd: function (val) {
+      this.getData(this.dateBegin, this.dateEnd)
     }
   },
   mounted: async function () {
@@ -237,10 +248,6 @@ export default {
     this.dateEnd = `${currentYear}-01-01`
     currentYear -= 1
     this.dateBegin = `${currentYear}-01-01`
-
-    this.balanceSheetData = (await AccountingService.getBalanceSheet()).data
-    this.incomeStatementData = (await AccountingService.getIncomeStatement()).data
-    this.ratios = (await AccountingService.getFinancialRatios()).data
   }
 }
 </script>

@@ -1,16 +1,16 @@
 import Api from '@/services/Api'
 
 export default {
-  getBalanceSheet () {
-    return Api().get(`/api/saft/BalanceSheet`)
+  getBalanceSheet (begin, end) {
+    return Api().get(`/api/saft/BalanceSheet?arg1=${begin}&arg2=${end}`)
   },
-  getIncomeStatement () {
-    return Api().get('/api/saft/IncomeStatement')
+  getIncomeStatement (begin, end) {
+    return Api().get(`/api/saft/IncomeStatement?arg1=${begin}&arg2=${end}`)
   },
-  getFinancialRatios () {
-    return Api().get('/api/saft/FinancialRatios')
+  getFinancialRatios (begin, end) {
+    return Api().get(`/api/saft/FinancialRatios?arg1=${begin}&arg2=${end}`)
   },
-  getNetIncome () {
-    return Api().get('/api/saft/NetIncome')
+  getNetIncome (begin, end) {
+    return Api().get(`/api/saft/NetIncome?arg1=${begin}&arg2=${end}`)
   }
 }

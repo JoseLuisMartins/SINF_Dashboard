@@ -291,7 +291,7 @@
             v-bind:headers="backlogProductsHeader"
             :items="salesBacklogItem.LinhasDoc"           
             >
-            <template slot="items" scope="props">
+            <template slot="items" scope="props" v-if="props.item.Quantidade != 0">
               <td> {{props.item.CodArtigo }} </td>
               <td> {{props.item.DescArtigo }} </td>
               <td> {{props.item.Quantidade }} </td>

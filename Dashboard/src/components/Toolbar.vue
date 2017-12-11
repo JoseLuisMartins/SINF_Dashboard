@@ -4,7 +4,7 @@
     color="blue darken-4"
     dark
   >
-    <v-toolbar-side-icon></v-toolbar-side-icon>
+    
     <v-icon class="pointer" @click="loadPage" dark large> track_changes </v-icon>
     <v-toolbar-title class="pointer" @click="loadPage"> {{title}}</v-toolbar-title>
     <v-spacer></v-spacer>
