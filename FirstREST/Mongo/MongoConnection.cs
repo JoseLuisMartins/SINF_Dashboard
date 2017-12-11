@@ -8,6 +8,10 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Bson.IO;
 using FirstREST.Lib_Primavera.Model;
 using Newtonsoft.Json.Linq;
+using System.IO;
+using System.Text.RegularExpressions;
+using System.Net.Http;
+using System.Text;
 
 namespace FirstREST.Mongo
 {
@@ -16,7 +20,7 @@ namespace FirstREST.Mongo
         static MongoClient client;
         static IMongoDatabase db;
 
-        static SaftParser saft;
+
 
         static MongoConnection()
         {
@@ -24,12 +28,24 @@ namespace FirstREST.Mongo
             client = new MongoClient("mongodb://localhost:27017");
             client.DropDatabase("SAFTDB");
             db = client.GetDatabase("SAFTDB");
-            saft = new SaftParser();
+
+            string[] fileNames = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory + "Assets\\");
+
+            foreach (string filename in fileNames)
+                new SaftParser(getYear(filename));
+
+
+        }
+
+        public static string getYear(string stringXiraa)
+        {
+            var m = Regex.Match(stringXiraa, @"(\d\d\d\d)");
+            return m.Groups[0].Value;
         }
 
         public static void Add(string collection, string json)
         {
-
+           
             BsonDocument document = BsonSerializer.Deserialize<BsonDocument>(json);
 
             db.GetCollection<BsonDocument>(collection).InsertOne(document);
@@ -95,7 +111,7 @@ namespace FirstREST.Mongo
                                                         {"$lt", end}
                                                     }}}
                                             )
-                                         .Group(new BsonDocument { { "_id", "null" }, { "total", new BsonDocument("$sum", "$DocumentTotals.NetTotal") } });            
+                                         .Group(new BsonDocument { { "_id", "null" }, { "total", new BsonDocument("$sum", "$DocumentTotals.NetTotal") } });
             return aggregate.ToList().ToJson(settings);
         }
 
@@ -130,7 +146,7 @@ namespace FirstREST.Mongo
                                          .Group(new BsonDocument { { "_id", "$line.ProductCode" }, { "total_sold", new BsonDocument("$sum", "$total") } })
                                          .Match(new BsonDocument { { "_id", id } });
 
-            
+
             return aggregate.ToList().ToJson(settings);
         }
 
@@ -164,12 +180,13 @@ namespace FirstREST.Mongo
                                          .Match(new BsonDocument { { "_id", customerId } });
             var list = aggregate.ToList();
 
-            if (list.Count > 0) {
+            if (list.Count > 0)
+            {
                 var ids = list[0].ToBsonDocument()["products"].AsBsonArray;
                 return GetCollectionsByIds("Products", "ProductCode", ids);
             }
-            
-           return "";
+
+            return "";
         }
 
         public static string GetProductCustomers(string productId)
@@ -182,16 +199,17 @@ namespace FirstREST.Mongo
                                          .Unwind(x => x["line"])
                                          .Group(new BsonDocument { { "_id", "$line.ProductCode" }, { "customers", new BsonDocument("$addToSet", "$CustomerID") } })
                                          .Match(new BsonDocument { { "_id", productId } }); ;
-                                                       
+
             var list = aggregate.ToList();
 
-            if (list.Count > 0) {
+            if (list.Count > 0)
+            {
                 var ids = list[0].ToBsonDocument()["customers"].AsBsonArray;
-                return  GetCollectionsByIds("Customers", "CustomerID", ids);
+                return GetCollectionsByIds("Customers", "CustomerID", ids);
             }
 
 
-            return "";  
+            return "";
         }
 
         public static string GetCollectionsByIds(string collection, string field, BsonArray ids)
@@ -205,22 +223,7 @@ namespace FirstREST.Mongo
             return coll.FindSync(query).ToList().ToJson(settings);
         }
 
-        public static double GetAccountClosingValue(int accountId)
-        {
-            var settings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
-            JToken balaceSheet = new JObject();
 
-            var coll = db.GetCollection<BsonDocument>("Accounts");
-
-            var filter = "{ AccountID: '" +  accountId + "'}";
-
-            var query = coll.FindSync(filter).ToList();
-
-            if (query.Count > 0)
-                return query[0].ToBsonDocument()["ClosingDebitBalance"].AsDouble - query[0].ToBsonDocument()["ClosingCreditBalance"].AsDouble;
-            
-            return 0;
-        }
 
         public static string GetTop10Products(string begin, string end)
         {
@@ -274,6 +277,24 @@ namespace FirstREST.Mongo
             return aggregate.ToList().ToJson(settings);
         }
 
+        public static double GetAccountOpeningValue(int accountId, string year)
+        {
+            var settings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
+            JToken balaceSheet = new JObject();
+
+            var coll = db.GetCollection<BsonDocument>("Accounts" + year);
+
+            var filter = "{ AccountID: '" + accountId + "'}";
+
+            var query = coll.FindSync(filter).ToList();
+
+            if (query.Count > 0)
+                return query[0].ToBsonDocument()["OpeningDebitBalance"].AsDouble - query[0].ToBsonDocument()["OpeningCreditBalance"].AsDouble;
+
+            return 0;
+        }
+
+
         public static double GetAccountCredit(int account, string begin, string end)
         {
             var settings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
@@ -294,12 +315,11 @@ namespace FirstREST.Mongo
                                                     }}
                                           )
                                          .Group(new BsonDocument { 
-                                                            { "_id", "$transaction.Lines.creditLine.AccountID" }, 
+                                                            { "_id", "null" }, 
                                                             { "total_credit", new BsonDocument("$sum", "$transaction.Lines.creditLine.CreditAmount")}
                                          });
 
             var list = aggregate.ToList();
-            System.Diagnostics.Debug.WriteLine(list.ToJson()[0]);
             if (list.Count > 0)
             {
                 return list[0].ToBsonDocument()["total_credit"].AsDouble;
@@ -329,7 +349,7 @@ namespace FirstREST.Mongo
                                                     }}
                                           )
                                          .Group(new BsonDocument { 
-                                                            { "_id", "$transaction.Lines.debitLine.AccountID" }, 
+                                                            { "_id", "null" }, 
                                                             { "total_debit", new BsonDocument("$sum", "$transaction.Lines.debitLine.DebitAmount")}
                                          });
 
@@ -344,37 +364,17 @@ namespace FirstREST.Mongo
 
         }
 
-        public static double GetAccountOpeningValue(int accountId)
+
+
+        public static double GetAccountInRange(int account, string begin, string end)
         {
-            var settings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
-            JToken balaceSheet = new JObject();
+            string year = getYear(end);
 
-            var coll = db.GetCollection<BsonDocument>("Accounts");
-
-            var filter = "{ AccountID: '" + accountId + "'}";
-
-            var query = coll.FindSync(filter).ToList();
-
-            if (query.Count > 0)
-                return query[0].ToBsonDocument()["OpeningDebitBalance"].AsDouble - query[0].ToBsonDocument()["OpeningCreditBalance"].AsDouble;
-
-            return 0;
-        }
-
-
-        public static string GetAccountInRange(int account, string begin, string end)
-        {
-            double initialAccount = GetAccountOpeningValue(account);
+            double initialAccount = GetAccountOpeningValue(account, year);
             double periodCredit = GetAccountCredit(account, begin, end);
             double periodDebit = GetAccountDebit(account, begin, end);
 
-            JObject res = new JObject();
-
-            res.Add("account", account);
-            res.Add("value", initialAccount + periodDebit - periodCredit);
-
-
-            return res.ToString();
+            return initialAccount + periodDebit - periodCredit;
 
         }
 
@@ -391,29 +391,31 @@ namespace FirstREST.Mongo
             return obj;
         }
 
-        public static string GetNetIncome()        {
+        public static string GetNetIncome(string begin, string end)
+        {
             JObject netIncome = new JObject();
 
 
-            double account71 = GetAccountClosingValue(71);
-            double account72 = GetAccountClosingValue(72);
-            double account73 = GetAccountClosingValue(73);
-            double account74 = GetAccountClosingValue(74);
-            double account75 = GetAccountClosingValue(75);
-            double account78 = GetAccountClosingValue(78);
-            double account79 = GetAccountClosingValue(79);
-            double account761 = GetAccountClosingValue(761);
-            double account762 = GetAccountClosingValue(762);
-            double account763 = GetAccountClosingValue(763);
-            double account61 = GetAccountClosingValue(61);
-            double account62 = GetAccountClosingValue(62);
-            double account63 = GetAccountClosingValue(63);
-            double account64 = GetAccountClosingValue(64);
-            double account65 = GetAccountClosingValue(65);
-            double account67 = GetAccountClosingValue(67);
-            double account68 = GetAccountClosingValue(68);
-            double account69 = GetAccountClosingValue(69);
-            double account812 = GetAccountClosingValue(812);
+
+            double account71 = GetAccountInRange(71, begin, end);
+            double account72 = GetAccountInRange(72, begin, end);
+            double account73 = GetAccountInRange(73, begin, end);
+            double account74 = GetAccountInRange(74, begin, end);
+            double account75 = GetAccountInRange(75, begin, end);
+            double account78 = GetAccountInRange(78, begin, end);
+            double account79 = GetAccountInRange(79, begin, end);
+            double account761 = GetAccountInRange(761, begin, end);
+            double account762 = GetAccountInRange(762, begin, end);
+            double account763 = GetAccountInRange(763, begin, end);
+            double account61 = GetAccountInRange(61, begin, end);
+            double account62 = GetAccountInRange(62, begin, end);
+            double account63 = GetAccountInRange(63, begin, end);
+            double account64 = GetAccountInRange(64, begin, end);
+            double account65 = GetAccountInRange(65, begin, end);
+            double account67 = GetAccountInRange(67, begin, end);
+            double account68 = GetAccountInRange(68, begin, end);
+            double account69 = GetAccountInRange(69, begin, end);
+            double account812 = GetAccountInRange(812, begin, end);
 
 
             double netIncomeVal = Math.Abs(account71 + account72) + account75 + account73 + account74 - account61 - account62 -
@@ -426,71 +428,71 @@ namespace FirstREST.Mongo
 
         }
 
-        public static string GetFinancialRatios()
+        public static string GetFinancialRatios(string begin, string end)
         {
             JArray ratios = new JArray();
 
             //*************** Aux Values ********************
             //Income statement--------------- 
-            double account71 = GetAccountClosingValue(71);
-            double account72 = GetAccountClosingValue(72);
-            double account73 = GetAccountClosingValue(73);
-            double account74 = GetAccountClosingValue(74);
-            double account75 = GetAccountClosingValue(75);
-            double account78 = GetAccountClosingValue(78);
-            double account79 = GetAccountClosingValue(79);
-            double account761 = GetAccountClosingValue(761);
-            double account762 = GetAccountClosingValue(762);
-            double account763 = GetAccountClosingValue(763);         
-            double account61 = GetAccountClosingValue(61);
-            double account62 = GetAccountClosingValue(62);
-            double account63 = GetAccountClosingValue(63);
-            double account64 = GetAccountClosingValue(64);
-            double account65 = GetAccountClosingValue(65);
-            double account67 = GetAccountClosingValue(67);
-            double account68 = GetAccountClosingValue(68);
-            double account69 = GetAccountClosingValue(69);
-            double account812 = GetAccountClosingValue(812);
+            double account71 = GetAccountInRange(71, begin, end);
+            double account72 = GetAccountInRange(72, begin, end);
+            double account73 = GetAccountInRange(73, begin, end);
+            double account74 = GetAccountInRange(74, begin, end);
+            double account75 = GetAccountInRange(75, begin, end);
+            double account78 = GetAccountInRange(78, begin, end);
+            double account79 = GetAccountInRange(79, begin, end);
+            double account761 = GetAccountInRange(761, begin, end);
+            double account762 = GetAccountInRange(762, begin, end);
+            double account763 = GetAccountInRange(763, begin, end);
+            double account61 = GetAccountInRange(61, begin, end);
+            double account62 = GetAccountInRange(62, begin, end);
+            double account63 = GetAccountInRange(63, begin, end);
+            double account64 = GetAccountInRange(64, begin, end);
+            double account65 = GetAccountInRange(65, begin, end);
+            double account67 = GetAccountInRange(67, begin, end);
+            double account68 = GetAccountInRange(68, begin, end);
+            double account69 = GetAccountInRange(69, begin, end);
+            double account812 = GetAccountInRange(812, begin, end);
             //-----------------------------------------
-            
+
             // balance sheet-------------------------
             // non current assets
-            double class4 = GetAccountClosingValue(41) +
-                            GetAccountClosingValue(42) +
-                            GetAccountClosingValue(43) +
-                            GetAccountClosingValue(44) +
-                            GetAccountClosingValue(45) +
-                            GetAccountClosingValue(46);
+            double class4 = GetAccountInRange(41, begin, end) +
+                            GetAccountInRange(42, begin, end) +
+                            GetAccountInRange(43, begin, end) +
+                            GetAccountInRange(44, begin, end) +
+                            GetAccountInRange(45, begin, end) +
+                            GetAccountInRange(46, begin, end);
 
             // current assets             
-           
-            double class3 = GetAccountClosingValue(32) +
-                            GetAccountClosingValue(33) +
-                            GetAccountClosingValue(34) +
-                            GetAccountClosingValue(35) +
-                            GetAccountClosingValue(36) +
-                            GetAccountClosingValue(39);
 
-            double account21 = GetAccountClosingValue(21);
-            double class1 = GetAccountClosingValue(11) +
-                            GetAccountClosingValue(12) +
-                            GetAccountClosingValue(13) +
-                            GetAccountClosingValue(14);
+            double class3 = GetAccountInRange(32, begin, end) +
+                            GetAccountInRange(33, begin, end) +
+                            GetAccountInRange(34, begin, end) +
+                            GetAccountInRange(35, begin, end) +
+                            GetAccountInRange(36, begin, end) +
+                            GetAccountInRange(39, begin, end);
+
+            double account21 = GetAccountInRange(21, begin, end);
+            double class1 = GetAccountInRange(11, begin, end) +
+                            GetAccountInRange(12, begin, end) +
+                            GetAccountInRange(13, begin, end) +
+                            GetAccountInRange(14, begin, end);
 
             // non current liabilities
-            double account25 = Math.Abs(GetAccountClosingValue(25));
+            double account25 = Math.Abs(GetAccountInRange(25, begin, end));
 
 
             // current liabilities
-            double account22 = Math.Abs(GetAccountClosingValue(22));
-            double account24 = Math.Abs(GetAccountClosingValue(24));
-            double account26 = Math.Abs(GetAccountClosingValue(26));
+            double account22 = Math.Abs(GetAccountInRange(22, begin, end));
+            double account24 = Math.Abs(GetAccountInRange(24, begin, end));
+            double account26 = Math.Abs(GetAccountInRange(26, begin, end));
 
-          
+
             //----------------------------------
-            
-            
-            double netSales = Math.Abs(account71 + account72) + account75 + account73 + account74 - account61 - account62 - 
+
+
+            double netSales = Math.Abs(account71 + account72) + account75 + account73 + account74 - account61 - account62 -
                 account63 + account762 - account65 + account763 - account67 + account78 - account68;
             double ebit = netSales + (account761 - account64);
             double interest = account79 - account69;
@@ -498,14 +500,14 @@ namespace FirstREST.Mongo
             double totalAssets = class4 + class3 + account21 + class1;
             double currentLiabilities = account22 + account24 + account26;
             double nonCurrentLiabilities = account25;
-            double equity = totalAssets - currentLiabilities - nonCurrentLiabilities;            
+            double equity = totalAssets - currentLiabilities - nonCurrentLiabilities;
             double inventory = class3;
             double costsOfGoodSold = account61;
             double accountsReceivable = Math.Abs(account21);
-            double sales = Math.Abs(GetAccountClosingValue(71));
+            double sales = Math.Abs(GetAccountInRange(71, begin, end));
             double accountsPayable = account22;
-            double purchases = GetAccountClosingValue(31);
-            double cash = GetAccountClosingValue(11);
+            double purchases = GetAccountInRange(31, begin, end);
+            double cash = GetAccountInRange(11, begin, end);
 
 
 
@@ -518,11 +520,11 @@ namespace FirstREST.Mongo
             JObject analysisOfReturn = new JObject();
 
             analysisOfReturn.Add("name", "Analysis of return");
-            
+
             JArray analysisOfReturnValues = new JArray();
-            analysisOfReturnValues.Add(getRatioObject("Return on sales", (netEarnings/netSales) * 100, ""));
-            analysisOfReturnValues.Add(getRatioObject("Return on Assets", (netEarnings/totalAssets) * 100, ""));
-            analysisOfReturnValues.Add(getRatioObject("Return on Equity", (netEarnings/equity) * 100, ""));
+            analysisOfReturnValues.Add(getRatioObject("Return on sales", (netEarnings / netSales) * 100, ""));
+            analysisOfReturnValues.Add(getRatioObject("Return on Assets", (netEarnings / totalAssets) * 100, ""));
+            analysisOfReturnValues.Add(getRatioObject("Return on Equity", (netEarnings / equity) * 100, ""));
 
             analysisOfReturn.Add("values", analysisOfReturnValues);
 
@@ -533,11 +535,11 @@ namespace FirstREST.Mongo
             efficiency.Add("name", "Efficiency");
 
             JArray efficiencyValues = new JArray();
-            efficiencyValues.Add(getRatioObject("Asset turnover", (sales/totalAssets) * 100, ""));
-            efficiencyValues.Add(getRatioObject("Average inventory period", (inventory/costsOfGoodSold) * 365, ""));
-            efficiencyValues.Add(getRatioObject("Inventory turnover", (costsOfGoodSold/inventory) * 100, ""));
-            efficiencyValues.Add(getRatioObject("Average collection period", (accountsReceivable/sales) * 365, ""));
-            efficiencyValues.Add(getRatioObject("Average payment period", (accountsPayable/purchases) * 365, ""));
+            efficiencyValues.Add(getRatioObject("Asset turnover", (sales / totalAssets) * 100, ""));
+            efficiencyValues.Add(getRatioObject("Average inventory period", (inventory / costsOfGoodSold) * 365, ""));
+            efficiencyValues.Add(getRatioObject("Inventory turnover", (costsOfGoodSold / inventory) * 100, ""));
+            efficiencyValues.Add(getRatioObject("Average collection period", (accountsReceivable / sales) * 365, ""));
+            efficiencyValues.Add(getRatioObject("Average payment period", (accountsPayable / purchases) * 365, ""));
 
 
             efficiency.Add("values", efficiencyValues);
@@ -549,8 +551,8 @@ namespace FirstREST.Mongo
             liquidity.Add("name", "Liquidity");
 
             JArray liquidityValues = new JArray();
-            liquidityValues.Add(getRatioObject("Current ratio", totalAssets/currentLiabilities, ""));
-            liquidityValues.Add(getRatioObject("Quick ratio", (totalAssets - inventory)/currentLiabilities, ""));
+            liquidityValues.Add(getRatioObject("Current ratio", totalAssets / currentLiabilities, ""));
+            liquidityValues.Add(getRatioObject("Quick ratio", (totalAssets - inventory) / currentLiabilities, ""));
             liquidityValues.Add(getRatioObject("Cash ratio", class1 / currentLiabilities, ""));
             liquidityValues.Add(getRatioObject("Working Capital", totalAssets - currentLiabilities, ""));
 
@@ -563,10 +565,10 @@ namespace FirstREST.Mongo
             financialStabilityAndLeverage.Add("name", "Financial stability and Leverage");
 
             JArray financialStabilityAndLeverageValues = new JArray();
-            financialStabilityAndLeverageValues.Add(getRatioObject("Equity to assets ratio", equity/totalAssets, ""));
+            financialStabilityAndLeverageValues.Add(getRatioObject("Equity to assets ratio", equity / totalAssets, ""));
             //financialStabilityAndLeverageValues.Add(getRatioObject("Debt to Equity", 0, ""));
             //financialStabilityAndLeverageValues.Add(getRatioObject("Coverage of fixed investments", 0, ""));
-            financialStabilityAndLeverageValues.Add(getRatioObject("Interest Coverage", interest != 0 ? ebit/interest : 0, ""));
+            financialStabilityAndLeverageValues.Add(getRatioObject("Interest Coverage", interest != 0 ? ebit / interest : 0, ""));
 
             financialStabilityAndLeverage.Add("values", financialStabilityAndLeverageValues);
 
@@ -591,7 +593,7 @@ namespace FirstREST.Mongo
             ratios.Add(liquidity);
             ratios.Add(financialStabilityAndLeverage);
             //ratios.Add(growthRatios);
-            
+
 
             return ratios.ToString();
         }
@@ -607,29 +609,29 @@ namespace FirstREST.Mongo
             return obj;
         }
 
-        public static string GetIncomeStatement()
+        public static string GetIncomeStatement(string begin, string end)
         {
             JArray obj = new JArray();
 
-            double account71 = GetAccountClosingValue(71);
-            double account72 = GetAccountClosingValue(72);
-            double account73 = GetAccountClosingValue(73);
-            double account74 = GetAccountClosingValue(74);
-            double account75 = GetAccountClosingValue(75);
-            double account78 = GetAccountClosingValue(78);
-            double account79 = GetAccountClosingValue(79);
-            double account761 = GetAccountClosingValue(761);
-            double account762 = GetAccountClosingValue(762);
-            double account763 = GetAccountClosingValue(763);         
-            double account61 = GetAccountClosingValue(61);
-            double account62 = GetAccountClosingValue(62);
-            double account63 = GetAccountClosingValue(63);
-            double account64 = GetAccountClosingValue(64);
-            double account65 = GetAccountClosingValue(65);
-            double account67 = GetAccountClosingValue(67);
-            double account68 = GetAccountClosingValue(68);
-            double account69 = GetAccountClosingValue(69);
-            double account812 = GetAccountClosingValue(812);
+            double account71 = GetAccountInRange(71, begin, end);
+            double account72 = GetAccountInRange(72, begin, end);
+            double account73 = GetAccountInRange(73, begin, end);
+            double account74 = GetAccountInRange(74, begin, end);
+            double account75 = GetAccountInRange(75, begin, end);
+            double account78 = GetAccountInRange(78, begin, end);
+            double account79 = GetAccountInRange(79, begin, end);
+            double account761 = GetAccountInRange(761, begin, end);
+            double account762 = GetAccountInRange(762, begin, end);
+            double account763 = GetAccountInRange(763, begin, end);
+            double account61 = GetAccountInRange(61, begin, end);
+            double account62 = GetAccountInRange(62, begin, end);
+            double account63 = GetAccountInRange(63, begin, end);
+            double account64 = GetAccountInRange(64, begin, end);
+            double account65 = GetAccountInRange(65, begin, end);
+            double account67 = GetAccountInRange(67, begin, end);
+            double account68 = GetAccountInRange(68, begin, end);
+            double account69 = GetAccountInRange(69, begin, end);
+            double account812 = GetAccountInRange(812, begin, end);
 
 
             obj.Add(getIncomeStatementObject("Net Sales", Math.Abs(account71 + account72), false));
@@ -644,7 +646,7 @@ namespace FirstREST.Mongo
             obj.Add(getIncomeStatementObject("Other income and gains", account78, false));
             obj.Add(getIncomeStatementObject("Other expenses and losses", -account68, false));
 
-            double total = Math.Abs(account71 + account72) + account75 + account73 + account74 - account61 - account62 - 
+            double total = Math.Abs(account71 + account72) + account75 + account73 + account74 - account61 - account62 -
                 account63 + account762 - account65 + account763 - account67 + account78 - account68;
 
             obj.Add(getIncomeStatementObject("Result before depreciation, financing expenses and taxes", total, true));
@@ -654,7 +656,7 @@ namespace FirstREST.Mongo
             total += account761 - account64;
 
             obj.Add(getIncomeStatementObject("Operating income (before financing expenses and taxes)", total, true));
-        
+
             //-----------
             obj.Add(getIncomeStatementObject("Net financing expense", account79 - account69, false));
             total += account79 - account69;
@@ -665,10 +667,10 @@ namespace FirstREST.Mongo
             total += account812;
             obj.Add(getIncomeStatementObject("Net income", total, true));
 
-            
+
             return obj.ToString();
         }
-        
+
         private static JObject getFieldObject(string name, double value)
         {
             JObject obj = new JObject();
@@ -679,22 +681,22 @@ namespace FirstREST.Mongo
             return obj;
         }
 
-        public static string GetBalanceSheet()
+        public static string GetBalanceSheet(string begin, string end)
         {
             JObject obj = new JObject();
 
             //ASSETS--------------------------------------------------------------------------------------------
-            JObject assets =  new JObject();
-            
+            JObject assets = new JObject();
+
             //Non current assets----        
 
             // sub topics
-            double class4 = GetAccountClosingValue(41) +
-                            GetAccountClosingValue(42) +
-                            GetAccountClosingValue(43) +
-                            GetAccountClosingValue(44) +
-                            GetAccountClosingValue(45) +
-                            GetAccountClosingValue(46);
+            double class4 = GetAccountInRange(41, begin, end) +
+                            GetAccountInRange(42, begin, end) +
+                            GetAccountInRange(43, begin, end) +
+                            GetAccountInRange(44, begin, end) +
+                            GetAccountInRange(45, begin, end) +
+                            GetAccountInRange(46, begin, end);
 
             JArray nonCurrentAssetsValues = new JArray();
 
@@ -704,47 +706,47 @@ namespace FirstREST.Mongo
 
             // object
             JObject nonCurrentAssets = new JObject();
-                nonCurrentAssets.Add("name", "Non Current Assets");
-                nonCurrentAssets.Add("total", class4);
-                nonCurrentAssets.Add("values", nonCurrentAssetsValues);
-       
+            nonCurrentAssets.Add("name", "Non Current Assets");
+            nonCurrentAssets.Add("total", class4);
+            nonCurrentAssets.Add("values", nonCurrentAssetsValues);
+
 
             // current assets
-           
+
             // sub topics
-            double class3 = GetAccountClosingValue(32) +
-                            GetAccountClosingValue(33) +
-                            GetAccountClosingValue(34) +
-                            GetAccountClosingValue(35) +
-                            GetAccountClosingValue(36) +
-                            GetAccountClosingValue(39);
+            double class3 = GetAccountInRange(32, begin, end) +
+                            GetAccountInRange(33, begin, end) +
+                            GetAccountInRange(34, begin, end) +
+                            GetAccountInRange(35, begin, end) +
+                            GetAccountInRange(36, begin, end) +
+                            GetAccountInRange(39, begin, end);
 
-            double account21 = GetAccountClosingValue(21);
+            double account21 = GetAccountInRange(21, begin, end);
 
-            double class1 = GetAccountClosingValue(11) +
-                            GetAccountClosingValue(12) +
-                            GetAccountClosingValue(13) +
-                            GetAccountClosingValue(14);
-           
+            double class1 = GetAccountInRange(11, begin, end) +
+                            GetAccountInRange(12, begin, end) +
+                            GetAccountInRange(13, begin, end) +
+                            GetAccountInRange(14, begin, end);
+
             JArray currentAssetsValues = new JArray();
 
-            JObject inventory = getFieldObject("Inventory", class3);     
+            JObject inventory = getFieldObject("Inventory", class3);
             JObject accountsReceivable = getFieldObject("Accounts Receivable", account21);
-            JObject liquidAssets = getFieldObject("Liquid Assets (Cash, Bank Deposits and other)", class1);  
-              
+            JObject liquidAssets = getFieldObject("Liquid Assets (Cash, Bank Deposits and other)", class1);
+
 
             currentAssetsValues.Add(inventory);
             currentAssetsValues.Add(accountsReceivable);
             currentAssetsValues.Add(liquidAssets);
 
-         
+
             // object
             JObject currentAssets = new JObject();
             currentAssets.Add("name", "Current Assets");
             currentAssets.Add("total", class3 + account21 + class1);
             currentAssets.Add("values", currentAssetsValues);
-                   
-            
+
+
             //assets obj           
             JArray assetsFields = new JArray();
 
@@ -761,7 +763,7 @@ namespace FirstREST.Mongo
             //Non current liabilities
 
             // sub topics
-            double account25 = Math.Abs(GetAccountClosingValue(25));
+            double account25 = Math.Abs(GetAccountInRange(25, begin, end));
 
 
             JArray nonCurrentLiabilitiesValues = new JArray();
@@ -778,9 +780,9 @@ namespace FirstREST.Mongo
 
 
             // current liabilities
-            double account22 = Math.Abs(GetAccountClosingValue(22));
-            double account24 = Math.Abs(GetAccountClosingValue(24));
-            double account26 = Math.Abs(GetAccountClosingValue(26));
+            double account22 = Math.Abs(GetAccountInRange(22, begin, end));
+            double account24 = Math.Abs(GetAccountInRange(24, begin, end));
+            double account26 = Math.Abs(GetAccountInRange(26, begin, end));
 
             JArray currentLiabilitiesValues = new JArray();
 
@@ -791,8 +793,8 @@ namespace FirstREST.Mongo
             currentLiabilitiesValues.Add(accountsPayable);
             currentLiabilitiesValues.Add(state);
             currentLiabilitiesValues.Add(shareholders);
-            
-     
+
+
             // object
             JObject currentLiabilities = new JObject();
             currentLiabilities.Add("name", "Current Liabilities");
@@ -813,77 +815,10 @@ namespace FirstREST.Mongo
             // balance sheet
             obj.Add("Assets", assets);
             obj.Add("Liabilities", liabilities);
-           
+
 
 
             return obj.ToString();
-            // GFK
-            /*
-            JObject ativos_nao_correntes = new JObject();
-            ativos_nao_correntes.Add("Ativos fixos tangíveis", GetAccountClosingValue(43) + GetAccountClosingValue(453));
-            ativos_nao_correntes.Add("Propriedades de investimento", GetAccountClosingValue(42));
-            ativos_nao_correntes.Add("Activos intangíveis", GetAccountClosingValue(44) - GetAccountClosingValue(441) + GetAccountClosingValue(454));
-            ativos_nao_correntes.Add("Activos biológicos", GetAccountClosingValue(37));
-            ativos_nao_correntes.Add("Participações financeiras - método eq. patrimonial", GetAccountClosingValue(411) + GetAccountClosingValue(2) + GetAccountClosingValue(3));
-            ativos_nao_correntes.Add("Participações financeiras - outros métodos", GetAccountClosingValue(414) + GetAccountClosingValue(9));
-            ativos_nao_correntes.Add("Accionistas / sócios", GetAccountClosingValue(26));
-            ativos_nao_correntes.Add("Outros activos financeiros", GetAccountClosingValue(1421) + GetAccountClosingValue(1431) + GetAccountClosingValue(415) + GetAccountClosingValue(416) + GetAccountClosingValue(417) + GetAccountClosingValue(418) + GetAccountClosingValue(419));
-            ativos_nao_correntes.Add("Activos por impostos diferidos", GetAccountClosingValue(274));
-
-            JObject ativos_correntes = new JObject();
-            ativos_correntes.Add("Inventários", GetAccountClosingValue(32) + GetAccountClosingValue(33) + GetAccountClosingValue(34) + GetAccountClosingValue(35) + GetAccountClosingValue(36) + GetAccountClosingValue(39));
-            ativos_correntes.Add("Activos Biológicos", GetAccountClosingValue(37));
-            ativos_correntes.Add("Clientes", GetAccountClosingValue(21) - GetAccountClosingValue(218));
-            ativos_correntes.Add("Adiantamentos a fornecedores", GetAccountClosingValue(228) + GetAccountClosingValue(229));
-            ativos_correntes.Add("Estado e outros entres públicos", GetAccountClosingValue(24));
-            ativos_correntes.Add("Accionistas / Sócios", GetAccountClosingValue(26) - GetAccountClosingValue(261) - GetAccountClosingValue(262));
-            ativos_correntes.Add("Outras contas a receber", GetAccountClosingValue(22) + GetAccountClosingValue(23) + GetAccountClosingValue(27) + GetAccountClosingValue(29));
-            ativos_correntes.Add("Diferimentos", GetAccountClosingValue(28 ));
-            ativos_correntes.Add("Activos financeiros detidos para negociação", GetAccountClosingValue(1421));
-            ativos_correntes.Add("Outros activos financeiros", GetAccountClosingValue(1431));
-            ativos_correntes.Add("Activos não correntes detidos para venda", GetAccountClosingValue(46) + GetAccountClosingValue(49));
-            ativos_correntes.Add("Caixa e depósitos bancários", GetAccountClosingValue(11) + GetAccountClosingValue(12) + GetAccountClosingValue(13));
-
-            JObject capitais_proprios = new JObject();
-            capitais_proprios.Add("Capital realizado", GetAccountClosingValue(51) + GetAccountClosingValue(261) + GetAccountClosingValue(262));
-            capitais_proprios.Add("Ações (quotas) próprias", GetAccountClosingValue(52));
-            capitais_proprios.Add("Outros instrumentos de capital próprio", GetAccountClosingValue(53));
-            capitais_proprios.Add("Prémios de emissão", GetAccountClosingValue(54));
-            capitais_proprios.Add("Reservas legais", GetAccountClosingValue(551));
-            capitais_proprios.Add("Outras reservas", GetAccountClosingValue(552));
-            capitais_proprios.Add("Resultados transitados", GetAccountClosingValue(56));
-            capitais_proprios.Add("Ajustamentos em ativos financeiros", GetAccountClosingValue(57));
-            capitais_proprios.Add("Excedentes de revalorização", GetAccountClosingValue(58));
-            capitais_proprios.Add("Outras variações no capital próprio", GetAccountClosingValue(59));
-            capitais_proprios.Add("Resultado líquido do exercício", GetAccountClosingValue(818));
-
-            JObject passivos_nao_correntes = new JObject();
-            passivos_nao_correntes.Add("Provisões", GetAccountClosingValue(29));
-            passivos_nao_correntes.Add("Financiamentos obtidos", GetAccountClosingValue(25));
-            passivos_nao_correntes.Add("Responsabilidades por benefícios pós-emprego", GetAccountClosingValue(273));
-            passivos_nao_correntes.Add("Passivos por impostas diferidos", GetAccountClosingValue(2742));
-            passivos_nao_correntes.Add("Outras contas a pagar", GetAccountClosingValue(21) + GetAccountClosingValue(23) + GetAccountClosingValue(26) + GetAccountClosingValue(27));
-
-            JObject passivos_correntes = new JObject();
-            passivos_correntes.Add("Fornecedores", GetAccountClosingValue(22));
-            passivos_correntes.Add("Adiantamento de clientes", GetAccountClosingValue(218));
-            passivos_correntes.Add("Estado e outros entes públicos", GetAccountClosingValue(24));
-            passivos_correntes.Add("Accionistas/Sócios", GetAccountClosingValue(26) - GetAccountClosingValue(261) - GetAccountClosingValue(262));
-            passivos_correntes.Add("Financiamentos obtidos", GetAccountClosingValue(25));
-            passivos_correntes.Add("Outras contas a pagar", GetAccountClosingValue(21) + GetAccountClosingValue(23) + GetAccountClosingValue(27));
-            passivos_correntes.Add("Diferimentos", GetAccountClosingValue(28));
-            passivos_correntes.Add("Passivos financeiros detidos para negociação", GetAccountClosingValue(1422));
-            passivos_correntes.Add("Outros passivos financeiros", GetAccountClosingValue(1432));
-            
-            obj.Add("Ativos não correntes", ativos_nao_correntes);
-            obj.Add("Ativos correntes", ativos_correntes);
-            obj.Add("Capitais Próprios", capitais_proprios);
-            obj.Add("Passivo não corrente", passivos_nao_correntes);
-            obj.Add("Passivo corrente", passivos_correntes);
-            
-            return obj.ToString();
-            
-            */
         }
 
     }

@@ -9,20 +9,23 @@ using System.Xml;
 using FirstREST.Validation;
 using System.Globalization;
 using FirstREST.Lib_Primavera.Model;
+using System.Text;
 
 
 namespace FirstREST.Mongo
 {
     public class SaftParser
     {
-        public SaftParser()
+        string year;
+
+        public SaftParser(string year)
         {
 
             XmlDocument doc = new XmlDocument();
-
-            doc.LoadXml(System.IO.File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "Assets\\SAFT_DEMOSINF_01-01-2016_31-12-2016.xml"));
+            this.year = year;
+            doc.LoadXml(System.IO.File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "Assets\\SAFT_DEMOSINF_01-01-" + year + "_31-12-" + year + ".xml"));
             string jsonText = JsonConvert.SerializeXmlNode(doc);
-                      
+         
 
             JToken tkn = JObject.Parse(jsonText);
 
@@ -49,26 +52,38 @@ namespace FirstREST.Mongo
             JToken suppliers = master.SelectToken("Supplier");
             JToken products = master.SelectToken("Product");
 
-            string accountsJson = JsonConvert.SerializeObject(JsonConvert.DeserializeObject<List<SaftAccount>>(accounts.ToString()));
 
 
-            MongoConnection.AddMany("Accounts", accountsJson);
-            MongoConnection.AddMany("Customers", customers.ToString());
-            MongoConnection.AddMany("Suppliers", suppliers.ToString());
-            MongoConnection.AddMany("Products", products.ToString());
+            if (accounts != null)
+            {
+                string accountsJson = JsonConvert.SerializeObject(JsonConvert.DeserializeObject<List<SaftAccount>>(accounts.ToString()));
+                MongoConnection.AddMany("Accounts" + year, accountsJson);
+            }
+            if (customers != null)
+                MongoConnection.AddMany("Customers", customers.ToString());
+            if (suppliers != null)
+                MongoConnection.AddMany("Suppliers", suppliers.ToString());
+            if (products != null)
+                MongoConnection.AddMany("Products", products.ToString());
 
         }
 
+       
        
         public void GeneralLedgerEntries(JToken ledgerEntries)
         {
             JToken journals = ledgerEntries.SelectToken("Journal");
             JObject generalInfo = FillInfo(ledgerEntries);
 
-            string journalsJson = JsonConvert.SerializeObject(JsonConvert.DeserializeObject<List<SaftJournal>>(journals.ToString()));
 
-            MongoConnection.AddMany("Journals", journalsJson);
-            MongoConnection.Add("LedgerEntriesInfo", generalInfo.ToString());
+
+            if (journals != null)
+            {
+                string journalsJson = JsonConvert.SerializeObject(JsonConvert.DeserializeObject<List<SaftJournal>>(journals.ToString()));
+                MongoConnection.AddMany("Journals", journalsJson);
+            }
+            if(generalInfo != null)
+                MongoConnection.Add("LedgerEntriesInfo", generalInfo.ToString());
 
         }
 
@@ -86,14 +101,20 @@ namespace FirstREST.Mongo
             JToken stockMovements = movementOfGoods.SelectToken("StockMovement");
 
 
-            string invoicesJson = JsonConvert.SerializeObject(JsonConvert.DeserializeObject<List<SaftInvoice>>(invoices.ToString()));
+            
 
-            MongoConnection.Add("InvoicesInfo", invoicesInfo.ToString());
-            MongoConnection.AddMany("Invoices", invoicesJson);
-
-            MongoConnection.Add("GoodsInfo", goodsInfo.ToString());
-            MongoConnection.AddMany("StockMovements", stockMovements.ToString());
-
+            if(invoices != null) {
+                string invoicesJson = JsonConvert.SerializeObject(JsonConvert.DeserializeObject<List<SaftInvoice>>(invoices.ToString()));
+                MongoConnection.AddMany("Invoices", invoicesJson);
+            }
+            if (invoicesInfo != null)            
+                MongoConnection.Add("InvoicesInfo", invoicesInfo.ToString());
+            
+                
+              
+            if (goodsInfo != null)
+                MongoConnection.Add("GoodsInfo", goodsInfo.ToString());
+           
         }
 
        
