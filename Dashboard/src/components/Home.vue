@@ -203,7 +203,7 @@ export default {
       let totalInventoryValue = await ProductService.getTotalValueInventory(this.dateEnd)
       this.topics[2].value = `${parseFloat(totalInventoryValue.data.TotalValue).toFixed(0)}€`
 
-      let NetIncomeValue = await AccountingService.getNetIncome()
+      let NetIncomeValue = await AccountingService.getNetIncome(this.dateBegin, this.dateEnd)
       this.topics[3].value = `${parseFloat(NetIncomeValue.data.value).toFixed(0)}€`
     }
   }
