@@ -395,7 +395,7 @@ namespace FirstREST.Mongo
         {
             JObject netIncome = new JObject();
 
-
+            System.Diagnostics.Debug.WriteLine("xiro_begin-> " + begin + " end-> " + end);
 
             double account71 = GetAccountInRange(71, begin, end);
             double account72 = GetAccountInRange(72, begin, end);
@@ -423,6 +423,7 @@ namespace FirstREST.Mongo
 
             netIncome.Add("name", "Net Income");
             netIncome.Add("value", netIncomeVal);
+            System.Diagnostics.Debug.WriteLine("xiro_total-> " + netIncomeVal);
 
             return netIncome.ToString();
 
@@ -858,7 +859,7 @@ namespace FirstREST.Mongo
                 string endDate = arg2;
 
                 if(mounthStart != mounthEnd || yearStart != yearEnd)
-                    endDate = String.Format("{0}-{1}-01", yearStart, mounthStart);
+                    endDate = String.Format("{0}-{1}-01", yearStart, mounthStart.ToString("D2"));
 
                 receivable.Add("x", endDate);
                 double accountValue = GetAccountInRange(21, beginDate, endDate); 
@@ -915,7 +916,7 @@ namespace FirstREST.Mongo
                 string endDate = arg2;
 
                 if (mounthStart != mounthEnd || yearStart != yearEnd)
-                    endDate = String.Format("{0}-{1}-01", yearStart, mounthStart);
+                    endDate = String.Format("{0}-{1}-01", yearStart, mounthStart.ToString("D2"));
 
                 netIncome.Add("x", endDate);
 
