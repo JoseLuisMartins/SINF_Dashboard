@@ -12,5 +12,11 @@ export default {
   },
   getNetIncome (begin, end) {
     return Api().get(`/api/saft/NetIncome?arg1=${begin}&arg2=${end}`)
+  },
+  getNetIncomeChart (begin, end) {
+    return Api().get(`/api/saft/NetIncomeChart?arg1=${begin}&arg2=${end}`)
+  },
+  getReceivableVSPayable (begin, end) {
+    return Api().get(`/api/saft/ReceivableVSPayable?arg1=${begin}&arg2=${end}`)
   }
 }

@@ -84,7 +84,9 @@ namespace FirstREST.Controllers
         // api/saft/BalanceSheet?arg1=2016-01-01&arg2=2017-01-01 
         // api/saft/IncomeStatement?arg1=2016-01-01&arg2=2017-01-01 
         // api/saft/FinancialRatios?arg1=2016-01-01&arg2=2017-01-01 
-        // api/saft/NetIncome?arg1=2016-01-01&arg2=2017-01-01 
+        // api/saft/NetIncome?arg1=2016-01-01&arg2=2017-01-01
+        // api/saft/ReceivableVSPayable?arg1=2016-01-01&arg2=2017-01-01
+        // api/saft/TurnOver?arg1=2016-01-01&arg2=2017-01-01 
         public HttpResponseMessage Get(string id, string arg1, string arg2)
         {
            
@@ -119,6 +121,9 @@ namespace FirstREST.Controllers
                     break;
                 case "ReceivableVSPayable":
                     body = MongoConnection.GetReceivableVSPayable(arg1, arg2);
+                    break;
+                case "NetIncomeChart":
+                    body = MongoConnection.GetRurnOver(arg1, arg2);
                     break;
 
             }

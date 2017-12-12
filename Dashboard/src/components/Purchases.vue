@@ -124,7 +124,7 @@
       </v-flex>
     </v-layout>
     <v-layout row wrap>
-      <v-flex d-flex sm12 md6>
+      <v-flex d-flex sm12 md8>
         <v-card>
           <v-card-title class="pb-0">
             <div class="headline">Suppliers</div>
@@ -159,7 +159,7 @@
         </v-card>
       </v-flex>
 
-      <v-flex d-flex sm12 md6>
+      <v-flex d-flex sm12 md4>
         <v-card>
           <v-card-title class="headline"> Top Suppliers </v-card-title>
           <div style="min-height: 400px">

@@ -860,11 +860,11 @@ namespace FirstREST.Mongo
                 if(mounthStart != mounthEnd || yearStart != yearEnd)
                     endDate = String.Format("{0}-{1}-01", yearStart, mounthStart);
 
-                receivable.Add("xasdas", beginDate);
+                receivable.Add("x", endDate);
                 double accountValue = GetAccountInRange(21, beginDate, endDate); 
-                receivable.Add("yasdsad", accountValue);
+                receivable.Add("y", accountValue);
 
-                payable.Add("x", "ola".ToJson());
+                payable.Add("x", endDate);
                 accountValue = GetAccountInRange(22, beginDate, endDate);
                 payable.Add("y", accountValue);
 
@@ -877,8 +877,64 @@ namespace FirstREST.Mongo
             data.Add("receivables", receivables);
             data.Add("payables", payables);
 
-            return data.ToJson();
+            return data.ToString();
 
+        }
+
+        internal static string GetRurnOver(string arg1, string arg2)
+        {
+            string[] date1 = arg1.Split(new char[] { '-', '/' });
+            string[] date2 = arg2.Split(new char[] { '-', '/' });
+
+            int mounthStart = int.Parse(date1[1]);
+            int mounthEnd = int.Parse(date2[1]);
+
+            int yearStart = int.Parse(date1[0]);
+            int yearEnd = int.Parse(date2[0]);
+
+            JObject data = new JObject();
+
+            JArray turnover = new JArray();
+
+
+            string beginDate = arg1;
+
+            do
+            {
+                JObject netIncome = new JObject();
+
+
+                mounthStart++;
+
+                if (mounthStart > 12)
+                {
+                    mounthStart = 1;
+                    yearStart++;
+                }
+
+                string endDate = arg2;
+
+                if (mounthStart != mounthEnd || yearStart != yearEnd)
+                    endDate = String.Format("{0}-{1}-01", yearStart, mounthStart);
+
+                netIncome.Add("x", endDate);
+
+                string res = GetNetIncome(beginDate, endDate);
+                
+                JToken jt = JObject.Parse(res);
+
+                netIncome.Add("y", jt.Value<double>("value"));
+
+                System.Diagnostics.Debug.WriteLine(netIncome.ToJson());
+
+                turnover.Add(netIncome);
+
+
+            } while (mounthStart != mounthEnd || yearStart != yearEnd);
+
+            data.Add("turnover", turnover);
+
+            return data.ToString();
         }
     }
 }

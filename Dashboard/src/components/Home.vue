@@ -1,5 +1,5 @@
 <template>
-  <v-container mt-4 grid-list-md>
+  <v-container mt-4 grid-list-md mb-4>
     <v-layout row wrap mb-4>
       <v-flex mb-4 d-flex sm6 offset-sm3 xs12>
         <v-card>
@@ -77,14 +77,33 @@
         <topic class="hoverAnim" :title="topic.title" :icon="topic.icon" :value="topic.value" :description="topic.description" :color="topic.color" :color2="topic.color2" :dest="topic.dest"/> 
       </v-flex>
     </v-layout>
-    <v-layout row wrap>
-      <v-flex class="chartHolder" sm12 md6 v-for="data in chartData" :key="data.name">
-        <v-card class="chartHeight white darken-3"> 
-          <v-card-title primary-title pb-1 > <div class="headline">{{data.title}}</div> </v-card-title>
-          <line-chart class="limitHeight"
-            :data="data"
-            :options="chartOptions"
-            ></line-chart>
+    <v-layout row wrap class="">
+      <v-flex d-flex class="chartHolder" sm12 md6>
+        <v-card class="chartHeight white darken-3 pb-2"> 
+          <v-card-title primary-title pb-1 > <div class="headline">Net Income</div> </v-card-title>
+          <div class="ma-4 limitHeight relative" style="min-height: 200px">
+            <loading color="teal" v-if="chartData == null"> </loading>
+            <line-chart class="chartHolder" 
+              style="min-height: 200px; max-height: 200px"
+              v-if="chartData != null"
+              :chartData="chartData"
+              :options="chartOptions"
+              ></line-chart>
+          </div>
+        </v-card>
+      </v-flex>
+      <v-flex d-flex class="chartHolder" sm12 md6>
+        <v-card class="chartHeight white darken-3 pb-2"> 
+          <v-card-title primary-title pb-1 > <div class="headline">Account Receivables VS Account Payables</div> </v-card-title>
+          <div class="ma-4 limitHeight relative" style="min-height: 200px">
+            <loading color="teal" v-if="chartDataIvsR == null"> </loading>
+            <line-chart class="chartHolder" 
+              style="min-height: 200px; max-height: 200px"
+              v-if="chartDataIvsR != null"
+              :chartData="chartDataIvsR"
+              :options="chartOptions"
+              ></line-chart>
+          </div>
         </v-card>
       </v-flex>
     </v-layout>
@@ -94,10 +113,12 @@
 <script>
 import Topic from '@/components/home/Topic'
 import LineChart from '@/components/charts/LineChart'
+import ChartOptions from '@/components/charts/config'
 import PurchasesService from '@/services/Purchases'
 import SalesService from '@/services/Sales'
 import ProductService from '@/services/Products'
 import AccountingService from '@/services/Accounting'
+import Loading from '@/components/loadings/loading'
 
 export default {
   name: 'HelloWorld',
@@ -107,63 +128,10 @@ export default {
       dateEnd: null,
       menu: false,
       modal: false,
-      chartOptions: {
-        responsive: true,
-        height: 100,
-        width: 300,
-        maintainAspectRatio: false,
-        fontColor: '#FFF',
-        elements: {
-          line: {
-            backgroundColor: '#F00',
-            pointBackgroundColor: '#FF00FF',
-            borderColor: '#CC3311',
-            fill: false,
-            tension: 0.5
-          }
-        },
-        scales: {
-          yAxes: [{
-            ticks: {
-              beginAtZero: false
-            }
-          }],
-          xAxes: [{
-            ticks: {
-            }
-          }]
-        },
-        legend: {
-          display: false,
-          labels: {
-            fontColor: '#FFF'
-          }
-        }
-      },
-      chartData: [
-        {
-          title: 'Turnover',
-          labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-          datasets: [
-            {
-              pointBackgroundColor: '#FF5522',
-              label: 'Turnover',
-              data: [20, 30, 20, 23, 21, 12, 23, 23, 32, 52, 50, 25]
-            }
-          ]
-        },
-        {
-          title: 'Costs',
-          labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-          datasets: [
-            {
-              pointBackgroundColor: '#FF5522',
-              label: 'Costs',
-              data: [20, 50, 20, 23, 21, 12, 23, 23, 32, 52, 50, 25]
-            }
-          ]
-        }
-      ],
+      enableCharts: false,
+      chartOptions: ChartOptions.options,
+      chartData: null,
+      chartDataIvsR: null,
       december: function (date) {
         return date.getMonth() === 11
       },
@@ -176,7 +144,7 @@ export default {
     }
   },
   components: {
-    Topic, LineChart
+    Topic, LineChart, Loading
   },
   mounted: function () {
     let currentYear = new Date().getFullYear()
@@ -194,6 +162,8 @@ export default {
   },
   methods: {
     async getData () {
+      this.LoadIvsR()
+      this.LoadChartData()
       let totalSalesValue = await SalesService.getTotalNetSales(this.dateBegin, this.dateEnd)
       this.topics[0].value = `${parseFloat(totalSalesValue.data[0].total).toFixed(0)}€`
 
@@ -205,6 +175,73 @@ export default {
 
       let NetIncomeValue = await AccountingService.getNetIncome(this.dateBegin, this.dateEnd)
       this.topics[3].value = `${parseFloat(NetIncomeValue.data.value).toFixed(0)}€`
+    },
+    async LoadIvsR () {
+      try {
+        this.chartDataIvsR = null
+        let res = await AccountingService.getReceivableVSPayable(this.dateBegin, this.dateEnd)
+
+        for (var value of res.data.payables) {
+          value.y = Math.abs(value.y).toFixed(2)
+        }
+
+        for (value of res.data.receivables) {
+          value.y = value.y.toFixed(2)
+        }
+
+        this.chartDataIvsR = {
+          datasets: [{
+            data: res.data.receivables,
+            pointRadius: 3,
+            fill: true,
+            pointHoverRadius: 6,
+            pointBackgroundColor: '#FF5522',
+            backgroundColor: 'rgba(255,85,34,0.3)',
+            borderColor: '#FF5522',
+            borderWidth: 3,
+            showLine: true,
+            snapGaps: false,
+            label: 'Account Receivables'
+          },
+          {
+            pointRadius: 3,
+            pointHoverRadius: 6,
+            fill: true,
+            backgroundColor: 'rgba(34,85,255,0.3)',
+            pointBackgroundColor: '#2255FF',
+            borderColor: '#2255FF',
+            borderWidth: 3,
+            showLine: true,
+            snapGaps: false,
+            data: res.data.payables,
+            label: 'Account Payables'
+          }]
+        }
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    async LoadChartData () {
+      try {
+        this.chartData = null
+        let res = await AccountingService.getNetIncomeChart(this.dateBegin, this.dateEnd)
+        this.chartData = {
+          datasets: [{
+            data: res.data.turnover,
+            pointRadius: 3,
+            fill: true,
+            pointHoverRadius: 6,
+            pointBackgroundColor: '#FF5522',
+            backgroundColor: 'rgba(255,85,34,0.3)',
+            borderColor: '#FF5522',
+            borderWidth: 3,
+            showLine: true,
+            snapGaps: false
+          }]
+        }
+      } catch (error) {
+        console.error(error)
+      }
     }
   }
 }
