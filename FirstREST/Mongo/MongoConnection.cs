@@ -821,5 +821,64 @@ namespace FirstREST.Mongo
             return obj.ToString();
         }
 
+
+        public static string GetReceivableVSPayable(string arg1, string arg2)
+        {
+            string[] date1 = arg1.Split(new char[]{'-','/'});
+            string[] date2 = arg2.Split(new char[]{'-','/'});
+            
+            int mounthStart = int.Parse(date1[1]);
+            int mounthEnd = int.Parse(date2[1]);
+
+            int yearStart = int.Parse(date1[0]);
+            int yearEnd = int.Parse(date2[0]);
+
+            JObject data = new JObject();
+
+            JArray receivables = new JArray();
+            JArray payables = new JArray();
+
+
+
+            string beginDate = arg1;
+
+            do
+            {
+                JObject payable = new JObject();
+                JObject receivable = new JObject();
+
+
+                mounthStart++;
+
+                if(mounthStart > 12){
+                    mounthStart = 1;
+                    yearStart++;
+                }
+
+                string endDate = arg2;
+
+                if(mounthStart != mounthEnd || yearStart != yearEnd)
+                    endDate = String.Format("{0}-{1}-01", yearStart, mounthStart);
+
+                receivable.Add("xasdas", beginDate);
+                double accountValue = GetAccountInRange(21, beginDate, endDate); 
+                receivable.Add("yasdsad", accountValue);
+
+                payable.Add("x", "ola".ToJson());
+                accountValue = GetAccountInRange(22, beginDate, endDate);
+                payable.Add("y", accountValue);
+
+
+                receivables.Add(receivable);
+                payables.Add(payable);
+
+            } while (mounthStart != mounthEnd || yearStart != yearEnd);
+
+            data.Add("receivables", receivables);
+            data.Add("payables", payables);
+
+            return data.ToJson();
+
+        }
     }
 }

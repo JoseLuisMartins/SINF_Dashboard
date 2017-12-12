@@ -117,6 +117,9 @@ namespace FirstREST.Controllers
                 case "NetIncome":
                     body = MongoConnection.GetNetIncome(arg1, arg2);
                     break;
+                case "ReceivableVSPayable":
+                    body = MongoConnection.GetReceivableVSPayable(arg1, arg2);
+                    break;
 
             }
                   
