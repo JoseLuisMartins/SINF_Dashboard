@@ -95,12 +95,24 @@
         </v-card>
       </v-flex>
     </v-layout>
+
+    <v-layout>
+        <v-flex mb-4 d-flex sm6 offset-sm3 xs12>             
+          <v-card style="color:#f2f2f2">
+            <v-card-title class="headline green darken-2" >
+              <b > Total Purchases </b>
+              <v-spacer> </v-spacer>
+              <b > {{(totalAmount + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ")}} <v-icon large>euro_symbol</v-icon> </b>
+            </v-card-title>
+          </v-card>
+      </v-flex>
+    </v-layout>
+
     <v-layout row wrap>
       <v-flex d-flex xs12>
         <v-card>
           <v-card-title>
             <div class="headline"> Purchases </div>
-            <div class="ml-3"><b>Total : {{(totalAmount + "").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1 ")}}€</b></div>
           </v-card-title>
           <v-card-text>
             <div class="limitHeight chartHolder" v-if="purchasesChartData.datasets.length == 0"> 

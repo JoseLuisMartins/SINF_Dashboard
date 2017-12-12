@@ -87,7 +87,7 @@
               style="min-height: 200px; max-height: 200px"
               v-if="chartData != null"
               :chartData="chartData"
-              :options="chartOptions"
+              :options="chartOptions1"
               ></line-chart>
           </div>
         </v-card>
@@ -129,7 +129,8 @@ export default {
       menu: false,
       modal: false,
       enableCharts: false,
-      chartOptions: ChartOptions.options,
+      chartOptions: ChartOptions.options2,
+      chartOptions1: ChartOptions.options,
       chartData: null,
       chartDataIvsR: null,
       december: function (date) {
