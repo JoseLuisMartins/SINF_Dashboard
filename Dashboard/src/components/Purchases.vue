@@ -96,7 +96,7 @@
       </v-flex>
     </v-layout>
     <v-layout row wrap>
-      <v-flex d-flex xs10 offset-xs1>
+      <v-flex d-flex xs12>
         <v-card>
           <v-card-title>
             <div class="headline"> Purchases </div>
