@@ -71,5 +71,33 @@ export default {
     responsive: true,
     maintainAspectRatio: false,
     fontColor: '#FFF'
+  },
+  radarOptions: {
+    responsive: true,
+    maintainAspectRatio: false,
+    fontColor: '#FFF',
+    legend: {
+      display: false,
+      labels: {
+        fontColor: '#FFF'
+      }
+    }
+  },
+  barOptions: {
+    responsive: true,
+    maintainAspectRatio: false,
+    fontColor: '#FFF',
+    legend: {
+      display: false,
+      labels: {
+        fontColor: '#FFF'
+      }
+    },
+    scales: {
+      xAxes: [{
+        barPercentage: 0.8,
+        categoryPercentage: 0.8
+      }]
+    }
   }
 }

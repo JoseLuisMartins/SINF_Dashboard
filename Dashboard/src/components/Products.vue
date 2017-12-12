@@ -124,12 +124,12 @@
           <v-card-title class="headline"> Total Inventory Chart (In €)</v-card-title>
           <v-card-text>
 
-            <div style="min-height: 400px"> 
+            <div style="min-height: 200px"> 
               <transition name="fade">
                 <loading color="teal" v-if="inventoryChartData.datasets == null"> </loading>
               </transition>
               <transition name="fade">
-                <pie-chart class="chartHolder" style="min-height: 400px" 
+                <pie-chart class="chartHolder" style="min-height: 200px" 
                   v-if="inventoryChartData.datasets != null" 
                   :chartData="inventoryChartData.datasets" :options="pieChartOptions">
                 </pie-chart>
@@ -185,12 +185,12 @@
           <v-flex xs12>
             <v-card>
               <v-card-title class="headline"> By Families </v-card-title>
-              <div style="min-height: 400px"> 
+              <div style="min-height: 200px"> 
                 <transition name="fade">
                   <loading color="teal" v-if="inventoryChartData.familiesIN == null"> </loading>
                 </transition>
                 <transition name="fade">
-                  <pie-chart class="chartHolder" style="min-height: 400px" 
+                  <pie-chart class="chartHolder" style="min-height: 200px" 
                     v-if="inventoryChartData.familiesIN != null" 
                     :chartData="inventoryChartData.familiesIN" :options="pieChartOptions">
                   </pie-chart>
@@ -244,12 +244,12 @@
           <v-flex xs12>
             <v-card>
               <v-card-title class="headline"> By Families </v-card-title>
-              <div style="min-height: 400px"> 
+              <div style="min-height: 200px"> 
                 <transition name="fade">
                   <loading color="teal" v-if="inventoryChartData.familiesOut == null"> </loading>
                 </transition>
                 <transition name="fade">
-                  <pie-chart class="chartHolder" style="min-height: 400px" 
+                  <pie-chart class="chartHolder" style="min-height: 200px" 
                     v-if="inventoryChartData.familiesOut != null" 
                     :chartData="inventoryChartData.familiesOut" :options="pieChartOptions">
                   </pie-chart>
@@ -262,7 +262,7 @@
 
     </v-layout>
 
-    <v-layout row wrap>
+    <v-layout row wrap class="mb-5">
       <v-flex d-flex xs12 offset-lg2 lg8>
         <v-card>
           <v-card-title>
