@@ -413,6 +413,7 @@ export default {
 
     async getSTKInChart () {
       try {
+        this.inventoryChartData.familiesIN = null
         let response = await Products.getMovements(this.dateBegin, this.dateEnd, 'INC')
         this.inventoryChartData.familiesIN = this.prepareFamilyChart(response.data)
       } catch (error) {
@@ -422,11 +423,9 @@ export default {
 
     async getSTKOutChart () {
       try {
-        console.log('HEREA')
+        this.inventoryChartData.familiesOut = null
         let response = await Products.getMovements(this.dateBegin, this.dateEnd, 'OUTC')
-        console.log('HERE')
         this.inventoryChartData.familiesOut = this.prepareFamilyChart(response.data)
-        console.log('HEREC')
       } catch (error) {
         console.log(error)
         this.error = error
@@ -455,6 +454,7 @@ export default {
 
     async getMovementGraphData () {
       try {
+        this.movementsGraph = null
         let tempData = await Products.getMovementsGraph(this.dateBegin, this.dateEnd)
         tempData = tempData.data
 
@@ -492,6 +492,7 @@ export default {
     },
     async getInventoryByFamilies () {
       try {
+        this.inventoryChartData.datasets = null
         let response = await Products.getTotalInventoryByFamilies(this.dateEnd)
         let contents = response.data
         this.inventoryChartData.datasets = this.prepareFamilyChart(contents)
