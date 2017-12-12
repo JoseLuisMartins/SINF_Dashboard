@@ -2,16 +2,6 @@
         <v-card class="grey lighten-2">
           <v-card-title>
             <v-spacer></v-spacer>
-            <v-menu bottom left>
-              <v-btn icon slot="activator">
-                <v-icon>more_vert</v-icon>
-              </v-btn>
-              <v-list>
-                <v-list-tile v-for="(item, i) in items" :key="i">
-                  <v-list-tile-title>{{ item.title }}</v-list-tile-title>
-                </v-list-tile>
-              </v-list>
-            </v-menu>
           </v-card-title>
           <v-card-text>
             <v-layout row wrap>
@@ -100,14 +90,6 @@ export default {
         {text: 'Description', value: 'ProductDescription', align: 'left'},
         {text: 'Quantity', value: 'Quantity'},
         {text: 'Price', value: 'UnitPrice'}
-      ],
-      items: [
-        {
-          title: 'Export to PDF'
-        },
-        {
-          title: 'Print'
-        }
       ]
     }
   },
