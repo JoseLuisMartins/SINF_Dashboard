@@ -36,3 +36,11 @@ ou de prestação de serviços, quando devam existir:
 
 
 [More Information](http://webcache.googleusercontent.com/search?q=cache:http://info.portaldasfinancas.gov.pt/NR/rdonlyres/ACD9174B-FA72-4D80-9E99-760745CC14AA/0/Portaria_302_2016.pdf&gws_rd=cr&dcr=0&ei=oEv8WeLTO4qqUeyCjrAH)
+
+
+## Developers :
+
+* [David Azevedo](https://github.com/PeaceOff)
+* [João Ferreira](https://github.com/joaocsf)
+* [José Martins](https://github.com/JoseLuisMartins)
+* [Marcelo Ferreira](https://github.com/mferreira96)
